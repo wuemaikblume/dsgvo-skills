@@ -75,6 +75,11 @@ Beides ist erforderlich. Art. 44-49 ersetzt Art. 6 nicht — er ergänzt ihn nur
        Mitarbeiterdaten)
    c) Vertraglich verankert: DPF-Klausel im DPA + Beschwerdemechanismus?
    ├─ Alle 3 Ja → erlaubt unter DPF
+   │  ⚠ ABER: Auch DPF-zertifizierte US-Konzerne unterliegen dem
+   │  US CLOUD Act — auch wenn sie in `eu-central-1` hosten.
+   │  Bei Art. 9-Daten / KRITIS / mehrjährigen Verträgen unbedingt
+   │  CLOUD-ACT.md lesen für echte EU-souveräne Alternativen
+   │  (Stackit, T-Systems, Hetzner, Scaleway, IONOS).
    └─ Nein → weiter zu 6
 
 6. SCCs + Transfer Impact Assessment (TIA):
@@ -123,6 +128,19 @@ Beides ist erforderlich. Art. 44-49 ersetzt Art. 6 nicht — er ergänzt ihn nur
 | Supabase | **NICHT DPF-zertifiziert** | SCCs Modul 2 + DPA; Project-Region EU; Subprozessoren/Edge Functions/Logs prüfen |
 | Mailgun | DPF + EU-Region | EU-Region (`api.eu.mailgun.net`) |
 | Hetzner / IONOS / Scaleway | EU-Anbieter | nur AVV nach Art. 28 |
+
+## Code-Generierungs-Regel
+
+Wenn der User **explizit eine Drittland-Region oder eine US-spezifische Konfiguration** anfragt (z.B. „us-east-1", „us-central1", „US-DSN", „global"):
+
+1. **NICHT stillschweigend umbauen.** Der User-Wunsch wird respektiert.
+2. **Beide Varianten im Code zeigen**, klar gekennzeichnet:
+   - Die angefragte Variante (z.B. mit `us-east-1`)
+   - Die DSGVO-konforme Variante (EU-Region + Whitelist-Pattern)
+3. Über dem Code als Kurz-Bullet die DSGVO-Pflichten benennen, die der User vor Production-Deployment erfüllen muss (DPF-Verifikation / SCCs / TIA / VVT / Art. 13/14).
+4. Bei sensiblen Daten (Art. 9) oder KRITIS: zusätzlich auf den **US CLOUD Act** hinweisen — auch DPF schützt nicht vor US-Behörden­anordnungen gegen US-Mütter (siehe `CLOUD-ACT.md`).
+
+So sieht der User, was er angefragt hat, weiß was rechtlich nötig ist, und hat das compliante Pattern direkt zum Vergleich.
 
 ## Code-Patterns
 
@@ -261,7 +279,7 @@ Zusätzlich: Information der Betroffenen nach **Art. 13/14 DSGVO** über Empfän
 | „Stripe ist EU, alles entspannt" | Hybride Rolle (Controller + Processor je Service). Siehe `PROVIDERS.md`. Datenflüsse zu Stripe Inc. (US) dokumentieren. |
 | „SCCs unterschrieben = fertig" | Ohne TIA + supplementary measures angreifbar. |
 | „Wir nutzen `eu-west-1`, also keine US-Berührung" | Backups, Logs, Monitoring, Cross-Region-Replikation oft separat. Provider-Doku prüfen. |
-| „Daten in `eu-central-1` sind vor US-Behörden sicher" | Falsch — US CLOUD Act greift bei US-Muttergesellschaften, auch wenn Server in EU stehen. Siehe `CLOUD-ACT.md`. |
+| „Daten in `eu-central-1` sind vor US-Behörden sicher" | Falsch — US CLOUD Act greift bei US-Muttergesellschaften (AWS, Microsoft, Google, Cloudflare, OpenAI, Supabase, Clerk, Sentry US-Backend etc.), auch wenn die Server-Region in der EU liegt. Bei Art. 9-Daten / KRITIS unbedingt EU-Konzerne (Stackit, T-Systems, Hetzner, Scaleway, IONOS) prüfen — siehe `CLOUD-ACT.md`. |
 | „Customer hat eingewilligt, also Art. 49" | Art. 49 Abs. 1 lit. a (Einwilligung) ist nach EDPB-Guidelines 2/2018 nur für **gelegentliche, nicht-wiederholte** Transfers zulässig — keine Routine-Grundlage für SaaS/APIs. |
 | „User-ID ist gehasht, also anonymisiert" | Pseudonymisierung — unterliegt weiter der DSGVO. Echte Anonymisierung erfordert, dass auch mit Zusatzwissen niemand re-identifizieren kann (Erwägungsgrund 26). |
 
@@ -284,7 +302,8 @@ DPF gilt: Adäquanzbeschluss vom 10. Juli 2023 in Kraft. Am 3. September 2025 ha
 
 - **Rolle unklar** (Controller / Processor / Joint Controller / Subprozessoren) → `ROLES.md`
 - **Sensible Daten / Profiling / großvolumiges Tracking** → `DPIA.md` (DSFA-Pflicht prüfen)
-- **US-Konzern hostet in EU / Behördenanordnung aus Drittland** → `CLOUD-ACT.md`
+- **US-Konzern hostet in EU** (AWS, Azure, Google, OpenAI, Cloudflare, Supabase, Clerk etc. — auch in `eu-central-1` o.ä.) **UND** sensible Daten / Art. 9 / KRITIS / mehrjähriger Vertrag → `CLOUD-ACT.md` lesen für Cloud-Act-Risiko + EU-souveräne Alternativen
+- **Behördenanordnung aus Drittland** (US National Security Letter, FBI-Subpoena, etc.) → `CLOUD-ACT.md` (Art. 48 DSGVO + EDPB 02/2024)
 - **Nutzer in der Schweiz** → `CH-REVDSG.md` (revDSG, Swiss-US DPF, EDÖB)
 - **Cookies / Tracking-Pixel / Analytics** → `EPRIVACY.md` (TTDSG, separater Pflichtenkreis)
 - **Detaillierte Anbieter-Profile** (OpenAI, Stripe, Firebase, Supabase, Cloudflare etc.) → `PROVIDERS.md`
