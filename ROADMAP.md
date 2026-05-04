@@ -116,9 +116,9 @@ Sechs `.mdc`-Rules in `cursor/rules/`, alle Agent-Requested (`alwaysApply: false
 
 Plus `cursor/INSTALL.md` (Agent-Requested-Erklärung, Verifikations-Prompt, Update-Befehle) und aktualisierte `cursor/README.md`.
 
-**Offen:**
-- [ ] In einem Cursor-Projekt installieren und Re-Test-1 + Re-Test-3 fahren (S3-Upload us-east-1 + OpenAI-Patient-Allergie). Trigger-Verhalten dokumentieren.
-- [ ] Falls Cursor schwächer triggert als Claude/Sonnet: Description nochmal schärfen oder `globs:` mit File-Pattern-Triggern füllen (z.B. `globs: ["**/*.tf", "**/aws-*.{js,ts}"]`).
+**Community-Tasks** (Maintainer hat kein Cursor — Praxisbericht via Issue/PR willkommen):
+- Re-Test 1 (S3-Upload us-east-1) und Re-Test 3 (OpenAI + Patient-Allergie) in echtem Cursor-Projekt fahren, Trigger-Verhalten dokumentieren
+- Falls Cursor schwächer triggert: Description schärfen oder `globs:` mit File-Pattern-Triggern füllen (z.B. `globs: ["**/*.tf", "**/aws-*.{js,ts}"]`)
 
 ### OpenAI Codex / GitHub Copilot Adaption ✅ (v1.3)
 
@@ -127,9 +127,10 @@ Plus `cursor/INSTALL.md` (Agent-Requested-Erklärung, Verifikations-Prompt, Upda
 - `codex/INSTALL.md` (Codex + Copilot Setup, Verifikations-Prompt, Tag-Pinning)
 - `codex/README.md` aktualisiert (Status v1.3)
 
-**Offen:**
-- [ ] In echtem Codex-CLI-Projekt installieren und Re-Test 1 + 3 fahren — verifizieren, ob Codex die Code-Generation-Regel (zwei Varianten) zuverlässig umsetzt
-- [ ] In Copilot-fähigem Repo installieren und in VS Code mit `@workspace` testen
+**Community-Tasks** (Maintainer hat weder Codex CLI noch Copilot — Praxisbericht via Issue/PR willkommen):
+- In echtem Codex-CLI-Projekt installieren und Re-Test 1 + 3 fahren — verifizieren, ob Codex die Code-Generation-Regel (zwei Varianten) zuverlässig umsetzt
+- In Copilot-fähigem Repo installieren und in VS Code mit `@workspace` testen
+- Falls Codex/Copilot schwächer triggern: AGENTS.md schärfen oder schon vorne mit explizitem `## CRITICAL`-Block beginnen, der bei Drittland-Code immer durchschlagen soll
 
 ### Weitere Skill-Familien
 
