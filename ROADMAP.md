@@ -120,14 +120,16 @@ Plus `cursor/INSTALL.md` (Agent-Requested-Erklärung, Verifikations-Prompt, Upda
 - [ ] In einem Cursor-Projekt installieren und Re-Test-1 + Re-Test-3 fahren (S3-Upload us-east-1 + OpenAI-Patient-Allergie). Trigger-Verhalten dokumentieren.
 - [ ] Falls Cursor schwächer triggert als Claude/Sonnet: Description nochmal schärfen oder `globs:` mit File-Pattern-Triggern füllen (z.B. `globs: ["**/*.tf", "**/aws-*.{js,ts}"]`).
 
-### OpenAI Codex / GitHub Copilot Adaption
+### OpenAI Codex / GitHub Copilot Adaption ✅ (v1.3)
 
-- [ ] **Codex CLI**: liest `AGENTS.md` im Projekt-Root, alle Inhalte sind immer geladen → Inhalt MUSS prägnant zusammengefasst sein
-- [ ] **GitHub Copilot**: liest `.github/copilot-instructions.md`
-- [ ] Strategie: eine konsolidierte Master-`AGENTS.md` mit den **wichtigsten** Regeln aus allen sieben Markdown-Files, ohne die Detail-Tabellen (die wären zu groß)
-- [ ] `codex/AGENTS.md` schreiben — Schwerpunkt: Decision Tree, Anbieter-Quick-Ref, Code-Patterns, Cloud-Act-Hinweis. Sub-Dateien müssen ggf. zu Bullet-Points kondensiert werden.
-- [ ] `codex/INSTALL.md`
-- [ ] `codex/README.md` aktualisieren
+- `codex/AGENTS.md` (~250 Zeilen) — Decision Tree, Anbieter-Quick-Ref, Code-Patterns, Code-Generation-Regel, CLOUD-Act-Branch, Häufige Fallen, VVT-Pflicht, Quellen
+- `codex/copilot-instructions.md` — identischer Inhalt, Header zeigt auf Copilot
+- `codex/INSTALL.md` (Codex + Copilot Setup, Verifikations-Prompt, Tag-Pinning)
+- `codex/README.md` aktualisiert (Status v1.3)
+
+**Offen:**
+- [ ] In echtem Codex-CLI-Projekt installieren und Re-Test 1 + 3 fahren — verifizieren, ob Codex die Code-Generation-Regel (zwei Varianten) zuverlässig umsetzt
+- [ ] In Copilot-fähigem Repo installieren und in VS Code mit `@workspace` testen
 
 ### Weitere Skill-Familien
 

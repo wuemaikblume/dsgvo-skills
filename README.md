@@ -1,14 +1,14 @@
 # DSGVO Skills für KI-Coding-Tools
 
-Kostenlose Compliance-Pakete für **Claude AI / Claude Code** (heute), **Cursor** und **OpenAI Codex** (geplant) — speziell für **DACH-Entwickler**, die produktiv mit KI-Coding arbeiten und dabei DSGVO, NIS2 und nationale Datenschutzregeln im Blick behalten müssen.
+Kostenlose Compliance-Pakete für **Claude AI / Claude Code**, **Cursor** und **OpenAI Codex CLI / GitHub Copilot** — speziell für **DACH-Entwickler**, die produktiv mit KI-Coding arbeiten und dabei DSGVO, NIS2 und nationale Datenschutzregeln im Blick behalten müssen.
 
 > **Was ist ein Skill?** Eine Markdown-Datei mit YAML-Frontmatter, die das Tool bei passendem Kontext automatisch lädt. Bei Claude: [offizielle Anthropic-Doku](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview).
 
-## Status
+## Status (v1.3)
 
 - ✅ **`/claude`** — Anthropic Skills für Claude Code, Claude.ai, Claude API. Eine Skill-Familie verfügbar (Drittlandtransfer + 5 Vertiefungs-Dateien).
-- 🚧 **`/cursor`** — Adaption auf `.cursor/rules/*.mdc` geplant.
-- 🚧 **`/codex`** — Adaption auf `AGENTS.md` (Codex CLI) und `copilot-instructions.md` geplant.
+- ✅ **`/cursor`** — Sechs `.cursor/rules/*.mdc` Agent-Requested-Rules.
+- ✅ **`/codex`** — Konsolidierte `AGENTS.md` (Codex CLI) und `copilot-instructions.md` (GitHub Copilot).
 
 ## Repository-Struktur
 
@@ -25,8 +25,19 @@ dsgvo-skills/
 │           ├── CLOUD-ACT.md        # Art. 48 / Cloud Act / BCRs / Datensouveränität
 │           ├── CH-REVDSG.md        # Schweiz revDSG, Swiss-US DPF
 │           └── EPRIVACY.md         # TTDSG / Cookies / Tracking-Pixel
-├── cursor/                          # Platzhalter — kommt
-├── codex/                           # Platzhalter — kommt
+├── cursor/                          # 6 .mdc Rules (Agent Requested)
+│   ├── INSTALL.md
+│   └── rules/
+│       ├── dsgvo-third-country-transfer.mdc   # SKILL + PROVIDERS gemerged
+│       ├── dsgvo-roles.mdc
+│       ├── dsgvo-dpia.mdc
+│       ├── dsgvo-cloud-sovereignty.mdc
+│       ├── dsgvo-eprivacy-tracking.mdc
+│       └── dsgvo-revdsg-ch.mdc
+├── codex/                           # Codex CLI + GitHub Copilot
+│   ├── INSTALL.md
+│   ├── AGENTS.md                    # für Codex CLI (Projekt-Root)
+│   └── copilot-instructions.md      # für .github/copilot-instructions.md
 ├── DISCLAIMER.md
 ├── LICENSE                          # MIT
 └── README.md                        # diese Datei

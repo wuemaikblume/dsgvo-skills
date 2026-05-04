@@ -1,21 +1,51 @@
-# DSGVO Instructions für OpenAI Codex / Copilot
+# DSGVO Instructions für OpenAI Codex CLI / GitHub Copilot
 
-> 🚧 **In Vorbereitung.** Aktuell verfügbar: nur die Claude-Variante in [`/claude`](../claude/).
+Konsolidierte DSGVO-Compliance-Anweisungen für Tools, die statische Markdown-Files in den System-Prompt laden:
 
-Sobald die Claude-Skills Version 1.1 stabil ist und in der Praxis getestet, wird hier eine **Codex-Adaption** als `AGENTS.md` (Codex CLI) und `copilot-instructions.md` (GitHub Copilot) folgen.
+- [`AGENTS.md`](AGENTS.md) — Codex CLI (im Projekt-Root)
+- [`copilot-instructions.md`](copilot-instructions.md) — GitHub Copilot (`.github/copilot-instructions.md`)
 
-## Geplante Inhalte
+**Stand:** v1.3, parallel zur Claude- und Cursor-Variante. Inhaltlich kondensiert, weil Codex/Copilot die Datei bei jeder Anfrage komplett mitladen — kein Auto-Trigger, kein Sub-File-Loading.
 
-- `AGENTS.md` — konsolidierte Compliance-Anweisungen für Codex CLI (Projekt-Root)
-- `copilot-instructions.md` — `.github/copilot-instructions.md` für Copilot-Workspaces
-- ggf. weitere Adapter für Cline, Continue, etc.
+## Was drin ist
 
-## Unterschied zu Claude Skills
+- Decision Tree für Drittlandtransfer (Art. 44-49 DSGVO)
+- Anbieter-Quick-Ref für 15 typische SaaS-Provider (DPF-Status, Pflicht-Aktion)
+- Code-Patterns: AWS S3 Fail-closed Whitelist, Sentry EU-DSN, Firebase Region zwingend, OpenAI Triangulation, Datadog/Supabase EU
+- Code-Generierungs-Regel: bei explizitem US-Wunsch beide Varianten zeigen + Pflicht-Bullets
+- US CLOUD Act-Hinweis als eigener Pflicht-Branch bei Art. 9 / KRITIS / § 203 StGB
+- Pflicht-Dokumentation (VVT, Art. 30) + häufige Fallen
+- Schweiz revDSG, ePrivacy/TTDSG, NIS2, DSFA-Pflichtfälle als Kurzhinweise
 
-Codex liest `AGENTS.md` im Projekt-Root und folgt allen Anweisungen darin **bei jeder Anfrage**. Es gibt **kein Auto-Trigger** auf bestimmte Themen — der gesamte Inhalt wird immer mitgeladen. Für ein 8-Skill-Pack heißt das: alles muss inline und prägnant sein, sonst wird der Kontext zu groß.
+## Was bewusst NICHT drin ist
 
-## Manueller Workaround heute
+Detaillierte Anbieter-Profile, DSFA-Schwellenanalyse, BCR-Vergleich, Schweiz-Vertiefung — diese liegen ausschließlich im Repo unter [`/claude/skills/dsgvo-third-country-transfer/`](../claude/skills/dsgvo-third-country-transfer/). Bei Bedarf kann der Codex-User die Roh-URL nachladen oder die relevante Sub-Datei projektspezifisch ergänzen.
 
-Wer heute Codex CLI oder Copilot nutzt, kann die wichtigsten Regeln der Claude-Skills manuell in `AGENTS.md` übernehmen. Volle Triggerlogik wie bei Claude ist nicht möglich.
+Hintergrund: Codex/Copilot würden andernfalls bei jeder Anfrage 30+ KB an Compliance-Material mitschleppen, was Token-Budget und Antwort-Latenz unnötig belastet.
 
-Issues / PRs für eine native Variante willkommen.
+## Installation
+
+Siehe [`INSTALL.md`](INSTALL.md). Kurzform:
+
+```bash
+# Codex CLI
+curl -fsSL https://raw.githubusercontent.com/wuemaikblume/dsgvo-skills/main/codex/AGENTS.md -o AGENTS.md
+
+# GitHub Copilot
+mkdir -p .github
+curl -fsSL https://raw.githubusercontent.com/wuemaikblume/dsgvo-skills/main/codex/copilot-instructions.md -o .github/copilot-instructions.md
+```
+
+## Updates
+
+Pinning auf einen Tag empfohlen — DPF-Status, Schrems-III-Lage und Adäquanzbeschlüsse ändern sich:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/wuemaikblume/dsgvo-skills/v1.3/codex/AGENTS.md -o AGENTS.md
+```
+
+Releases auf <https://github.com/wuemaikblume/dsgvo-skills/releases>.
+
+## Issues / PRs
+
+Verbesserungen willkommen — speziell Praxis-Berichte, ob Codex/Copilot die Code-Generierungs-Regel (zwei Varianten zeigen) zuverlässig umsetzen oder ob die Anweisung schärfer formuliert werden muss.
