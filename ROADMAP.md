@@ -2,7 +2,7 @@
 
 > Diese Datei ist gleichzeitig öffentliche Roadmap UND **Onboarding-Doku für die nächste Arbeits-Session**. Sie enthält genug Kontext, dass weder ein neuer Claude-Lauf noch ein menschlicher Mitwirkender eine separate Erklärung braucht.
 
-**Stand:** 2026-05-04, Version 1.3 live. v1.2-Re-Tests unter Opus beide PASS (S3-Upload mit zwei Varianten, OpenAI+Patient mit Cloud Act + § 203 StGB). v1.2-Re-Test unter Sonnet 4.6 FAIL (Trigger feuerte nicht) → v1.3 schärft die Description.
+**Stand:** 2026-05-04, Version 1.3 live über alle drei Tool-Targets (Claude / Cursor / Codex+Copilot). Re-Tests unter Claude Code: Opus + Sonnet 4.6 beide PASS für Re-Test 1 (S3-Upload, beide Varianten generiert) und Re-Test 3 (OpenAI + Patient-Allergie, Cloud Act + § 203 StGB führend). v1.2 hatte unter Sonnet 4.6 Trigger-Probleme, die v1.3 mit geschärfter Description schließt.
 
 ---
 
@@ -18,9 +18,8 @@ Kostenlose Open-Source-Skills für KI-Coding-Tools (Claude AI, Claude Code, spä
 |----|-----|
 | GitHub-Repo | <https://github.com/wuemaikblume/dsgvo-skills> |
 | Default-Branch | `main` |
-| SSH-Remote | `(SSH-remote)` |
-| Long-Form-Artikel (persönlich) | <https://maikblume.de/blog/warum-ich-einen-dsgvo-skill-fuer-claude-gebaut-habe> |
-| News-Artikel (Chilikanal) | <https://chilikanal.de/artikel/dsgvo-skill-fuer-claude-bringt-eu-compliance-ins-ki-coding> |
+| Long-Form-Artikel | <https://maikblume.de/blog/warum-ich-einen-dsgvo-skill-fuer-claude-gebaut-habe> |
+| News-Artikel | <https://chilikanal.de/artikel/dsgvo-skill-fuer-claude-bringt-eu-compliance-ins-ki-coding> |
 
 ### Skill-Architektur
 
@@ -41,9 +40,9 @@ Sub-Dateien laden via Anthropic-Progressive-Disclosure-Pattern nur on-demand.
 
 ```
 dsgvo-skills/
-├── claude/      # gefüllt
-├── cursor/      # Platzhalter (README erklärt geplante Struktur)
-├── codex/       # Platzhalter
+├── claude/      # Anthropic Skills (Hauptdatei + 6 Sub-Files)
+├── cursor/      # 6 .cursor/rules/*.mdc (Agent Requested)
+├── codex/       # AGENTS.md (Codex CLI) + copilot-instructions.md
 ├── README.md
 ├── DISCLAIMER.md
 ├── LICENSE      # MIT (deutsche Übersetzung)
@@ -66,35 +65,27 @@ dsgvo-skills/
 ### Drei Cross-Reviews (alle Befunde im Repo eingearbeitet)
 
 1. **Sonnet-Subagent intern** (mit WebSearch-Zugriff) — fand CNIL-URL-Datum-Inkonsistenz, Latombe-Quelle fehlt inline, Anthropic/Clerk DPF nicht live verifiziert
-2. **GPT/Gemini Standard-Cross-Review** (extern, vom User) — fand Stripe Controller/Processor-Hybrid, Schweizer revDSG fehlt komplett, Art. 26/28/35/48 fehlen
-3. **Tiefenrecherche** (extern, vom User, mit Quellen-Crawling) — fand **Brasilien-Adäquanzbeschluss 10.02.2026**, **Supabase nicht DPF**, **Clerk DPF aktiv seit 22.02.2024**, **OpenAI Ireland Ltd. als Vertragspartner**, **Firebase Cloud Functions Default `us-central1`**, **AWS eu-west-2 = UK (nicht EU)**
+2. **GPT/Gemini Standard-Cross-Review** (extern) — fand Stripe Controller/Processor-Hybrid, Schweizer revDSG fehlt komplett, Art. 26/28/35/48 fehlen
+3. **Tiefenrecherche** (extern, mit Quellen-Crawling) — fand **Brasilien-Adäquanzbeschluss 10.02.2026**, **Supabase nicht DPF**, **Clerk DPF aktiv seit 22.02.2024**, **OpenAI Ireland Ltd. als Vertragspartner**, **Firebase Cloud Functions Default `us-central1`**, **AWS eu-west-2 = UK (nicht EU)**
 
-### Vier Trigger-Tests (in echter Claude-Code-Session)
+### Trigger-Tests (in echter Claude-Code-Session)
 
-| Test | Prompt-Kern | Ergebnis |
-|------|-------------|----------|
-| 1 | „Node-Skript S3-Upload us-east-1" | Skill triggert + DSGVO-Hinweis vorab. Code aber mit `us-east-1` (User-Wunsch respektiert). v1.2 Code-Generation-Regel sollte das in Folgeläufen fixen — **noch nicht re-getestet**. |
-| 2 | „Sentry für Next.js" | Compliant Output: EU-DSN, `sendDefaultPii: false`, `beforeSend`-Hook, Replay-Masking. ✅ |
-| 3 | „OpenAI mit Patient-Allergie-Tickets" | Skill explizit geladen, Art. 9 erkannt, DSFA empfohlen, Pseudonymisierung als Pflicht, Azure OpenAI als EU-Alternative. **Aber Cloud Act nicht erwähnt** → v1.2 sollte das fixen, **noch nicht re-getestet**. |
-| 4 | „DigitalOcean Frankfurt → Hetzner Falkenstein" | Skill nicht überschießend: 4 DSGVO-Bullets, dann technische Migrations-Beratung. ✅ |
+| Test | Prompt-Kern | v1.1 | v1.3 |
+|------|-------------|------|------|
+| 1 | „Node-Skript S3-Upload us-east-1" | Skill triggert, aber nur Hinweis vorab — Code rein us-east-1 | ✅ Opus + Sonnet 4.6: beide Varianten generiert, DPF-Pflichten als Bullets |
+| 2 | „Sentry für Next.js" | ✅ EU-DSN, `sendDefaultPii: false`, `beforeSend`, Replay-Masking | (nicht erneut nötig) |
+| 3 | „OpenAI mit Patient-Allergie-Tickets" | Art. 9 erkannt, DSFA + Pseudonymisierung, **aber Cloud Act fehlte** | ✅ Opus: Cloud Act + § 203 StGB führend, vier Architektur-Optionen, Refusal ohne DSFA |
+| 4 | „DigitalOcean Frankfurt → Hetzner Falkenstein" | ✅ Skill nicht überschießend: 4 DSGVO-Bullets + Migrations-Beratung | (nicht erneut nötig) |
 
 ---
 
 ## 3. Offene Punkte (priorisiert + handlungsfertig)
 
-### Re-Tests von v1.2 (15 Min)
+### Externer Re-Review v1.3 (optional)
 
-In **neuer** Claude-Code-Session (Skill ist bereits in `~/.claude/skills/`), folgende Prompts wiederholen und bewerten:
-
-- [ ] **Re-Test 1** — derselbe Prompt wie Test 1 oben („Node-Skript S3-Upload us-east-1"). Erwartet: Claude zeigt **beide Varianten** im Code (us-east-1 wie gewünscht UND EU-Whitelist-Pattern als Vergleich), nicht nur Hinweis vorab.
-- [ ] **Re-Test 3** — derselbe Prompt wie Test 3 oben (OpenAI + Patient-Allergie). Erwartet: Cloud-Act wird mindestens einmal erwähnt, idealerweise mit Verweis auf EU-souveräne Alternative (Stackit / T-Systems / Self-Hosted).
-- [ ] Falls v1.2-Verbesserungen NICHT greifen: SKILL.md weiter schärfen (z.B. Decision Tree um Cloud-Act-Schritt 5b ergänzen, der nicht nur als „⚠ ABER" formuliert ist, sondern als eigener Pflicht-Branch).
-
-### Externer Re-Review (optional)
-
-- [ ] Den korrigierten v1.2-Skill nochmal durch **GPT-5.5** und **Gemini** schicken — gleicher Prompt wie damals (siehe Konversations-Historie / Memory). Zweck: Verifikation, dass Brasilien, Supabase-Korrektur, Clerk-Update, OpenAI-Ireland-Klärung wirklich sauber sind.
-- [ ] Bei neuen Befunden: in einem v1.3-Patch einarbeiten.
-- [ ] **Achtung:** Beim Verfassen des externen Cross-Check-Prompts den SKILL.md-Body **nicht versehentlich doppelt einfügen** (passierte beim ersten Mal, beide externen KIs flaggten „doppelte Tabelle" — das war der Prompt, nicht der Skill).
+- [ ] Den v1.3-Skill nochmal durch **GPT-5.5** und **Gemini** schicken. Zweck: Verifikation, dass Brasilien-Adäquanz, Supabase-Korrektur, Clerk-DPF-Update, OpenAI-Ireland-Klärung und die neue „any user data = personal data"-Klausel sauber sind.
+- [ ] Bei neuen Befunden: in einem v1.4-Patch einarbeiten.
+- [ ] **Achtung:** Beim Verfassen des externen Cross-Check-Prompts den SKILL.md-Body **nicht versehentlich doppelt einfügen** (passiert leicht — beide externen KIs flaggen sonst „doppelte Tabelle", was am Prompt liegt, nicht am Skill).
 
 ### Cursor-Adaption ✅ (v1.3, Commit `d122638`)
 
