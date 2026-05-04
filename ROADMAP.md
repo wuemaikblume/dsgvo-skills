@@ -22,17 +22,6 @@ Kostenlose Open-Source-Skills für KI-Coding-Tools (Claude AI, Claude Code, spä
 | Long-Form-Artikel (persönlich) | <https://maikblume.de/blog/warum-ich-einen-dsgvo-skill-fuer-claude-gebaut-habe> |
 | News-Artikel (Chilikanal) | <https://chilikanal.de/artikel/dsgvo-skill-fuer-claude-bringt-eu-compliance-ins-ki-coding> |
 
-### Server-Pfade
-
-| Was | Pfad |
-|-----|------|
-| Repo lokal | `<REDACTED-PATH>/` |
-| Aktiver Skill in Claude Code (User-Personal) | `~/.claude/skills/dsgvo-third-country-transfer/` |
-| Maikblume-Projekt | `<REDACTED-PATH>/` |
-| Chilikanal-Projekt | `<REDACTED-PATH>/` |
-
-DB-Zugänge: stehen im Memory (`<REDACTED-PATH>`).
-
 ### Skill-Architektur
 
 ```
@@ -205,19 +194,14 @@ Der Skill schreibt aktuell „Anthropic: DPF (zur Live-Prüfung empfohlen)". Vor
 
 ---
 
-## 5. Kontext für die nächste Session
+## 5. Onboarding für Mitwirkende
 
-Wenn du eine neue Claude-Code-Session öffnest und an diesem Projekt weiterarbeitest, reicht der folgende Prompt:
+Diese ROADMAP ist die Eintrittstür ins Projekt. Sie enthält:
 
-> Wir arbeiten am Projekt `dsgvo-skills` weiter. Der aktuelle Stand ist v1.2, alles dokumentiert in `<REDACTED-PATH>/ROADMAP.md` (öffentlich) und `<REDACTED-PATH>/INTERNAL.md` (lokal, gitignored). Lies beide Dateien, dann frage mich, an welchem Abschnitt wir weitermachen wollen, und schlage konkrete erste Schritte vor.
-
-Die Datei enthält:
-
-- alle Live-URLs (Repo, Maikblume, Chilikanal)
-- Server-Pfade zu Repo und installierten Skills
+- alle Live-URLs (Repo, Long-Form-Artikel, News)
 - Versions-Historie und Inhalt der drei Cross-Reviews
 - Test-Ergebnisse mit konkreten verbleibenden Lücken
-- Detaillierte To-Dos pro Bereich
-- Konventionen und Pflichten für jeden Skill-Beitrag
+- Detaillierte To-Dos pro Bereich (Re-Tests, Cursor, Codex, weitere Skill-Familien)
+- Konventionen und Pflichten für jeden Skill-Beitrag (Cross-Review, Quellen, Stichtag, Disclaimer)
 
-Damit ist sowohl ein menschlicher Mitwirkender als auch eine neue KI-Session arbeitsfähig, ohne dass du den ganzen Kontext rekonstruieren musst.
+Damit ist sowohl ein menschlicher Mitwirkender als auch eine neue KI-Session arbeitsfähig, ohne separaten Kontext-Aufbau.
