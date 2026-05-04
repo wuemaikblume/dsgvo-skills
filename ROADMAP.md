@@ -2,7 +2,7 @@
 
 > Diese Datei ist gleichzeitig öffentliche Roadmap UND **Onboarding-Doku für die nächste Arbeits-Session**. Sie enthält genug Kontext, dass weder ein neuer Claude-Lauf noch ein menschlicher Mitwirkender eine separate Erklärung braucht.
 
-**Stand:** 2026-05-04, Version 1.2 live, drei Cross-Reviews integriert, vier Trigger-Tests gefahren.
+**Stand:** 2026-05-04, Version 1.3 live. v1.2-Re-Tests unter Opus beide PASS (S3-Upload mit zwei Varianten, OpenAI+Patient mit Cloud Act + § 203 StGB). v1.2-Re-Test unter Sonnet 4.6 FAIL (Trigger feuerte nicht) → v1.3 schärft die Description.
 
 ---
 
@@ -72,6 +72,7 @@ dsgvo-skills/
 | v1.1 | `275f633` | Multi-Tool-Restrukturierung + drei Reviews integriert (Brasilien, Supabase, Clerk, OpenAI Ireland, Firebase, Stripe, AWS eu-west-2 = UK, Sentry-Scrubbing, Anonymisierung-Präzisierung). Sub-Datei-Architektur eingeführt. |
 | v1.1+docs | `0307cee` | `<REPO>`-Platzhalter ersetzt durch `wuemaikblume` |
 | v1.2 | `42be843` | Cloud-Act-Trigger geschärft + neue „Code-Generierungs-Regel" für explizite Drittland-Wünsche |
+| v1.3 | `ccc453f` | Description-Härtung für Sonnet-4.6-Trigger: Avatar/Upload/Signup explizit, „any user data = personal data unter GDPR"-Klausel, Art. 9-Trigger-Liste, § 203 StGB + revDSG im Scope |
 
 ### Drei Cross-Reviews (alle Befunde im Repo eingearbeitet)
 
