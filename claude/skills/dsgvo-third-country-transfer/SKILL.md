@@ -109,7 +109,7 @@ Beides ist erforderlich. Art. 44-49 ersetzt Art. 6 nicht — er ergänzt ihn nur
 
 ## Anbieter-Quick-Reference
 
-> ⚠️ **Stichtags-Hinweis (Mai 2026).** DPF-Zertifizierungen können sich ändern. Vor Vertragsabschluss IMMER auf [dataprivacyframework.gov/list](https://www.dataprivacyframework.gov/list) live prüfen + Datum + DPF-Participant-ID dokumentieren. **Detaillierte Anbieter-Profile siehe `PROVIDERS.md`.**
+> ⚠️ **Stichtag Mai 2026, DPF-Status verifiziert 2026-05-04 gegen die offizielle Excel-Liste der ITA** (`dataprivacyframework.gov/list` → Download „Data Privacy Framework Participants List"). DPF-Zertifizierungen können sich kurzfristig ändern. Vor Vertragsabschluss IMMER live prüfen + DPF-Participant-ID + Stichtag dokumentieren. **Detaillierte Anbieter-Profile siehe `PROVIDERS.md`.**
 
 | Anbieter | Status | Was zu tun ist |
 |----------|--------|----------------|
@@ -117,13 +117,13 @@ Beides ist erforderlich. Art. 44-49 ersetzt Art. 6 nicht — er ergänzt ihn nur
 | Microsoft Azure | DPF | EU Data Boundary aktivieren; `westeurope` / `germanywestcentral` |
 | Google Cloud | DPF | EU-Region; siehe `PROVIDERS.md` für Firebase-Spezifika |
 | Cloudflare Inc. | DPF | EU Data Localization Suite; IP-Verarbeitung am Edge — TIA empfohlen |
-| OpenAI | OpenAI Ireland Ltd. ist EWR-Vertragspartner; US-Mutter DPF | Vertrag mit OpenAI Ireland; SCCs für US-Backend; ZDR/MAM für sensible Prompts (nicht Standard) |
-| Anthropic | DPF (zur Live-Prüfung) | DPA separat; ZDR via Enterprise/Bedrock prüfen |
+| OpenAI | OpenAI Ireland Ltd. ist EWR-Vertragspartner; **US-Mutter NICHT DPF-zertifiziert** (verifiziert 2026-05-04) | Vertrag mit OpenAI Ireland; **SCCs Modul 3** (Processor→Processor) für US-Backend; ZDR/MAM für sensible Prompts (nicht Standard) |
+| Anthropic | **NICHT DPF-zertifiziert** (verifiziert 2026-05-04) | SCCs Modul 2 + DPA; AWS Bedrock in `eu-central-1` als EU-Pfad; ZDR via Enterprise prüfen |
 | Stripe | hybride Rolle — Controller + Processor | siehe `PROVIDERS.md` (Detail-Erklärung) |
 | Sentry | EU-Region verfügbar | EU DSN (`*.ingest.de.sentry.io`) + clientseitiges PII-Scrubbing (siehe Code-Patterns) |
 | Datadog | DPF + EU-Site | EU1 Site (`datadoghq.eu`); kein US1 |
 | Auth0 (Okta) | DPF | EU-Tenant explizit (`*.eu.auth0.com`) |
-| Clerk | **DPF aktiv seit 22.2.2024** (Non-HR Data) | DPA + DPF-Klausel |
+| Clerk | DPF aktiv seit 23.2.2024 (Non-HR Data, Participant 2718, alle drei Frameworks); Status „Active - Re-certification under Review" (Stand 5/2026) | DPA + DPF-Klausel; Re-Zertifizierungs-Status checken (Re-Cert-Fenster läuft bis 27.2.2026) |
 | Firebase (Google) | über Google LLC DPF | Firestore: `eur3` (BE/NL); **Cloud Functions zwingend `europe-west1` setzen** — sonst Fallback `us-central1` |
 | Supabase | **NICHT DPF-zertifiziert** | SCCs Modul 2 + DPA; Project-Region EU; Subprozessoren/Edge Functions/Logs prüfen |
 | Mailgun | DPF + EU-Region | EU-Region (`api.eu.mailgun.net`) |
@@ -275,6 +275,7 @@ Zusätzlich: Information der Betroffenen nach **Art. 13/14 DSGVO** über Empfän
 | „DPF-Anbieter brauchen kein TIA" | Korrekt: TIA-Pflicht nur bei Art. 46-Tools (SCCs/BCRs). Bei DPF (Art. 45) entfällt die Pflicht. Risikobewertung wegen Schrems-III empfohlen. |
 | „Cloudflare ist nur Proxy" | IPs/Header sind personenbezogen. Cloudflare Inc. (US) verarbeitet sie → DPF + supplementary measures. |
 | „OpenAI bekommt nur Texte" | Texte enthalten Namen, IDs, sensible Inhalte. Pseudonymisierung im Prompt + ggf. ZDR. |
+| „OpenAI / Anthropic sind DPF-zertifiziert" | **Falsch (Stand 5/2026):** weder OpenAI noch Anthropic stehen auf der DPF-Liste. Transfers laufen über SCCs (OpenAI: Modul 3 via OpenAI Ireland → US-Backend; Anthropic: Modul 2 direkt). |
 | „UK ist EU-äquivalent für immer" | UK-Adäquanz am 19.12.2025 erneuert, Sunset 27.12.2031. Vor Ablauf prüfen. |
 | „Stripe ist EU, alles entspannt" | Hybride Rolle (Controller + Processor je Service). Siehe `PROVIDERS.md`. Datenflüsse zu Stripe Inc. (US) dokumentieren. |
 | „SCCs unterschrieben = fertig" | Ohne TIA + supplementary measures angreifbar. |
@@ -326,4 +327,4 @@ DPF gilt: Adäquanzbeschluss vom 10. Juli 2023 in Kraft. Am 3. September 2025 ha
 
 ## Disclaimer
 
-Dieser Skill ist eine **Best-Practice-Sammlung mit Stand Mai 2026**, keine Rechtsberatung. Bei sensiblen Datenkategorien (Art. 9 DSGVO), hohen Compliance-Anforderungen, KRITIS, Bußgeld-Risiken oder konkreten Aufsichtsanfragen: Anwalt für IT-Recht oder externen Datenschutzbeauftragten konsultieren.
+Dieser Skill ist eine **Best-Practice-Sammlung mit Stand Mai 2026** (DPF-Status verifiziert 2026-05-04 gegen offizielle ITA-Excel-Liste), keine Rechtsberatung. Bei sensiblen Datenkategorien (Art. 9 DSGVO), hohen Compliance-Anforderungen, KRITIS, Bußgeld-Risiken oder konkreten Aufsichtsanfragen: Anwalt für IT-Recht oder externen Datenschutzbeauftragten konsultieren.

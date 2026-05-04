@@ -1,6 +1,6 @@
 # DSGVO-Compliance — Anweisungen für KI-Coding-Assistenten
 
-> GitHub Copilot lädt diese Datei aus `.github/copilot-instructions.md` für alle Code-Suggestions im Workspace. Sie zwingt Copilot, vor jedem Code-Vorschlag DSGVO-Konformität zu prüfen, wenn personenbezogene Daten an Drittland-Dienste fließen. Stand Mai 2026, v1.3. Quelle und Updates: <https://github.com/wuemaikblume/dsgvo-skills>.
+> GitHub Copilot lädt diese Datei aus `.github/copilot-instructions.md` für alle Code-Suggestions im Workspace. Sie zwingt Copilot, vor jedem Code-Vorschlag DSGVO-Konformität zu prüfen, wenn personenbezogene Daten an Drittland-Dienste fließen. Stand Mai 2026, v1.4 (DPF-Status verifiziert 2026-05-04 gegen offizielle ITA-Excel-Liste). Quelle und Updates: <https://github.com/wuemaikblume/dsgvo-skills>.
 
 ## Geltungsbereich
 
@@ -89,13 +89,13 @@ Wenn der User **explizit** eine Drittland-Region oder US-Konfiguration anfragt (
 | Azure | DPF | `westeurope` / `germanywestcentral`, EU Data Boundary aktivieren |
 | Google Cloud / Firebase | DPF (Google LLC) | EU-Region; **Cloud Functions zwingend `europe-west1`**, sonst us-central1-Fallback |
 | Cloudflare | DPF | EU Data Localization Suite; Edge-IP-Verarbeitung → TIA empfohlen |
-| OpenAI | OpenAI Ireland Ltd. EWR-Vertragspartner; US-Mutter DPF | Vertrag mit Ireland; SCCs für US-Backend; ZDR/Modified Abuse Monitoring nur auf Antrag |
-| Anthropic | DPF (Live-Prüfung) | DPA separat; ZDR via Enterprise/Bedrock prüfen |
+| OpenAI | OpenAI Ireland Ltd. EWR-Vertragspartner; **US-Mutter NICHT DPF** (verifiziert 2026-05-04) | Vertrag mit Ireland; **SCCs Modul 3** (P→P) für US-Backend; ZDR/Modified Abuse Monitoring nur auf Antrag |
+| Anthropic | **NICHT DPF-zertifiziert** (verifiziert 2026-05-04) | SCCs Modul 2 + DPA; AWS Bedrock in `eu-central-1` als EU-Pfad |
 | Stripe | hybrid: Controller + Processor je Service | Datenflüsse zu Stripe Inc. (US) im VVT dokumentieren |
 | Sentry | EU-Region verfügbar | EU-DSN `*.ingest.de.sentry.io` + breites PII-Scrubbing |
 | Datadog | DPF + EU-Site | EU1 (`datadoghq.eu`), nicht US1 |
 | Auth0 | DPF | EU-Tenant explizit (`*.eu.auth0.com`) |
-| Clerk | **DPF aktiv seit 22.2.2024** | DPA + DPF-Klausel |
+| Clerk | DPF Participant 2718 (Clerk, Inc.), alle drei Frameworks, Status „Active - Re-certification under Review" (Stand 5/2026, Re-Cert-Fenster bis 27.2.2026) | DPA + DPF-Klausel; Re-Cert-Status vor Vertrag live prüfen |
 | Supabase | **NICHT DPF-zertifiziert** | SCCs Modul 2 + DPA; Project-Region EU; Subprozessoren prüfen |
 | Mailgun | DPF + EU-Region | `api.eu.mailgun.net` |
 | Hetzner / IONOS / Scaleway / OVHcloud | EU-Anbieter, kein Drittlandtransfer | nur AVV nach Art. 28 |
@@ -153,9 +153,12 @@ export const onUserCreate = onDocumentCreated({
 ### OpenAI — vertragliche Triangulation
 
 ```typescript
-// EWR-Nutzer: Vertragspartner = OpenAI Ireland Ltd.
-// Backend-Verarbeitung primär US (intrakonzernlich via SCCs/DPF).
-// VVT-Eintrag: "OpenAI Ireland Ltd." als Auftragsverarbeiter.
+// EWR-Nutzer: Vertragspartner = OpenAI Ireland Ltd. (Dublin)
+// Backend-Verarbeitung primär US bei OpenAI OpCo, LLC.
+// US-Mutter ist NICHT DPF-zertifiziert (Stand 5/2026) →
+// Transfermechanismus: SCCs Modul 3 (Processor→Processor).
+// VVT: "OpenAI Ireland Limited" als Auftragsverarbeiter,
+// SCC-Modul 3 + TIA-Datum dokumentieren.
 // Sensible Prompts: ZDR/Modified Abuse Monitoring beantragen
 // (nicht Default), oder Azure OpenAI in westeurope/germanywestcentral.
 ```
@@ -192,6 +195,7 @@ Plus: Information der Betroffenen nach **Art. 13/14** in der Datenschutzerkläru
 | „DPF → egal welche Region" | DPF betrifft Rechtmäßigkeit, nicht Speicherort. EU-Region trotzdem wählen. |
 | „Adäquanz → AVV reicht" | AVV nur bei Auftragsverarbeitung. Bei C→C: Art. 6/9 + Art. 13/14 + ggf. Art. 26. |
 | „Daten in `eu-central-1` sind vor US sicher" | Falsch — US CLOUD Act greift bei US-Müttern (AWS, MS, Google, Cloudflare, OpenAI, Supabase, Clerk, Sentry US-Backend), auch in EU-Region. |
+| „OpenAI / Anthropic sind DPF-zertifiziert" | **Falsch (Stand 5/2026):** weder OpenAI noch Anthropic stehen auf der DPF-Liste. Transfers laufen über SCCs (OpenAI: Modul 3 via OpenAI Ireland; Anthropic: Modul 2 direkt). |
 | „User-ID ist gehasht, also anonymisiert" | Pseudonymisierung — DSGVO weiter anwendbar. Echte Anonymisierung: Re-Identifikation auch mit Zusatzwissen unmöglich (EwG 26). |
 | „Customer hat eingewilligt → Art. 49" | Art. 49 lit. a nur für gelegentliche, nicht-wiederholte Transfers (EDPB 2/2018). Keine Routine-Grundlage für SaaS. |
 | „Cloudflare ist nur Proxy" | IPs/Header sind personenbezogen. Cloudflare Inc. (US) → DPF + supplementary measures. |
@@ -235,4 +239,4 @@ Detail siehe Repo: <https://github.com/wuemaikblume/dsgvo-skills/tree/main/claud
 
 ## Disclaimer
 
-Diese Anweisungen sind eine **Best-Practice-Sammlung mit Stand Mai 2026**, keine Rechtsberatung. Bei Art. 9-Daten, KRITIS, Berufsgeheimnis-Sektoren, Bußgeld-Risiko oder Aufsichtsanfragen: Anwalt für IT-Recht oder externen Datenschutzbeauftragten einbinden.
+Diese Anweisungen sind eine **Best-Practice-Sammlung mit Stand Mai 2026** (DPF-Status verifiziert 2026-05-04 gegen offizielle ITA-Excel-Liste), keine Rechtsberatung. Bei Art. 9-Daten, KRITIS, Berufsgeheimnis-Sektoren, Bußgeld-Risiko oder Aufsichtsanfragen: Anwalt für IT-Recht oder externen Datenschutzbeauftragten einbinden.

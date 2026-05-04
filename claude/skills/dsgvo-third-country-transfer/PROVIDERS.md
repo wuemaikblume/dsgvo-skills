@@ -1,6 +1,6 @@
 # Anbieter-Profile (Detail)
 
-> Erweiterte Profile zu den in `SKILL.md` genannten Anbietern. Stand Mai 2026. Vor jedem Vertragsabschluss DPF-Status auf [dataprivacyframework.gov/list](https://www.dataprivacyframework.gov/list) live prüfen + Datum + DPF-Participant-ID dokumentieren.
+> Erweiterte Profile zu den in `SKILL.md` genannten Anbietern. **Stand Mai 2026, DPF-Status verifiziert 2026-05-04 gegen die offizielle Excel-Liste** (`dataprivacyframework.gov/list` → Download „Data Privacy Framework Participants List", `DataPrivacyFrameworkParticipantsList.xlsx`). Vor jedem Vertragsabschluss erneut live prüfen + Stichtag + DPF-Participant-ID dokumentieren.
 
 ## AWS (Amazon Web Services)
 
@@ -50,21 +50,24 @@
 
 ## OpenAI
 
+- **DPF-Status (verifiziert 2026-05-04):** **NICHT auf der DPF-Liste** — weder unter „OpenAI", „OpenAI OpCo", „OpenAI L.L.C.", „ChatGPT" noch unter sonstigen Variationen.
 - **Vertragsstruktur (für EWR-Nutzer):**
   - **Vertragspartner:** OpenAI Ireland Limited (Dublin) — siehe OpenAI DPA
   - **Subprozessoren:** OpenAI OpCo, LLC (US) und weitere
-  - **US-Mutter** ist DPF-zertifiziert; intrakonzernlicher Transfer von OpenAI Ireland in die US erfolgt zusätzlich auf Basis SCCs (Modul 2/3)
-- **VVT-Eintrag:** „OpenAI Ireland Limited" als Auftragsverarbeiter; Subprozessoren-Liste mitführen.
+  - **Transfermechanismus:** **SCCs Modul 3** (Processor → Processor) für intrakonzernliche Übermittlung von OpenAI Ireland an OpenAI OpCo (US). Kein Adäquanz-Pfad, da US-Mutter nicht DPF-zertifiziert.
+- **VVT-Eintrag:** „OpenAI Ireland Limited" als Auftragsverarbeiter; Subprozessoren-Liste mitführen; SCC-Modul 3 + TIA-Datum dokumentieren.
 - **Datenresidenz EU:** verfügbar für berechtigte API-Projekte mit Genehmigung — nicht Default.
 - **Zero Data Retention (ZDR) / Modified Abuse Monitoring (MAM):** auf Antrag, keine Pflicht. Empfehlenswert für sensible Prompts (Gesundheit, juristisch, HR).
-- **Strenge EU-Variante:** Azure OpenAI in `westeurope` oder `germanywestcentral` → Daten verbleiben in EU, MS-DPA gilt.
+- **Strenge EU-Variante:** Azure OpenAI in `westeurope` oder `germanywestcentral` → Daten verbleiben in EU, MS-DPA gilt (Microsoft ist DPF-zertifiziert; Cloud-Act-Restrisiko bleibt).
 
 ## Anthropic
 
-- **Status:** DPF-zertifiziert (Stand zur Live-Prüfung empfohlen).
-- **Vertragspartner:** Anthropic, PBC (US).
-- **Strenge EU-Variante:** AWS Bedrock mit Claude in EU-Region (`eu-central-1`) — AWS-DPA gilt, Datenflüsse über AWS-Infrastruktur.
-- **Pflichten:** DPA + DPF-Klausel; bei Enterprise-Tiers ZDR/erweiterte Datenkontrollen prüfen.
+- **DPF-Status (verifiziert 2026-05-04):** **NICHT auf der DPF-Liste** — weder als „Anthropic", „Anthropic, PBC" noch unter Claude-bezogenen Namen.
+- **Vertragspartner:** Anthropic, PBC (US-Public-Benefit-Corporation, Delaware).
+- **Transfermechanismus:** **SCCs Modul 2** (Controller → Processor) im Anthropic-DPA. Kein Adäquanz-Pfad.
+- **VVT-Eintrag:** „Anthropic, PBC" als Auftragsverarbeiter; SCC-Modul 2 + TIA-Datum dokumentieren.
+- **Strenge EU-Variante:** AWS Bedrock mit Claude in EU-Region (`eu-central-1`) — AWS-DPA gilt zusätzlich, Datenflüsse über AWS-Infrastruktur (AWS ist DPF-zertifiziert; Cloud-Act-Restrisiko bleibt). Alternativ Google Cloud Vertex AI mit Claude in EU-Region prüfen.
+- **Pflichten:** DPA mit SCC-Modul 2; bei Enterprise-Tiers ZDR/erweiterte Datenkontrollen prüfen; bei Art. 9-Daten EU-souveränes Modell (Mistral, Aleph Alpha) als Alternative evaluieren.
 
 ## Stripe
 
@@ -91,9 +94,19 @@
 
 ## Clerk
 
-- **DPF-Status:** **AKTIV zertifiziert seit 22.2.2024** für **Non-HR Data**. (Quelle: Clerk Legal DPF Notice)
+- **DPF-Status (verifiziert 2026-05-04 gegen offizielle ITA-Liste):**
+  - **Legal Name:** Clerk, Inc.
+  - **DPF-Participant-ID:** 2718 (URL: <https://www.dataprivacyframework.gov/participant/2718>)
+  - **Frameworks:** alle drei aktiv — EU-US, UK Extension, Swiss-US
+  - **Status:** „Active - Re-certification under Review" (Re-Zertifizierungs-Fenster läuft, Department of Commerce prüft jährliche Re-Cert)
+  - **Initial Install:** 23.2.2024
+  - **Re-Cert-Window-End:** 27.2.2026
+  - **Datenkategorie:** Non-HR Data (HR Data nicht abgedeckt — Mitarbeiterdaten brauchen separate Grundlage)
 - **Vertragspartner:** Clerk, Inc. (US).
-- **Pflichten:** DPA mit DPF-Klausel; jährliche Re-Zertifizierung-Status checken.
+- **Pflichten:**
+  - DPA mit DPF-Klausel
+  - **Vor Vertragsunterzeichnung Re-Zertifizierungs-Status erneut live prüfen** — „Under Review" kann zu „Active" oder zu „Inactive - Lapse" werden
+  - Falls beim Live-Check „Inactive - Lapse" oder „Inactive - Withdrawal": auf SCCs Modul 2 + TIA umsteigen
 - **EU-Datenresidenz:** auf Anfrage prüfen, nicht Default.
 
 ## Auth0 (Okta)
