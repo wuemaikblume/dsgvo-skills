@@ -107,27 +107,18 @@ In **neuer** Claude-Code-Session (Skill ist bereits in `~/.claude/skills/`), fol
 - [ ] Bei neuen Befunden: in einem v1.3-Patch einarbeiten.
 - [ ] **Achtung:** Beim Verfassen des externen Cross-Check-Prompts den SKILL.md-Body **nicht versehentlich doppelt einfügen** (passierte beim ersten Mal, beide externen KIs flaggten „doppelte Tabelle" — das war der Prompt, nicht der Skill).
 
-### Cursor-Adaption
+### Cursor-Adaption ✅ (v1.3, Commit `d122638`)
 
-Ziel: Inhalt von `claude/skills/dsgvo-third-country-transfer/` in Cursor's `.cursor/rules/*.mdc`-Format konvertieren.
+Sechs `.mdc`-Rules in `cursor/rules/`, alle Agent-Requested (`alwaysApply: false`), Description aus v1.3 übernommen:
 
-- [ ] Cursor unterstützt **kein** Progressive Disclosure → die sechs Sub-Dateien müssen in **eine** `.mdc`-Datei pro Thema gemerged werden, oder in eine einzige Big-File-Variante zusammengelegt
-- [ ] Cursor-Frontmatter unterscheidet sich: `description`, `globs` (für File-Pattern-Trigger), `alwaysApply: false` — Cursor-Doku konsultieren: <https://docs.cursor.com/en/context/rules>
-- [ ] Empfohlene Struktur:
+- `dsgvo-third-country-transfer.mdc` (konsolidiert SKILL + PROVIDERS, ~30 KB)
+- `dsgvo-roles.mdc`, `dsgvo-dpia.mdc`, `dsgvo-cloud-sovereignty.mdc`, `dsgvo-eprivacy-tracking.mdc`, `dsgvo-revdsg-ch.mdc`
 
-  ```
-  cursor/rules/
-  ├── dsgvo-third-country-transfer.mdc    # konsolidiert SKILL.md + PROVIDERS.md + Code-Patterns
-  ├── dsgvo-roles.mdc                     # ROLES.md
-  ├── dsgvo-dpia.mdc                      # DPIA.md
-  ├── dsgvo-cloud-sovereignty.mdc         # CLOUD-ACT.md
-  ├── dsgvo-eprivacy-tracking.mdc         # EPRIVACY.md
-  └── dsgvo-revdsg-ch.mdc                 # CH-REVDSG.md
-  ```
+Plus `cursor/INSTALL.md` (Agent-Requested-Erklärung, Verifikations-Prompt, Update-Befehle) und aktualisierte `cursor/README.md`.
 
-- [ ] `cursor/INSTALL.md` schreiben — analog zu `claude/INSTALL.md`
-- [ ] `cursor/README.md` aktualisieren (aktuell Platzhalter)
-- [ ] Test: in einem Cursor-Projekt installieren und denselben Test-Set fahren wie bei Claude (siehe ROADMAP Abschnitt B). Trigger-Verhalten dokumentieren.
+**Offen:**
+- [ ] In einem Cursor-Projekt installieren und Re-Test-1 + Re-Test-3 fahren (S3-Upload us-east-1 + OpenAI-Patient-Allergie). Trigger-Verhalten dokumentieren.
+- [ ] Falls Cursor schwächer triggert als Claude/Sonnet: Description nochmal schärfen oder `globs:` mit File-Pattern-Triggern füllen (z.B. `globs: ["**/*.tf", "**/aws-*.{js,ts}"]`).
 
 ### OpenAI Codex / GitHub Copilot Adaption
 
