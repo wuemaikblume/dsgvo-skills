@@ -1,31 +1,52 @@
 # DSGVO Rules für Cursor
 
-> 🚧 **In Vorbereitung.** Aktuell verfügbar: nur die Claude-Variante in [`/claude`](../claude/).
+Sechs **Agent Requested**-Rules im `.cursor/rules/*.mdc`-Format, die Cursor's Agent automatisch lädt, wenn DSGVO-Themen relevant werden — auch ohne dass der User „DSGVO" oder „GDPR" tippt.
 
-Sobald die Claude-Skills Version 1.1 stabil ist und in der Praxis getestet, wird hier eine **Cursor-Adaption** als `.cursor/rules/*.mdc` Dateien folgen.
+**Stand:** v1.3, parallel zur Claude-Variante. Inhaltlich identisch, technisch an Cursor's Rules-Engine angepasst.
 
-## Geplante Cursor-Rules
+## Inhalt
 
-- `dsgvo-third-country-transfer.mdc`
-- `dsgvo-data-processing-roles.mdc`
-- `dsgvo-dpia.mdc`
-- `dsgvo-cloud-sovereignty.mdc`
-- `dsgvo-eprivacy-tracking.mdc`
-- `revdsg-ch.mdc`
+| Regel | Inhalt |
+|-------|--------|
+| [`dsgvo-third-country-transfer.mdc`](rules/dsgvo-third-country-transfer.mdc) | Decision Tree für Art. 44-49, Anbieter-Profile, Code-Patterns, EU-Whitelist |
+| [`dsgvo-roles.mdc`](rules/dsgvo-roles.mdc) | Controller / Processor / Joint (Art. 6, 9, 26, 28) |
+| [`dsgvo-dpia.mdc`](rules/dsgvo-dpia.mdc) | DSFA-Pflicht, Schwellenanalyse, DSK-Muss-Liste |
+| [`dsgvo-cloud-sovereignty.mdc`](rules/dsgvo-cloud-sovereignty.mdc) | Datensouveränität, Art. 48, US CLOUD Act, BCRs, EU-Alternativen |
+| [`dsgvo-eprivacy-tracking.mdc`](rules/dsgvo-eprivacy-tracking.mdc) | TTDSG §25, Cookies, Tracking-Pixel, Consent |
+| [`dsgvo-revdsg-ch.mdc`](rules/dsgvo-revdsg-ch.mdc) | Schweiz revDSG, Swiss-US DPF, EDÖB |
 
-## Unterschied zu Claude Skills
+## Installation
 
-Cursor-Rules unterstützen Markdown-Frontmatter mit `description`, `globs` und `alwaysApply`. **Progressive Disclosure** (Sub-Dateien wie bei Claude Skills) wird **nicht unterstützt** — der Inhalt aller Sub-Files wird daher in eine `.mdc` Datei pro Thema gemerged.
-
-## Manueller Workaround heute
-
-Wer heute schon Cursor nutzt, kann den Inhalt der Claude-Skills (`/claude/skills/dsgvo-third-country-transfer/SKILL.md` und Sub-Files) als `.cursor/rules/*.mdc` ablegen. Die Rules-Engine versteht Standard-Markdown.
+Siehe [`INSTALL.md`](INSTALL.md). Kurzform:
 
 ```bash
-# Einfacher Workaround
-mkdir -p .cursor/rules
-cp ../claude/skills/dsgvo-third-country-transfer/SKILL.md \
-   .cursor/rules/dsgvo-third-country-transfer.mdc
+git clone https://github.com/wuemaikblume/dsgvo-skills.git /tmp/dsgvo-skills
+mkdir -p dein-projekt/.cursor/rules
+cp /tmp/dsgvo-skills/cursor/rules/*.mdc dein-projekt/.cursor/rules/
 ```
 
-Issues / PRs für eine native Cursor-Variante willkommen.
+## Unterschied zur Claude-Variante
+
+Cursor unterstützt kein **Progressive Disclosure** wie Claude Skills. Daher sind die Anbieter-Profile aus `PROVIDERS.md` direkt in `dsgvo-third-country-transfer.mdc` integriert. Die anderen fünf Sub-Themen bleiben als eigene Regeln, damit Cursor sie kontextspezifisch laden kann.
+
+Frontmatter-Schema (Cursor):
+
+```yaml
+---
+description: <Trigger-Beschreibung — agent-readable>
+globs:
+alwaysApply: false
+---
+```
+
+`alwaysApply: false` + starke `description` ist der Cursor-Pendant zu Anthropics auto-loadenden Skills.
+
+## Issues / PRs
+
+Verbesserungen willkommen — speziell:
+
+- Praxis-Berichte: triggert eine Regel zu oft / zu selten?
+- Branchenspezifische Ergänzungen (KRITIS, HealthTech, FinTech)
+- DPF-Status-Updates für einzelne Anbieter
+
+Repo: <https://github.com/wuemaikblume/dsgvo-skills>
