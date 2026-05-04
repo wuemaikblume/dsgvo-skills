@@ -8,7 +8,7 @@ Skills im Personal-Verzeichnis ablegen:
 
 ```bash
 # Repo klonen
-git clone https://github.com/<REPO>/dsgvo-skills.git ~/dsgvo-skills
+git clone https://github.com/wuemaikblume/dsgvo-skills.git ~/dsgvo-skills
 
 # Skills nach ~/.claude/skills/ kopieren
 mkdir -p ~/.claude/skills

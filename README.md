@@ -57,7 +57,7 @@ Triggert bei Code- oder Infrastruktur-Entscheidungen, die personenbezogene Daten
 ### Claude Code
 
 ```bash
-git clone https://github.com/<REPO>/dsgvo-skills.git ~/dsgvo-skills
+git clone https://github.com/wuemaikblume/dsgvo-skills.git ~/dsgvo-skills
 mkdir -p ~/.claude/skills
 cp -r ~/dsgvo-skills/claude/skills/* ~/.claude/skills/
 ```
