@@ -93,7 +93,11 @@ Vollständiger Disclaimer: [DISCLAIMER.md](DISCLAIMER.md).
 - **Eigene Skills beisteuern:** Pull Request mit Quellenangaben in jedem Skill
 - **Anwalt / DSB / DPO?** Besonders willkommen — bitte Berufsbezeichnung im PR angeben
 
-## Roadmap (geplant — Reihenfolge offen)
+## Roadmap
+
+Die ausführliche Roadmap mit aktuellen Aufgaben, Versions-Historie, Test-Ergebnissen und Mitwirkungs-Konventionen steht in [ROADMAP.md](ROADMAP.md) — sie dient gleichzeitig als Onboarding-Doku für neue Mitwirkende und als Status-Snapshot für jede Arbeits-Session.
+
+### Skill-Familien (Reihenfolge offen)
 
 | Skill | Status | Inhalt |
 |-------|--------|--------|
