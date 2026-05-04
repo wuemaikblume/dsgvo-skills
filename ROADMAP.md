@@ -92,20 +92,7 @@ dsgvo-skills/
 
 ## 3. Offene Punkte (priorisiert + handlungsfertig)
 
-### A. GitHub Web-UI Pflege (5 Min, manuell vom User)
-
-Diese Schritte muss der User in <https://github.com/wuemaikblume/dsgvo-skills/settings> bzw. auf der Repo-Hauptseite machen — Claude kann sie nicht via API ohne PAT-Token machen.
-
-- [ ] **About-Sektion** (Repo-Hauptseite, kleines Zahnrad oben rechts):
-  - Description: `DSGVO Compliance Skills für Claude AI / Claude Code — DACH-fokussierte Best-Practice-Sammlung für Drittlandtransfer (Art. 44-49) mit US-CLOUD-Act-Hinweis und Sub-Dateien zu Rollen, DSFA, ePrivacy, Schweiz`
-  - Website: `https://maikblume.de/blog/warum-ich-einen-dsgvo-skill-fuer-claude-gebaut-habe`
-  - Topics: `claude`, `claude-code`, `claude-skills`, `anthropic-skills`, `dsgvo`, `gdpr`, `compliance`, `dach`, `data-privacy-framework`, `dpf`, `nis2`
-- [ ] **Default-Branch** prüfen — sollte `main` sein (Settings → Branches)
-- [ ] **License-Erkennung** — GitHub erkennt `LICENSE` als MIT automatisch; falls Header das nicht anzeigt, Filename kontrollieren
-- [ ] **Release v1.2 taggen** — Releases → Draft a new release → Tag `v1.2`, Target `main`, Title „v1.2 — Cloud Act trigger sharpened + code-generation rule", Body kann das Commit-Subject sein
-- [ ] Optional: **Repository-Social-Image** hochladen (Settings → Social preview)
-
-### B. Re-Tests von v1.2 (15 Min, Tasks für Claude in neuer Session)
+### Re-Tests von v1.2 (15 Min)
 
 In **neuer** Claude-Code-Session (Skill ist bereits in `~/.claude/skills/`), folgende Prompts wiederholen und bewerten:
 
@@ -113,13 +100,13 @@ In **neuer** Claude-Code-Session (Skill ist bereits in `~/.claude/skills/`), fol
 - [ ] **Re-Test 3** — derselbe Prompt wie Test 3 oben (OpenAI + Patient-Allergie). Erwartet: Cloud-Act wird mindestens einmal erwähnt, idealerweise mit Verweis auf EU-souveräne Alternative (Stackit / T-Systems / Self-Hosted).
 - [ ] Falls v1.2-Verbesserungen NICHT greifen: SKILL.md weiter schärfen (z.B. Decision Tree um Cloud-Act-Schritt 5b ergänzen, der nicht nur als „⚠ ABER" formuliert ist, sondern als eigener Pflicht-Branch).
 
-### C. Externer Re-Review (optional, ~30 Min Aufwand des Users)
+### Externer Re-Review (optional)
 
 - [ ] Den korrigierten v1.2-Skill nochmal durch **GPT-5.5** und **Gemini** schicken — gleicher Prompt wie damals (siehe Konversations-Historie / Memory). Zweck: Verifikation, dass Brasilien, Supabase-Korrektur, Clerk-Update, OpenAI-Ireland-Klärung wirklich sauber sind.
 - [ ] Bei neuen Befunden: in einem v1.3-Patch einarbeiten.
 - [ ] **Achtung:** Beim Verfassen des externen Cross-Check-Prompts den SKILL.md-Body **nicht versehentlich doppelt einfügen** (passierte beim ersten Mal, beide externen KIs flaggten „doppelte Tabelle" — das war der Prompt, nicht der Skill).
 
-### D. Cursor-Adaption (4-6 Stunden Aufwand)
+### Cursor-Adaption
 
 Ziel: Inhalt von `claude/skills/dsgvo-third-country-transfer/` in Cursor's `.cursor/rules/*.mdc`-Format konvertieren.
 
@@ -141,7 +128,7 @@ Ziel: Inhalt von `claude/skills/dsgvo-third-country-transfer/` in Cursor's `.cur
 - [ ] `cursor/README.md` aktualisieren (aktuell Platzhalter)
 - [ ] Test: in einem Cursor-Projekt installieren und denselben Test-Set fahren wie bei Claude (siehe ROADMAP Abschnitt B). Trigger-Verhalten dokumentieren.
 
-### E. OpenAI Codex / GitHub Copilot Adaption (3-4 Stunden Aufwand)
+### OpenAI Codex / GitHub Copilot Adaption
 
 - [ ] **Codex CLI**: liest `AGENTS.md` im Projekt-Root, alle Inhalte sind immer geladen → Inhalt MUSS prägnant zusammengefasst sein
 - [ ] **GitHub Copilot**: liest `.github/copilot-instructions.md`
@@ -150,7 +137,7 @@ Ziel: Inhalt von `claude/skills/dsgvo-third-country-transfer/` in Cursor's `.cur
 - [ ] `codex/INSTALL.md`
 - [ ] `codex/README.md` aktualisieren
 
-### F. Weitere Skill-Familien (Roadmap, jeweils 1-2 Tage Aufwand)
+### Weitere Skill-Familien
 
 Alle nach demselben Schema: Prototyp → drei Reviews (Sonnet + extern × 2) → Korrekturen → Tests → Veröffentlichung.
 
@@ -163,7 +150,7 @@ Alle nach demselben Schema: Prototyp → drei Reviews (Sonnet + extern × 2) →
 
 **Empfohlene Reihenfolge:** Auth-Logging zuerst (am meisten Synergie zum Drittlandtransfer-Skill), dann Subject-Rights, dann NIS2, dann Marketing/Employment.
 
-### G. Anbieter-Updates pflegen (laufend, ~1 Stunde pro Quartal)
+### Anbieter-Updates pflegen (laufend)
 
 - [ ] **DPF-Status quartalsweise auf <https://www.dataprivacyframework.gov/list> live prüfen** — speziell: Anthropic, Clerk, Supabase, OpenAI, AWS, Microsoft, Google
 - [ ] **Schrems-III-Status** verfolgen — Latombe-Berufung, neue noyb-Klagen, EuGH-Verfahren
@@ -172,30 +159,16 @@ Alle nach demselben Schema: Prototyp → drei Reviews (Sonnet + extern × 2) →
 - [ ] **NIS2-UmsuCG**-Stand in DE
 - [ ] Wenn Befund relevant: einen v1.x-Patch im Skill machen + Stichtag aktualisieren
 
-### H. Issues-Templates und Contributor-Doku
+### Issues-Templates und Contributor-Doku
 
 - [ ] `.github/ISSUE_TEMPLATE/bug-report.md` — typisch: „Skill triggert nicht / falsch / zu oft"
 - [ ] `.github/ISSUE_TEMPLATE/skill-suggestion.md` — Vorschlag für neue Skill-Familie
 - [ ] `.github/ISSUE_TEMPLATE/provider-update.md` — Anbieter-DPF-Status hat sich geändert (Vorlage mit Pflichtfeldern: Anbieter, neuer Status, Quelle, Datum)
 - [ ] `CONTRIBUTING.md` — Hinweise auf Cross-Review-Pflicht, Quellen-Pflicht, Stichtag in jedem Skill, Disclaimer-Pflicht
 
-### I. Reichweite (Marketing, je nach Lust)
+### Anthropic-DPF-Status live verifizieren
 
-Konkrete Plattform-Posts mit Vorlagen:
-
-- [ ] **LinkedIn-Post** auf maikblume-Profil:
-  > 🇪🇺 Anthropics Skills-Architektur trifft DSGVO. Ich habe ein kostenloses Open-Source-Pack veröffentlicht, das Claude AI und Claude Code automatisch DACH-Compliance-Wissen mitgibt: Drittlandtransfer, Cloud Act, ePrivacy, Schweizer revDSG, plus Detail-Profile für 16 SaaS-Anbieter. Drei KI-Cross-Reviews haben harte Befunde geliefert: Brasilien-Adäquanz vom 10. Februar 2026 (fehlte!), Supabase ist nicht DPF-zertifiziert, Clerk schon, Firebase Cloud Functions fallen lautlos auf us-central1 zurück. Repo: https://github.com/wuemaikblume/dsgvo-skills | Long-Form: https://maikblume.de/blog/warum-ich-einen-dsgvo-skill-fuer-claude-gebaut-habe
-- [ ] **Mastodon** (z.B. fosstodon.org / chaos.social): kürzere Variante mit Repo-Link
-- [ ] **Reddit** r/de_EDV, r/datenschutz, r/Claude, r/ClaudeAI — angepasste deutsche bzw. englische Varianten
-- [ ] **Hacker News** — englische Übersetzung des Long-Form-Artikels nötig (~2-3h Aufwand). Submit als „Show HN: dsgvo-skills — GDPR compliance skills for Claude AI/Code". Achtung: HN ist anti-Eigen-PR, Beitrag muss substanziell sein.
-- [ ] **Newsletter chilikanal.de** — sobald Newsletter-System live ist, Artikel mit ausgehen lassen
-- [ ] **dev.to / hashnode** — englische Cross-Posts
-- [ ] **Anthropic Discord / Skills-Showcase** — falls es eine Plattform für Community-Skills gibt
-
-### J. Bekannte Quirks / kleine TODOs
-
-- [ ] **Chilikanal-Frontend-Bug:** Die Rubrik-Verlinkung im Header zeigt `<a href="/rubrik/dsgvo">Regulierung</a>` statt `/rubrik/regulierung`. Kategorie selbst ist korrekt (FK stimmt). Niedrige Priorität, aber prüfen falls Zeit.
-- [ ] **Anthropic-Skill-Status Live-Verifikation** — Skill schreibt aktuell „Anthropic: DPF (zur Live-Prüfung empfohlen)". Sollte auf `dataprivacyframework.gov/list` verifiziert + Datum dokumentiert werden.
+Der Skill schreibt aktuell „Anthropic: DPF (zur Live-Prüfung empfohlen)". Vor jedem Cross-Review oder Release einmal auf `dataprivacyframework.gov/list` verifizieren und das Prüfdatum in `PROVIDERS.md` dokumentieren.
 
 ---
 
@@ -241,7 +214,7 @@ Konkrete Plattform-Posts mit Vorlagen:
 
 Wenn du eine neue Claude-Code-Session öffnest und an diesem Projekt weiterarbeitest, reicht der folgende Prompt:
 
-> Wir arbeiten am Projekt `dsgvo-skills` weiter. Der aktuelle Stand ist v1.2, alles dokumentiert in `<REDACTED-PATH>/ROADMAP.md`. Lies die Datei, dann frage mich, an welchem Abschnitt (A-J) wir weitermachen wollen, und schlage konkrete erste Schritte vor.
+> Wir arbeiten am Projekt `dsgvo-skills` weiter. Der aktuelle Stand ist v1.2, alles dokumentiert in `<REDACTED-PATH>/ROADMAP.md` (öffentlich) und `<REDACTED-PATH>/INTERNAL.md` (lokal, gitignored). Lies beide Dateien, dann frage mich, an welchem Abschnitt wir weitermachen wollen, und schlage konkrete erste Schritte vor.
 
 Die Datei enthält:
 
