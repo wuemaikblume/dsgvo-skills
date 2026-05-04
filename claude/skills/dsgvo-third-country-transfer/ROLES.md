@@ -1,0 +1,129 @@
+# Datenschutzrechtliche Rollen (Art. 6, 9, 26, 28 DSGVO)
+
+> Vertiefungsdatei zu `SKILL.md`. Wird gelesen, wenn die Rolle des Anbieters / der eigenen Verarbeitung zu klären ist.
+
+## Warum die Rolle zuerst geklärt werden muss
+
+Bevor man über Drittlandtransfer (Art. 44-49) nachdenkt, muss klar sein:
+
+1. **Wer ist Verantwortlicher (Controller)?** Wer entscheidet über Zwecke und Mittel?
+2. **Wer ist Auftragsverarbeiter (Processor)?** Wer verarbeitet weisungsgebunden?
+3. **Liegt gemeinsame Verantwortung (Joint Controller) vor?** Wenn ja, Art. 26-Vereinbarung.
+4. **Welche Rechtsgrundlage** stützt die Verarbeitung (Art. 6, ggf. Art. 9)?
+
+Falsche Rolleneinordnung führt zu falschen Verträgen, falschen Pflichten in der Datenschutzerklärung und falschen VVT-Einträgen.
+
+## Rechtsgrundlage Art. 6 DSGVO
+
+Jede Verarbeitung braucht eine der sechs Rechtsgrundlagen:
+
+| lit. | Grundlage | Typischer SaaS-Fall |
+|------|-----------|---------------------|
+| a | Einwilligung | Newsletter, Tracking-Cookies (mit TTDSG, siehe `EPRIVACY.md`) |
+| b | Vertrag | Account-Anlage, Bestellabwicklung, Login |
+| c | Rechtliche Verpflichtung | GoBD-Belege, Steuerunterlagen, AGG-Aufbewahrung |
+| d | Lebenswichtige Interessen | selten in SaaS — z.B. Notfall-Apps |
+| e | Öffentliches Interesse | nur Behörden / öffentlich Beauftragte |
+| f | Berechtigtes Interesse | IT-Sicherheit, Betrugsprävention, Direktwerbung B2B |
+
+**lit. f (Berechtigtes Interesse)** verlangt eine **schriftliche Interessenabwägung** (LIA — Legitimate Interest Assessment). Im VVT dokumentieren.
+
+## Sensible Daten — Art. 9 DSGVO
+
+Besondere Kategorien (Gesundheit, ethnische Herkunft, politische/religiöse/weltanschauliche Überzeugung, Gewerkschaftszugehörigkeit, Biometrie, Genetik, Sexualleben/-orientierung):
+
+- **Grundsätzlich verboten** (Art. 9 Abs. 1)
+- **Ausnahmen** in Art. 9 Abs. 2 — am häufigsten:
+  - lit. a: ausdrückliche Einwilligung
+  - lit. b: Arbeits-/Sozialrecht
+  - lit. f: Rechtsansprüche
+  - lit. h: Gesundheitsversorgung
+  - lit. i: öffentliche Gesundheit
+
+Bei sensiblen Daten zusätzlich oft **DSFA-Pflicht** (siehe `DPIA.md`) und **strengere supplementary measures** bei Drittlandtransfer.
+
+## Auftragsverarbeitung — Art. 28 DSGVO
+
+Ein Anbieter ist **Processor**, wenn er **weisungsgebunden** im Auftrag des Verantwortlichen Daten verarbeitet, ohne eigene Zwecke zu verfolgen.
+
+**Pflichten des Verantwortlichen:**
+- AVV nach Art. 28 Abs. 3 abschließen (Schriftform inkl. elektronisch)
+- Nur Anbieter mit hinreichenden Garantien (TOMs nach Art. 32) wählen
+- Subprozessoren-Genehmigung sicherstellen (Art. 28 Abs. 2/4)
+
+**Inhalt eines AVV (Pflichtangaben):**
+- Gegenstand und Dauer
+- Art und Zweck der Verarbeitung
+- Datenkategorien und Betroffenenkreise
+- Pflichten und Rechte des Verantwortlichen
+- TOMs (technische und organisatorische Maßnahmen)
+- Unterstützung bei Betroffenenrechten (Art. 12-22)
+- Löschung/Rückgabe bei Vertragsende
+- Auditrechte
+- Subprozessoren-Genehmigung (allgemein oder spezifisch)
+
+### Subprozessoren — Art. 28 Abs. 2 + 4
+
+- **Allgemeine Genehmigung:** Verantwortlicher genehmigt Wechsel/Ergänzung pauschal, Anbieter muss **vorab informieren** und Widerspruchsrecht einräumen.
+- **Spezifische Genehmigung:** jeder einzelne Subprozessor wird vorab genehmigt.
+- Der Subprozessor unterliegt **denselben Pflichten** wie der Hauptprozessor (Art. 28 Abs. 4).
+- **Bei Drittland-Subprozessoren** zusätzlich Transfermechanismus durchspielen.
+
+**Praktischer Reflex:** Beim Auswählen eines EU-SaaS immer die **veröffentlichte Subprozessoren-Liste** lesen — oft unentdeckte US-Komponenten (Monitoring, Mail-Versand, Backup, Support).
+
+## Gemeinsame Verantwortung — Art. 26 DSGVO
+
+Wenn zwei oder mehr Stellen **gemeinsam** Zwecke und Mittel festlegen, sind sie Joint Controller.
+
+**Typische Fälle:**
+- Social Media Buttons / Like-Pixel mit Datenabfluss
+- Werbenetzwerke (Real-Time-Bidding)
+- Co-Marketing / Co-Webinar mit geteilten Leads
+- Teilweise: Analytics-Anbieter, die Daten für eigene Modelle nutzen
+- Plattform-Dienste mit eigener Profilbildung
+
+**Pflichten (Art. 26 Abs. 1):**
+- Schriftliche Vereinbarung über Zuständigkeiten
+- Wesentliches der Vereinbarung den Betroffenen zugänglich machen
+- Betroffene können Rechte gegen jeden der Joint Controller geltend machen
+
+**Praxisreflex:** Wenn ein API-Anbieter die Daten **auch für eigene Zwecke** nutzt (KI-Training, Profile, Targeting), liegt regelmäßig Joint Controllership vor — keine reine Auftragsverarbeitung.
+
+## Decision Tree: Rolle bestimmen
+
+```
+1. Verarbeitet der externe Dienstleister Daten ausschließlich nach
+   meinen Weisungen, ohne eigene Zwecke?
+   ├─ Ja  → Auftragsverarbeitung (Art. 28). AVV abschließen.
+   └─ Nein → weiter zu 2
+
+2. Legen mein Unternehmen UND der Dienstleister gemeinsam Zwecke
+   und/oder Mittel fest (z.B. Tracking-Pixel, das Daten zu beiden
+   liefert; KI-API, die Prompts zum Training nutzt)?
+   ├─ Ja  → Gemeinsame Verantwortung (Art. 26). Vereinbarung +
+   │         Information der Betroffenen.
+   └─ Nein → weiter zu 3
+
+3. Verarbeitet der Dienstleister die Daten für eigene, unabhängige
+   Zwecke (z.B. Stripe für Fraud-Prävention, regulatorische Pflichten)?
+   ├─ Ja  → eigene Verantwortlichkeit (Controller-Controller-Beziehung).
+   │         Kein AVV — aber Datenschutzhinweise transparent halten.
+   └─ Nein → wahrscheinlich Auftragsverarbeitung; nochmal prüfen.
+```
+
+## Häufige Fehler
+
+| Annahme | Realität |
+|---------|----------|
+| „Wir haben einen AVV unterschrieben — passt schon" | AVV ist nur die richtige Form für Auftragsverarbeitung. Wenn der Anbieter Controller oder Joint Controller ist, ist der AVV ineffektiv (kein Hauptpflichtinhalt erfüllt). |
+| „Subprozessoren sind das Problem des Anbieters" | Verantwortlicher muss Subprozessoren-Liste prüfen + bei Drittland-Subs Transfermechanismus dokumentieren. |
+| „Kostenlose Tools sind Auftragsverarbeitung" | Kostenlose Tools refinanzieren sich oft durch Datennutzung → Joint Controller oder eigener Controller. |
+| „Stripe ist immer Processor" | Bei Kernzahlungsabwicklung Controller (eigene Pflichten aus PSD2/AML). |
+
+## Quellen
+
+- DSGVO Art. 6: <https://eur-lex.europa.eu/eli/reg/2016/679/oj>
+- Art. 9: <https://gdpr-info.eu/art-9-gdpr/>
+- Art. 26 (Joint Controllers): <https://gdpr-info.eu/art-26-gdpr/>
+- Art. 28 (Processor): <https://gdpr-info.eu/art-28-gdpr/>
+- EDPB Guidelines 07/2020 on Controller/Processor concepts: <https://www.edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-072020-concepts-controller-and-processor-gdpr_en>
