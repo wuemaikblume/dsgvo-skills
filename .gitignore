@@ -1,5 +1,10 @@
 # Internal notes — never commit
 INTERNAL.md
+cross-review-prompts/
+plans/
+specs/
+.notes/
+drafts/
 
 .DS_Store
 *.swp

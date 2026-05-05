@@ -100,6 +100,16 @@ Mit aktiviertem `dsgvo-third-country-transfer`-Skill sollte Claude:
 
 Wenn das nicht passiert: Skill-Verzeichnis prüfen, Claude neu starten, ggf. Frontmatter-Syntax verifizieren.
 
+## Modell-Hinweis: Sonnet triggert weniger zuverlässig
+
+Trigger-Tests (siehe [`specs/2026-05-05-auth-and-logging-trigger-tests.md`](../specs/2026-05-05-auth-and-logging-trigger-tests.md)) haben gezeigt, dass **Claude Sonnet 4.6** DSGVO-Skills bei impliziten Anliegen häufig nicht selbständig lädt — z.B. bei „Sentry einrichten", „Brute-Force-Schutz", „MFA einbauen". Sonnet erzeugt dann Code, der an DSGVO-Bestimmungen vorbeigeht (Wizard-Defaults ohne PII-Scrubbing, IPs im Klartext, MFA ohne Replay-Schutz).
+
+**Wenn du mit Sonnet arbeitest:**
+- Bei sicherheits-/datenschutzrelevanten Aufgaben den Skill explizit anstoßen: „Beachte den Skill `dsgvo-auth-and-logging` und implementiere …"
+- Oder im Project-Memory bzw. `CLAUDE.md` verankern: „Bei Auth-/Logging-/Error-Monitoring-Tasks immer `dsgvo-auth-and-logging` und `dsgvo-third-country-transfer` konsultieren."
+
+**Mit Opus 4.7** triggern die Skills auch bei rein technisch formulierten Prompts (6/6 Tests PASS). Für DSGVO-kritische Reviews ist Opus die sicherere Wahl.
+
 ## Wie die Sub-Dateien funktionieren
 
 Die `SKILL.md` ist die Hauptdatei und wird geladen, wenn Claude den Trigger erkennt. Im Body verweist sie auf weitere Markdown-Dateien (`PROVIDERS.md`, `ROLES.md`, etc.). Claude liest diese Sub-Dateien **nur dann**, wenn sie für den konkreten Anwendungsfall relevant sind — typisch via `bash` und `Read`.

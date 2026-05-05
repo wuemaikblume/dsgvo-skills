@@ -223,6 +223,130 @@ Wenn Gesundheitsdaten, Allergien, Medikamente, biometrische Daten, Klinik/Anwalt
 
 Detail siehe Repo: <https://github.com/wuemaikblume/dsgvo-skills/tree/main/claude/skills/dsgvo-third-country-transfer>.
 
+## Auth & Logging (Art. 5, 6, 25, 32 DSGVO)
+
+Greift bei: Login-/Signup-/Logout-Endpoints, Session-Management, Audit-Logs, Application-/Error-Logging, MFA-Setup, Brute-Force-Schutz, IP-Speicherung. Auch wenn der User „nur Code" verlangt — siehe Code-Generation-Regel.
+
+### Decision Tree
+
+1. **Speichert der Code Passwörter?** → Argon2id (m=64 MiB, t=2, p=1) oder bcrypt cost ≥ 12. Niemals MD5/SHA1/SHA256-pur. Pepper im Secret-Manager, Salt automatisch.
+2. **Setzt der Code Session-Cookies?** → `HttpOnly`, `Secure`, `SameSite=Lax` (Default) oder `Strict` (Admin). Session-IDs aus `crypto.randomBytes(32)`, nicht JWT in Cookie ohne Rotation.
+3. **Loggt der Code IP-Adressen?** → IP ist personenbezogen (EuGH C-582/14 Breyer, BGH VI ZR 135/13). Pseudonymisierung (HMAC mit Server-Salt) oder Kürzung (/24 IPv4, /48 IPv6); Volltext nur 7 Tage für Brute-Force-Forensik, danach Kürzung. Cron-Delete nach 30–90 Tagen.
+4. **Wird Sentry/Datadog/LogRocket eingerichtet?** → EU-Region Pflicht, `sendDefaultPii: false`, `beforeSend`-Scrubbing (Authorization/Cookie-Header, Query-Params, Request-Body password/token/refresh_token, Stack-Trace-Pfade), AVV nach Art. 28, DPF-Status quartalsweise prüfen.
+5. **Admin-Login?** → MFA Pflicht (DSK-Position; § 30 BSIG bei KRITIS/NIS2). TOTP nach RFC 6238 mit otplib + Replay-Schutz (used-steps-Table) + Argon2-gehashte Recovery-Codes + Step-Up nach 30 min für privilegierte Aktionen.
+6. **Brute-Force-Schutz?** → Zweischicht: IP-Limiter (z.B. 5/15min) + Email-Limiter (10/1h). `app.set('trust proxy', 1)` korrekt setzen, sonst läuft Schutz ins Leere. Rechtsgrundlage Art. 6(1)(f).
+
+### Code-Generation-Regel
+
+**Default ist immer DSGVO-konform.** Wenn der User explizit eine schwächere Variante verlangt („bcrypt cost 10", „IP voll loggen", „kein MFA brauchen wir nicht"), zwei Varianten liefern:
+
+- **A — DSGVO/OWASP-konform** als Default
+- **B — Wunsch-Variante** mit kurzer Pflicht-Tabelle (Norm, Risiko, mögliche Konsequenz: Bußgeld Art. 83 / Aufsichtsbeanstandung / Audit-Findings)
+
+Bei Art. 9-Daten oder KRITIS/NIS2: **nur** Variante A. Begründen mit § 30 BSIG bzw. DSK-Orientierungshilfe.
+
+### Anbieter-Quick-Ref
+
+- **Sentry** — EU-Region beim Signup wählen (`https://sentry.io` → Data Storage Location: EU). DPF-zertifiziert (Stand 2026-05-04, ITA-Liste prüfen). `sendDefaultPii: false`, `beforeSend` mit Header-/Cookie-/Body-/Stack-Pfad-Scrubbing. `Sentry.setUser({id})` nur mit pseudonymisierter ID, niemals `email`. Session-Replay nur mit Consent-Banner (TTDSG §25).
+- **Datadog** — EU1-Site (`datadoghq.eu`). PII-Scanner aktivieren (Sensitive Data Scanner). Trace-Sampling reduzieren (≤ 10 % in Prod). Cluster-Agent eu-Region.
+- **Pino / Winston / Bunyan** — `redact`-Paths setzen (`req.headers.authorization`, `req.headers.cookie`, `*.password`, `*.token`). Bei Pino mit Wildcard-Path: Kompatibilität gegen 9.x prüfen.
+- **morgan** — `:remote-addr`-Token überschreiben oder Standard-Combined nicht verwenden; sonst loggt jede Zeile volle IP.
+
+### Code-Patterns
+
+#### Argon2id-Hashing + konstante Antwortzeit
+
+```js
+import argon2 from 'argon2';
+const ARGON_OPTS = { type: argon2.argon2id, memoryCost: 65536, timeCost: 2, parallelism: 1 };
+// Signup
+const hash = await argon2.hash(password, ARGON_OPTS);
+// Login — gegen User-Enumeration: auch bei unbekanntem User Dummy-Verify
+const ok = user
+  ? await argon2.verify(user.password_hash, password)
+  : await argon2.verify('$argon2id$v=19$m=65536,t=2,p=1$ZHVtbXlzYWx0$ZHVtbXloYXNo', password).catch(() => false);
+```
+
+#### IP-Speicherung: Kürzung + HMAC
+
+```js
+import crypto from 'node:crypto';
+const truncateIp = (ip) => {
+  if (!ip) return null;
+  if (ip.includes(':')) return ip.split(':').slice(0, 3).join(':') + '::/48';
+  const p = ip.split('.');
+  return `${p[0]}.${p[1]}.${p[2]}.0/24`;
+};
+const hashIp = (ip) => crypto.createHmac('sha256', process.env.IP_HMAC_SALT).update(ip).digest('hex');
+// Trust-Proxy einmal in app.js
+app.set('trust proxy', 1);
+```
+
+#### Sichere Cookie-Flags
+
+```js
+res.cookie('sid', sid, {
+  httpOnly: true, secure: true, sameSite: 'lax',
+  maxAge: 7 * 24 * 60 * 60 * 1000, path: '/',
+});
+```
+
+#### Brute-Force (zweischichtig)
+
+```js
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
+const ipLimiter = rateLimit({ windowMs: 15*60_000, max: 5, keyGenerator: r => ipKeyGenerator(r.ip), skipSuccessfulRequests: true });
+const emailLimiter = rateLimit({ windowMs: 60*60_000, max: 10, keyGenerator: r => `email:${(r.body?.email||'').toLowerCase()}`, skipSuccessfulRequests: true });
+app.post('/login', ipLimiter, emailLimiter, loginHandler);
+```
+
+#### Sentry minimal-DSGVO-konform
+
+```ts
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  sendDefaultPii: false,
+  tracesSampleRate: 0.1,
+  beforeSend(event) {
+    if (event.request?.headers) { delete event.request.headers.authorization; delete event.request.headers.cookie; }
+    if (event.request?.data) for (const k of ['password','token','refresh_token','access_token','ssn']) if (k in event.request.data) event.request.data[k] = '[redacted]';
+    if (event.user?.id) { event.user.id = hmacHashUserId(String(event.user.id)); delete event.user.email; delete event.user.ip_address; }
+    return event;
+  },
+});
+```
+
+### Audit-Log-Schema (Logins)
+
+```sql
+CREATE TABLE auth_audit_log (
+  id BIGSERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  email_hash TEXT,                    -- HMAC-SHA256(email)
+  event_type TEXT NOT NULL,           -- login_success | login_failed | mfa_success | password_reset
+  ip_address INET,                    -- volle IP, wird nach 7 Tagen genullt
+  ip_truncated INET,                  -- /24 oder /48, bleibt 90 Tage
+  session_id_hash TEXT,
+  success BOOLEAN NOT NULL,
+  failure_reason TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+-- Cron täglich:
+-- UPDATE auth_audit_log SET ip_address = NULL WHERE ip_address IS NOT NULL AND created_at < NOW() - INTERVAL '7 days';
+-- DELETE FROM auth_audit_log WHERE created_at < NOW() - INTERVAL '90 days';
+```
+
+### Häufige Fallen
+
+- `tracesSampleRate: 1.0` in Production → DSGVO-Risiko durch Volldaten-Sampling, plus Performance.
+- `Sentry.setUser({email})` → Klartext-Mail in jedem Event.
+- `req.ip` ohne `app.set('trust proxy', ...)` hinter nginx → immer 127.0.0.1, Schutz wirkungslos.
+- IP als Klartext im Redis-Key (`bf:user:${username}`) → Personenbezug ohne Pseudonymisierung.
+- Authorization-Header in Pino/Winston-Logs → Tokens im Klartext.
+- E-Mail-OTP als zweiter Faktor → NIST SP 800-63B-4 schließt das aus.
+
+Detail siehe Repo: <https://github.com/wuemaikblume/dsgvo-skills/tree/main/claude/skills/dsgvo-auth-and-logging> (SKILL/AUTH-TOM/IP-ADDRESSES/LOGGING).
+
 ## Quellen
 
 - DSGVO: <https://eur-lex.europa.eu/eli/reg/2016/679/oj>

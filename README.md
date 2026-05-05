@@ -4,11 +4,11 @@ Kostenlose Compliance-Pakete für **Claude AI / Claude Code**, **Cursor** und **
 
 > **Was ist ein Skill?** Eine Markdown-Datei mit YAML-Frontmatter, die das Tool bei passendem Kontext automatisch lädt. Bei Claude: [offizielle Anthropic-Doku](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview).
 
-## Status (v1.3)
+## Status (v1.5)
 
-- ✅ **`/claude`** — Anthropic Skills für Claude Code, Claude.ai, Claude API. Eine Skill-Familie verfügbar (Drittlandtransfer + 5 Vertiefungs-Dateien).
-- ✅ **`/cursor`** — Sechs `.cursor/rules/*.mdc` Agent-Requested-Rules.
-- ✅ **`/codex`** — Konsolidierte `AGENTS.md` (Codex CLI) und `copilot-instructions.md` (GitHub Copilot).
+- ✅ **`/claude`** — Anthropic Skills für Claude Code, Claude.ai, Claude API. Zwei Skill-Familien: Drittlandtransfer (+ 5 Vertiefungs-Dateien) und Auth & Logging (+ 3 Vertiefungs-Dateien).
+- ✅ **`/cursor`** — Neun `.cursor/rules/*.mdc` Agent-Requested-Rules.
+- ✅ **`/codex`** — Konsolidierte `AGENTS.md` (Codex CLI) und `copilot-instructions.md` (GitHub Copilot), beide mit Drittlandtransfer- und Auth/Logging-Sektion.
 
 ## Repository-Struktur
 
@@ -97,6 +97,20 @@ Detaillierte Anleitungen: **[claude/INSTALL.md](claude/INSTALL.md)**
 - ❌ **Keine automatische Aktualisierung.** Rechtslage ändert sich (Schrems-III, NIS2-Umsetzung, neue DSK-Beschlüsse). Stichtag steht in jeder Datei. PRs willkommen.
 
 Vollständiger Disclaimer: [DISCLAIMER.md](DISCLAIMER.md).
+
+## Modell-Hinweis: Opus vs. Sonnet
+
+Trigger-Tests am 2026-05-05 mit dem Skill `dsgvo-auth-and-logging` (siehe [`specs/2026-05-05-auth-and-logging-trigger-tests.md`](specs/2026-05-05-auth-and-logging-trigger-tests.md)) haben ein klares Muster gezeigt:
+
+- **Claude Opus 4.7** lädt DSGVO-Skills zuverlässig — auch wenn der Prompt rein technisch formuliert ist („Sentry für Next.js einrichten", „Brute-Force-Schutz", „MFA mit TOTP"). 6/6 Tests PASS.
+- **Claude Sonnet 4.6** lädt sie nur, wenn explizite DSGVO-Schlüsselwörter im Prompt stehen (IP-Adresse, Audit-Log, etc.). Bei impliziten DSGVO-Anliegen produziert Sonnet Code, der an DSGVO-Bestimmungen vorbeigeht — Wizard-Defaults ohne PII-Scrubbing, IPs roh in Redis-Keys, MFA-Implementierungen ohne Replay-Schutz oder Secret-Verschlüsselung. Description-Schärfungen halfen in 0/3 Re-Runs.
+
+**Praxis-Empfehlung:**
+
+- Wer mit Sonnet entwickelt, sollte bei sicherheits- und datenschutzrelevanten Aufgaben den Skill **explizit** anstoßen, z.B.: „Beachte den Skill `dsgvo-auth-and-logging` und implementiere…" oder im Project-Memory / `CLAUDE.md` festschreiben, dass DSGVO-Skills bei Auth-/Logging-/Monitoring-Tasks zu konsultieren sind.
+- Für DSGVO-kritische Code-Reviews ist **Opus** die robustere Wahl.
+
+Diese Einschränkung ist ein Modell-Verhalten, kein Skill-Defekt — die Skills sind unabhängig vom Modell inhaltlich vollständig.
 
 ## Mitwirken
 

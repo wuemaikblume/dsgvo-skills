@@ -1,0 +1,420 @@
+---
+description: Use whenever code touches authentication, login, session management, audit logging, or application logging — even if the user's prompt doesn't mention DSGVO, GDPR, privacy, or "personal data". Triggers on bcrypt/argon2/scrypt, jsonwebtoken/jose, passport/next-auth/Auth.js/authjs/lucia, express-session/iron-session, cookie-session, set-cookie headers, login/logout/signup/register endpoints, password reset flows, refresh-token rotation, console.log of user data, Express middleware that logs req/res, Next.js middleware logging, audit-log table schemas, IP-Adress-Speicherung, X-Forwarded-For handling, OAuth 2.0 / OIDC Authorization Code + PKCE flows (authorization_code, code_verifier, code_challenge, redirect_uri, state, nonce, openid-client, oauth4webapi), OAuth callback routes, magic-link login URLs. ALSO triggers on these specific setup tasks (treat as auth/logging even when phrased as a pure tech question) — (a) Error-/Application-Monitoring-Setup: Sentry, Sentry Setup, Sentry Wizard, `npx @sentry/wizard`, Sentry für Next.js / React / Node / Express einrichten, `Sentry.init`, `beforeSend`, `beforeBreadcrumb`, `sendDefaultPii`, `tracesSampleRate`, Datadog, LogRocket, Pino, Winston, Bunyan, morgan setup; (b) Brute-Force / Rate-Limit / Account-Lockout — auch wenn als reine Security-Frage gestellt: Brute-Force-Schutz mit IP-Tracking, Login-Lockout, Failed-Login-Counter, express-rate-limit, rate-limiter-flexible, `app.set('trust proxy', ...)` (IP-Tracking ist immer personenbezogen — DSGVO-Layer ergänzt OWASP); (c) Multi-Factor / 2FA / TOTP / WebAuthn / Passkeys: TOTP einbauen, 2FA Setup, MFA für Admin / Admin-Login, authenticator app, otplib, speakeasy, `authenticator.generateSecret`, `authenticator.verify`, recovery codes, backup codes, WebAuthn registration, `navigator.credentials.create`, FIDO2. Also triggers on phrases like "log the user in", "store IP", "audit trail", "wer hat sich wann eingeloggt", "Login-Versuche tracken", "Sentry konfigurieren". Covers DSGVO Art. 5 (Zweckbindung, Speicherbegrenzung), Art. 6 (Rechtsgrundlage), Art. 32 (Sicherheit der Verarbeitung — Hashing, MFA, Rate-Limit, Cookie-Flags), Art. 25 (Privacy by Design in Logs), EuGH/BGH-Rechtsprechung zu IP-Adressen als personenbezogenes Datum, typische Aufbewahrungsfristen für Auth-/Sicherheits-Logs (DSK-Orientierungshilfe, BfDI-Richtwerte). Complementary to `owasp-security`: this skill adds the DSGVO layer (purpose limitation, retention, pseudonymization, lawful basis) — load it even if `owasp-security` is already active. Cross-Link: Drittland-Auth-Provider und Cookie-Tracking → dsgvo-third-country-transfer.
+globs:
+alwaysApply: false
+---
+
+# DSGVO Auth & Logging (Art. 5, 6, 25, 32 DSGVO)
+
+## Kernprinzip
+
+Drei Sätze, die für jede Auth- und Logging-Entscheidung gelten:
+
+1. **Personenbezogene Daten in Logs und im Auth-Code** unterliegen denselben DSGVO-Pflichten wie Stammdaten in der Hauptdatenbank: Zweckbindung, Speicherbegrenzung, Rechtsgrundlage. „Es ist nur ein Log" ist keine Rechtfertigung.
+2. **Art. 32 verlangt technisch-organisatorische Maßnahmen entsprechend dem Stand der Technik** — Passwort-Hashing nach OWASP, MFA für privilegierte Konten, Rate-Limiting gegen Brute-Force, sichere Cookie-Flags. Diese sind nicht optional; sie sind die Eintrittskarte.
+3. **IP-Adressen, User-IDs, Session-IDs und Stack-Traces mit User-Bezug sind personenbezogen** — auch wenn Code, Tutorials oder Bibliotheken sie als „technische" Felder behandeln. EuGH (Breyer) und BGH haben das mehrfach klargestellt.
+
+## Wann dieser Skill greift
+
+**Trigger-Symptome (Code-Patterns):**
+
+- **Imports:** `bcrypt`, `argon2`, `scrypt`, `jsonwebtoken`, `jose`, `passport`, `next-auth`, `auth.js`, `lucia`, `express-session`, `iron-session`, `cookie-session`
+- **Endpoints:** `/login`, `/logout`, `/signup`, `/register`, `/auth/*`, `/password-reset`, `/mfa/verify`
+- **Header-Setting:** `Set-Cookie`, Logging von `Authorization`-Headern, Verarbeitung von `X-Forwarded-For` / `CF-Connecting-IP`
+- **Logging-Setup:** `Sentry.init`, `datadogLogs.init`, `pino()`, `winston.createLogger`, `bunyan.createLogger`, `morgan(...)`, LogRocket, NewRelic-Browser-Agent
+- **Middleware:** `express-rate-limit`, `rate-limiter-flexible`, Upstash Ratelimit, Next.js Middleware mit Request-/Response-Logging
+- **DB-Schema:** Audit-Log-Tabellen mit Spalten `user_id`, `ip_address`, `user_agent`, `session_id`, `event_type`, `created_at`
+
+**Skip wenn:**
+
+- Reine Technik-Metriken **ohne User-Bezug** (CPU-Last, GC-Stats, Heap-Größe, Queue-Tiefe, Pod-Restart-Counter)
+- Öffentliche API ohne Auth und ohne User-Identifier (Static-Asset-Server, Read-only-Public-Endpoint mit anonymem Zugriff, sofern keine IP geloggt wird)
+- Vollständig anonymisierte Aggregate im Sinne von Erwägungsgrund 26 — Re-Identifizierung mit „vernünftigerweise einsetzbaren Mitteln" nicht mehr möglich (nicht zu verwechseln mit Pseudonymisierung wie gehashten User-IDs — die unterliegen weiter der DSGVO)
+
+## Decision Tree
+
+```
+1. Welche Daten gehen ins Log / werden im Auth-Flow verarbeitet?
+   ├─ Klartext-Passwörter, Tokens, Health-Daten → STOP, nicht loggen
+   ├─ IP, User-ID, Session-ID, User-Agent → personenbezogen → weiter zu 2
+   └─ Reine Technik-Metriken ohne User-Bezug → außerhalb DSGVO
+
+2. Zweck des Logs eindeutig (Art. 5(1)(b))?
+   ├─ Sicherheit (Auth-Audit, IDS) → Art. 6(1)(f), 30–90 Tage
+   ├─ Debugging → Art. 6(1)(f), möglichst kurz, scrubben
+   ├─ Performance-Monitoring → kein Login-Tracking, keine User-IDs
+   └─ Beschäftigten-Verhaltenskontrolle → § 26 BDSG, Betriebsrat → siehe `dsgvo-employment` (geplant)
+
+3. Auth-Code-Pattern korrekt? (siehe AUTH-TOM.md)
+   ├─ Passwort-Hashing: Argon2id (OWASP-Min mem ≥ 19 MiB, empfohlener Default 64 MiB; t=2, p=1) oder bcrypt cost ≥ 10 (OWASP) / ≥ 12 (BSI-konservativ)
+   ├─ Session-Cookie: HttpOnly + Secure + SameSite=Lax (Strict für Admin)
+   ├─ MFA: Pflicht für Admin / Art. 9-Daten / KRITIS-Sektor (→ nis2-security-baseline geplant)
+   ├─ Rate-Limit: Login (5/min/IP), Password-Reset (3/h/Mail), MFA-Verify
+   └─ Token-Rotation: Refresh + jti-Revocation
+
+4. Log-Inhalt korrekt scrubbed? (siehe LOGGING.md)
+   ├─ Sentry/Datadog: beforeSend + sendDefaultPii=false
+   ├─ Stack-Traces: User-Pfade redacten
+   ├─ Request-Logs: Authorization/Cookie/X-API-Key entfernen
+   └─ Body-Felder: password, token, ssn, health pseudonymisieren
+
+5. IP-Speicherung gerechtfertigt? (siehe IP-ADDRESSES.md)
+   ├─ Sicherheit (Brute-Force) → Art. 6(1)(f), Kürzung nach Zweckende
+   ├─ Volle IP > 7 Tage → triftiger Grund + DSFA prüfen
+   └─ Anonymisierung: letztes Oktett (IPv4) bzw. /48-Präfix (IPv6)
+```
+
+## Code-Generation-Regel
+
+1. **Default:** DSGVO-konforme Variante schreiben — Hashing korrekt parametrisiert, Logs gescrubbt, IP gekürzt nach Zweckende, Cookie-Flags vollständig gesetzt, Rate-Limit aktiv, MFA-Hooks vorhanden. Kein Hinweis nötig, wenn der User nichts Schwächeres verlangt.
+
+2. **Wenn der User explizit eine schwächere Variante will** — erkennbar an Phrasen wie:
+   - „IP voll speichern"
+   - „bcrypt cost 10 reicht"
+   - „kein MFA brauchen wir nicht"
+   - „Rate-Limit nervt nur"
+   - „logge alles inkl. Authorization-Header"
+   - „brauche das schnell, ohne den ganzen Compliance-Kram"
+
+   → **Zwei Code-Blöcke** generieren:
+
+   - **Variante A: DSGVO-konform** (Default-Implementation, lauffähig)
+   - **Variante B: Wunsch-Variante** mit Tabelle der konkreten DSGVO-Pflichten, die verletzt sein können (Artikel + erwartete Konsequenz: Bußgeld-Risiko nach Art. 83 / DSFA-Pflicht / Aufsichtsbehörde-Beanstandung). Die Tabelle steht **vor** dem Code, nicht versteckt darunter.
+
+3. **Refusal-Klausel:** Bei Art. 9-Daten (Gesundheit, Patientenakten, Religion, Sexualleben, Biometrie, ethnische Herkunft) ODER erkennbarem KRITIS-Kontext (Energie, Wasser, Verkehr, Gesundheit, Finanzen, IT/TK) wird die schwächere Variante **nicht** generiert. Hinweis stattdessen: ausdrücklicher Vermerk des Datenschutzbeauftragten oder Anwalts erforderlich, bevor abgewichen werden darf. Bei NIS2-/KRITIS-Sektoren zusätzlich auf **§ 38 BSIG** hinweisen (in Kraft seit 06.12.2025): Cybersicherheit ist nicht-delegierbare „Chefsache" — unzureichende Auth-Maßnahmen (schwache Hashing-Cost, fehlende MFA, kein Account-Lockout) begründen direkte persönliche Haftung der Geschäftsleitung. § 30 BSIG-Risikomanagementmaßnahmen sind für wesentliche und wichtige Einrichtungen gesetzlich verpflichtend.
+
+So sieht der User, was er angefragt hat, weiß was rechtlich nötig ist, und hat das compliante Pattern direkt zum Vergleich.
+
+## Inline-Mini Roles
+
+| Rolle | DSGVO-Artikel | Auth-/Logging-Beispiel |
+|---|---|---|
+| Verantwortlicher (Controller) | Art. 4 Nr. 7 | Webseite mit eigenem Login speichert Auth-Logs in eigener DB |
+| Auftragsverarbeiter (Processor) | Art. 4 Nr. 8, 28 | Auth0 / Clerk / Supabase Auth verarbeitet Login-Daten weisungsgebunden |
+| Gemeinsame Verantwortliche (Joint Controllers) | Art. 26 | Nur wenn Zwecke **und** wesentliche Mittel gemeinsam festgelegt werden (EDPB 07/2020). OAuth/OIDC pro Datenfluss prüfen: IdP häufig eigenständig Verantwortlicher für Konto-/Sicherheitszwecke, App Verantwortlicher für eigenen Login-Pfad — gemeinsame Verantwortlichkeit nicht automatisch. |
+
+> Detail zu Art. 6 / 9 / 26 / 28 und AVV-Pflicht (Art. 28 Abs. 3) → `dsgvo-third-country-transfer/ROLES.md`.
+
+## Cross-Links
+
+| Thema | siehe |
+|---|---|
+| Auth0 / Clerk / Firebase Auth Drittland-Aspekt | `dsgvo-third-country-transfer/PROVIDERS.md` |
+| Cookie-Tracking / TDDDG § 25 (vormals TTDSG, umbenannt 14.05.2024) | `dsgvo-third-country-transfer/EPRIVACY.md` |
+| DPIA-Pflicht (Art. 35) | `dsgvo-third-country-transfer/DPIA.md` |
+| Cloud Act / Konzernzugriff auf Auth-Daten | `dsgvo-third-country-transfer/CLOUD-ACT.md` |
+| KRITIS-Sektor MFA / NIS2 Art. 21 | `nis2-security-baseline` (geplant) |
+| Account-Löschung (Art. 17) | `dsgvo-subject-rights` (geplant) |
+| Backup-Verschlüsselung von Auth-Tabellen | `dsgvo-personal-data-storage` (geplant) |
+| Beschäftigten-Login-Monitoring | `dsgvo-employment` (geplant) |
+
+## Häufige Fallen
+
+- **Sentry mit `sendDefaultPii: true`** (Default in vielen Tutorials und Quickstart-Snippets) leakt User-Daten in Stack-Traces, Headers und Breadcrumbs. Explizit auf `false` setzen und zusätzlich `beforeSend` mit Header-/Stack-Trace-Redact konfigurieren — siehe `LOGGING.md` für den vollständigen Patch.
+- **bcrypt cost < 10** unterläuft das OWASP-Minimum 2026. OWASP nennt cost ≥ 10 als Mindestmaß; viele Audit-Frameworks und der konservative Server-Login-Default gehen auf cost ≥ 12 (≈ 250 ms). Argon2id ist die erste Wahl. Bei bcrypt-Migration: alten Hash beim nächsten Login verifizieren und gleich mit Argon2id rehashen.
+- **JWT ohne Expiry oder ohne serverseitigen Revocation-Pfad** ist ein DSGVO-Risiko: Logout muss tatsächlich invalidieren können (jti-Revocation-Liste oder Server-Session-Validation), sonst bleibt die Datenkontrolle bis zum Token-Ablauf außer Reichweite.
+- **IP-Speicherung „nur zur Sicherheit", aber 365 Tage** verstößt gegen Art. 5(1)(c) Datenminimierung. Für Brute-Force-Erkennung sind 7–30 Tage typisch ausreichend; alles darüber braucht eine schriftliche Begründung und ggf. eine DSFA.
+- **`console.log(req.headers)` in Production** schreibt Authorization-Header, Cookies und API-Keys ins Log. Strukturiertes Logging mit Redaction-Liste verwenden (`pino` mit `redact`, Winston-Filter, morgan-Custom-Token).
+- **`SameSite=None` ohne `Secure`** = Cookie ungeschützt über HTTP übertragbar; aktuelle Browser blockieren das ohnehin. Für Cross-Site-Sessions immer `SameSite=None; Secure`, sonst `SameSite=Lax` als Default.
+- **Refresh-Token ohne Rotation** ist ein stiller Account-Takeover-Vektor: jeder Refresh muss einen neuen Token ausstellen und den alten invalidieren. Wird ein bereits genutzter Refresh-Token erneut präsentiert, alle Tokens des Users widerrufen.
+- **Stack-Trace mit File-Pfad `/home/maik/...`** ist personenbezogen — der Username im Pfad reicht für Re-Identifizierung. `beforeSend`-Hook im Sentry/Datadog-SDK muss diese Pfade auf `/home/REDACTED/` normalisieren, bevor sie das Backend verlassen.
+- **Audit-Log mit Klartext-User-ID quer durch alle Logs** = bei Logs-Leak sofort jeder User identifizierbar. User-IDs in Logs mit HMAC-SHA-256 + Server-Salt pseudonymisieren — das Salt landet in einem Secret-Manager, nicht im Repo.
+- **CORS mit Wildcard + Cookie-Auth gleichzeitig** ist eine klassische Schnittstellenfalle: `Access-Control-Allow-Origin: *` mit `credentials: true` wird zwar vom Browser blockiert, aber im Code stehen oft beide Werte ohne explizite Origin-Whitelist — Cookie-Sessions werden dann unzugänglich oder es entsteht Druck, `SameSite=None` ohne CSRF-Schutz zu setzen. Origins explizit whitelisten, `credentials: 'include'`/`withCredentials: true` nur für vertrauenswürdige Origins, CSRF-Token zusätzlich.
+- **OAuth Authorization Code Flow ohne PKCE in SPAs** ist 2026 obsolet — der Implicit Grant ist abgelöst. PKCE (`code_verifier`, `code_challenge` mit SHA-256) ist Pflicht; der `state`-Parameter muss serverseitig gegen einen Anti-CSRF-Token gebunden und validiert werden, sonst sind OAuth-Callbacks CSRF-anfällig.
+
+## Quellen
+
+- [DSGVO Volltext (eur-lex)](https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679)
+- [BDSG Volltext (gesetze-im-internet.de)](https://www.gesetze-im-internet.de/bdsg_2018/)
+- [EuGH C-582/14 Breyer (curia.europa.eu)](https://curia.europa.eu/juris/document/document.jsf?docid=184668)
+- BGH VI ZR 135/13 (16.05.2017) — Volltext-Link siehe `IP-ADDRESSES.md`
+- [DSK-Beschlüsse (datenschutzkonferenz-online.de)](https://www.datenschutzkonferenz-online.de/)
+- [BfDI Tätigkeitsberichte](https://www.bfdi.bund.de/)
+- [BSI TR-02102-1 (Kryptographische Verfahren)](https://www.bsi.bund.de/DE/Themen/Unternehmen-und-Organisationen/Standards-und-Zertifizierung/Technische-Richtlinien/TR-nach-Thema-sortiert/tr02102/tr02102.html)
+- [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
+- [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
+- [OWASP Logging Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html)
+- [RFC 6238 (TOTP)](https://www.rfc-editor.org/rfc/rfc6238)
+- [WebAuthn Spec (W3C)](https://www.w3.org/TR/webauthn-3/)
+
+## Disclaimer
+
+Best-Practice-Sammlung, **keine Rechtsberatung**. Bei Art. 9-Daten (Gesundheit, Religion, Sexualleben, Biometrie, ethnische Herkunft), KRITIS-Sektor-Auth, Aufsichtsanfragen oder Beschäftigten-Verhaltenskontrolle: Anwalt oder Datenschutzbeauftragten konsultieren.
+
+**Stand:** Mai 2026. DPF-Status, DSK-Beschlüsse, BSI-TR-Updates und EuGH-Rechtsprechung quartalsweise live prüfen — Verweis-URLs in Sektion „Quellen".
+
+
+---
+
+# Logging — was rein darf, was raus muss
+
+> Sub-File zu `dsgvo-auth-and-logging`. Best-Practice, **keine Rechtsberatung**. Stand Mai 2026.
+
+Diese Datei liefert konkrete Scrubbing-Patterns für Sentry, Datadog, Pino, Winston, morgan und Next.js-Middleware sowie Default-Aufbewahrungsfristen und typische Zweckbindungs-Verstöße. Auth-spezifische TOMs (Hashing-Parameter, Cookie-Flags, MFA) wohnen in `AUTH-TOM.md`, IP-Anonymisierung in `IP-ADDRESSES.md`.
+
+## Was loggen, was pseudonymisieren, was nie
+
+| Erlaubt (Klartext) | Pseudonymisieren | Verboten |
+|---|---|---|
+| Request-ID / Trace-ID (UUID, server-generiert) | User-ID (HMAC-SHA-256 + Server-Salt, siehe Pseudonymisierungs-Pattern unten) | Klartext-Passwörter, auch versehentlich im Body |
+| HTTP-Status, HTTP-Methode | Session-ID (gehashed, nicht roher Cookie-Wert) | `Authorization`-Header (Bearer-/Basic-Token) |
+| Endpoint-Name **ohne** PII-Pfad-Parameter (`/api/users/:id` statt `/api/users/42`) | IP-Adresse (gekürzt — Verfahren in `IP-ADDRESSES.md`) | `Cookie`-Header und `Set-Cookie` |
+| Timestamp, Server-Region, Pod-Name, Build-/Lib-Version | Device-Fingerprint (gehashed mit Salt, nicht roh) | `X-API-Key`, OAuth-Access-/Refresh-Tokens, MFA-Recovery-Codes |
+| Reine Technik-Metriken (Latenz, RPS, Heap) | Korrelations-IDs, die ohne Hash rückführbar wären | Body-Felder mit Health/SSN/Bank/Kreditkarte/Religion/Biometrie (Art. 9) |
+| Feature-Flag-Namen, A/B-Test-Bucket (ohne User-ID) | E-Mail nur als gehashter lokaler Teil, Domain optional separat | Stack-Trace mit Pfaden wie `/home/<user>/`, `C:\Users\<user>\` |
+
+> **Health-Kontext weit verstehen** (EuGH C-21/23 Lindenapotheke, 04.10.2024): In Apotheken-, Medizin-, Therapie- oder Health-Shop-Apps können bereits Produkt-, Bestell-, Such- oder URL-Daten Art.-9-Bezug haben, wenn aus ihnen Gesundheitsinformationen ableitbar sind. „Bestellte Migräne-Tablette" ist ein Gesundheitsdatum. Audit-Logs in solchen Kontexten besonders strikt scrubben — Endpoint-Pfade ohne Produkt-IDs, Suchanfragen nicht klartext loggen.
+
+## Scrubbing-Snippets
+
+### Sentry (Node.js)
+
+```js
+const Sentry = require('@sentry/node');
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN_EU, // de.sentry.io / EU-Hosting
+  sendDefaultPii: false,
+  beforeSend(event) {
+    if (event.request?.headers) {
+      delete event.request.headers.authorization;
+      delete event.request.headers.cookie;
+      delete event.request.headers['x-api-key'];
+    }
+    event.exception?.values?.forEach((e) => {
+      e.stacktrace?.frames?.forEach((f) => {
+        if (f.filename) {
+          f.filename = f.filename
+            .replace(/\/(home|Users)\/[^/]+/g, '/$1/REDACTED')
+            .replace(/([A-Za-z]:\\Users\\)[^\\]+/g, '$1REDACTED');
+        }
+      });
+    });
+    return event;
+  },
+});
+```
+
+> Der Snippet zeigt nur die Privacy-relevanten Optionen. `tracesSampleRate`, `release`, `environment` und Tracing-Integrationen bewusst weggelassen — diese ergänzt jede App nach Bedarf.
+>
+> **`@sentry/node` v10+ (OpenTelemetry-Architektur, 2026 industrieller Standard):** `sendDefaultPii: false` blockiert die inferrierte IP-Erfassung auf Error-Event-Ebene. v10 baut nativ auf OpenTelemetry v2 auf — bei aktiviertem Performance-Tracing (Spans/Transactions) muss zusätzlich `beforeSendTransaction` analog zu `beforeSend` implementiert werden, sonst leaken Span-Attribute mit User-IDs, Session-Cookies oder HTTP-Metadaten über verteilte Traces. OTel-Instrumentierungen legen detaillierte HTTP-Daten in Span-Attributen ab, die der Privacy-Filter sonst nicht erreicht.
+
+### Datadog Browser RUM / Logs
+
+```js
+import { datadogLogs } from '@datadog/browser-logs';
+
+datadogLogs.init({
+  clientToken: process.env.DD_TOKEN,
+  site: 'datadoghq.eu', // EU-Hosting
+  forwardErrorsToLogs: true,
+  beforeSend: (log) => {
+    if (log.http?.headers) {
+      delete log.http.headers.authorization;
+      delete log.http.headers.cookie;
+    }
+    return true;
+  },
+});
+```
+
+### Pino (Node.js)
+
+```js
+const pino = require('pino');
+
+const logger = pino({
+  redact: {
+    paths: [
+      'req.headers.authorization',
+      'req.headers.cookie',
+      'req.headers["x-api-key"]',
+      '*.password',
+      '*.token',
+      '*.refreshToken',
+      'body.ssn',
+      'body.creditCard',
+    ],
+    censor: '[REDACTED]',
+  },
+});
+```
+
+> Pino-Wildcards (`*.password`) durchsuchen das Log-Objekt auf tieferen Ebenen rekursiv, verursachen aber einen massiven **Performance-Overhead bis zu 50%** bei JSON-Serialisierung gegenüber expliziten Pfaden (~2%) — der AST muss dynamisch traversiert werden. Zudem matchen sie das Top-Level-Feld (`password` direkt im Root) systembedingt **nicht**. **Best Practice:** Top-Level-Felder explizit ohne Wildcard listen (`'password'`), Wildcards sparsam einsetzen, tiefe Pfade explizit auflisten (`'body.user.password'`). Bei 3+ Verschachtelungsebenen weisen Wildcards in `fast-redact` bekannte Bugs auf ([Issue pinojs/redact#19](https://github.com/pinojs/redact/issues/19)) — explizites Pathing zwingend, sonst DSGVO-relevante Datenlecks.
+
+### Winston (Node.js)
+
+```js
+const winston = require('winston');
+
+const sensitiveFilter = winston.format((info) => {
+  // Shallow-Clone, weil JS Objekte per Referenz übergibt: ohne Clone würde
+  // der Filter das Original-Objekt mutieren und nachgelagerte Verwendungen
+  // (Metriken, Antwort-Formatierung) beschädigen.
+  const cloned = { ...info, headers: info.headers ? { ...info.headers } : undefined };
+  const SENSITIVE = ['password', 'token', 'refreshToken', 'authorization', 'cookie'];
+  for (const key of SENSITIVE) {
+    if (cloned[key]) cloned[key] = '[REDACTED]';
+  }
+  if (cloned.headers?.authorization) cloned.headers.authorization = '[REDACTED]';
+  return cloned;
+});
+
+const logger = winston.createLogger({
+  format: winston.format.combine(sensitiveFilter(), winston.format.json()),
+});
+```
+
+### morgan (Express Access-Log)
+
+```js
+const morgan = require('morgan');
+
+// Pfad ohne Query-String loggen — Query-Parameter enthalten in der Praxis
+// Reset-Tokens, Magic-Link-Tokens, OAuth-State, E-Mail-Adressen oder Tracking-IDs.
+morgan.token('safe-path', (req) => {
+  try {
+    return new URL(req.originalUrl || req.url, 'http://local').pathname;
+  } catch {
+    return req.path || '[invalid-url]';
+  }
+});
+
+morgan.token('request-id', (req) => req.headers['x-request-id'] || '-');
+
+// Whitelist-basiertes Format — keine Header-Spread-Liste mit „alles außer Auth/Cookie".
+// Header wie referer, x-forwarded-for, user-agent oder eigene App-Header
+// können selbst PII enthalten.
+app.use(morgan(':method :safe-path :status :response-time ms rid=:request-id'));
+```
+
+### Next.js Middleware
+
+```ts
+import { NextRequest, NextResponse } from 'next/server';
+
+export function middleware(request: NextRequest) {
+  // Whitelist-basiert — kein Spread aller Header, weil referer / user-agent /
+  // x-forwarded-for / eigene App-Header selbst PII enthalten können.
+  // `request.nextUrl.pathname` lässt searchParams bewusst weg.
+  console.log(
+    JSON.stringify({
+      method: request.method,
+      path: request.nextUrl.pathname,
+      requestId: request.headers.get('x-request-id') ?? undefined,
+      timestamp: new Date().toISOString(),
+    }),
+  );
+  return NextResponse.next();
+}
+```
+
+Bunyan (Node) bzw. LogRocket (Browser-Session-Replay) lassen sich analog absichern: Bunyan über eigene Serializers (`req`, `err`) mit Header-Whitelist, LogRocket über `requestSanitizer` / `responseSanitizer` und das Privacy-Mode-Attribut `data-private` auf sensiblen DOM-Elementen.
+
+## Aufbewahrungsfristen (Richtwerte für Auth- und Application-Logs)
+
+| Log-Typ | Default | Maximum | Begründung / Quelle |
+|---|---|---|---|
+| Auth-Audit (Login Success/Fail, Passwort-Reset, MFA-Verify) | 30–90 Tage | 180 Tage | DSK-Orientierungshilfe; Sicherheits-Reaktionsfenster |
+| Application Error (Sentry, Stack-Traces) | 14 Tage | 30 Tage | Debugging-Zeitfenster ohne Daueraufbewahrung |
+| Access Log (HTTP-Anfragen) | 7 Tage | 90 Tage | nur mit konkreter Sicherheitsbegründung über 7 Tage |
+| Sicherheits-Vorfall (aktiv) | bis Aufklärung | – | Beweissicherung; danach archivieren oder löschen |
+| Performance-Metriken (ohne User-Bezug) | beliebig | – | außerhalb DSGVO bei vollständiger Anonymisierung |
+
+> Aufbewahrungsfristen anderer Datenkategorien (HGB-Belege 10 Jahre, AO-Steuerunterlagen, TKG-Verbindungsdaten) gelten **nicht** automatisch für Auth-Logs — siehe `dsgvo-personal-data-storage` (geplant).
+
+## Security-Event-Taxonomie
+
+OWASP Top 10 A09 (2025) listet Authentifizierungs-, Autorisierungs- und Session-Management-Fehler explizit als log-relevant. Mindest-Set für Auth-Audit-Logs:
+
+- `login.success` / `login.failure` (mit Grund: wrong-password, mfa-failed, account-locked)
+- `mfa.challenge_issued` / `mfa.success` / `mfa.failure`
+- `password.reset_requested` / `password.reset_completed` / `password.changed`
+- `session.created` / `session.revoked` / `session.refreshed`
+- `token.reuse_detected` (= Refresh-Token-Diebstahl-Detection)
+- `account.locked` / `account.unlocked` / `account.role_changed`
+- `data.export_started` / `data.export_completed` (Art. 20 Portabilität)
+- `account.deleted` (Art. 17 Recht auf Löschung)
+
+Diese Event-Liste ist auch die Basis für **Datenpanne-Trigger nach Art. 33/34 DSGVO**: bei `token.reuse_detected`, `password.exposed_in_logs`, `account.role_changed_unauthorized` oder kompromittiertem Admin-Konto Incident-Bewertung anstoßen — 72-Stunden-Frist bis Aufsichtsbehörde-Meldung. Detail: geplanter `nis2-security-baseline`-Skill.
+
+## Audit-Log-Integrität
+
+Vertraulichkeit (Scrubbing, Pseudonymisierung) ist nur die halbe Miete. Bei kritischen Anwendungen — Gesundheitsdaten Art. 9, Finanzsektor unter DORA, KRITIS / NIS2 — ist auch die **Integrität** der Audit-Logs gefordert (Beweissicherung, forensische Nachvollziehbarkeit, Art. 33 DSGVO Meldepflicht). Ein Angreifer mit Server-Zugriff könnte sonst Logs nachträglich manipulieren oder selektiv löschen, um laterale Bewegungen zu verschleiern.
+
+**Architektur-Bausteine:**
+
+- **Append-only Speicherung** + getrennte Schreib-/Leserechte. Logs nicht in derselben DB-Rolle wie Anwendungsdaten.
+- **WORM / Object-Lock** für archivierte Security-Logs — z.B. AWS S3 Object Lock im Compliance-Mode, Azure Blob Immutable Storage. Drittland-Aspekt: `dsgvo-third-country-transfer/PROVIDERS.md`.
+- **HMAC-Chain** für laufende Audit-Logs: jeder Log-Eintrag enthält den HMAC-Hash des vorherigen Eintrags — jede nachträgliche Manipulation bricht die Kette.
+- **Server-seitiger Zeitstempel** statt Client-Timestamp — sonst kann der Client (oder ein Angreifer) historische Einträge fälschen.
+- **Lösch-/Retention-Jobs dokumentiert** und auditierbar separat geloggt.
+
+```js
+const crypto = require('crypto');
+
+// HMAC-Chain: jeder Eintrag hängt am Hash des vorherigen.
+// Bei Manipulation einzelner Einträge bricht die Kette an dieser Stelle.
+function appendAuditLog(prevHash, entry) {
+  const data = JSON.stringify({ ...entry, prev: prevHash, ts: new Date().toISOString() });
+  const hash = crypto.createHmac('sha256', process.env.AUDIT_LOG_KEY).update(data).digest('hex');
+  return { data, hash };
+}
+
+// Verifikation: Kette von Eintrag 0 bis n durchrechnen, mit gespeicherten Hashes vergleichen.
+function verifyChain(entries) {
+  let prev = '0'.repeat(64); // Genesis
+  for (const e of entries) {
+    const expected = crypto.createHmac('sha256', process.env.AUDIT_LOG_KEY).update(e.data).digest('hex');
+    if (expected !== e.hash || !e.data.includes(prev)) return false;
+    prev = e.hash;
+  }
+  return true;
+}
+```
+
+> Der `AUDIT_LOG_KEY` gehört in einen Secret-Manager (nicht in die Log-DB!) — analog zum Pseudonymisierungs-Salt. Bei Leak des Keys ist die Kette zwar weiter konsistent, aber ein Angreifer kann beliebige Einträge fälschen.
+
+## Zweckbindung — Anti-Patterns
+
+- **Auth-Logs für Marketing-Analyse zweitverwerten** → Verstoß gegen Art. 5(1)(b) Zweckbindung. Wenn Marketing-Daten gewollt: separater Datenfluss mit eigener Rechtsgrundlage (Einwilligung).
+- **Performance-KPIs aus Login-Tracking ableiten** → Zweckänderung ohne neue Rechtsgrundlage. Login-Erfolg ist ein Sicherheitssignal, kein Performance-Signal.
+- **Application-Logs für Mitarbeiter-Verhaltenskontrolle nutzen** → § 26 BDSG, Mitbestimmung des Betriebsrats nach § 87 Abs. 1 Nr. 6 BetrVG; siehe `dsgvo-employment` (geplant).
+- **Error-Logs als Daten-Backup für Customer-Support** → Zweckänderung; Support-Fälle gehören in CRM mit eigener Aufbewahrungsfrist, nicht in Sentry.
+- **Audit-Logs als KI-Trainingsdaten verwenden** → Zweckänderung nach Art. 5(1)(b) und Art. 6(4): braucht eigene Rechtsgrundlage, bei sensiblen Kategorien zusätzlich Art. 9. Wenn das trainierte Modell später vollautomatisiert über Betroffene entscheidet, kommt Art. 22 ins Spiel. DSFA bei Profiling oder großem Umfang sensibler Daten (→ `dsgvo-third-country-transfer/DPIA.md`).
+
+## Pseudonymisierung von User-IDs
+
+Klartext-User-IDs in Logs sind bei einem Logs-Leak sofort re-identifizierbar — deshalb HMAC-SHA-256 mit serverseitigem Salt:
+
+```js
+const crypto = require('crypto');
+
+// Salt im Secret-Manager, NICHT im Repo, NICHT in der Log-DB.
+const SALT = process.env.LOG_USER_HASH_SALT; // ≥ 32 Bytes random
+
+function pseudonymizeUserId(userId) {
+  return crypto
+    .createHmac('sha256', SALT)
+    .update(String(userId))
+    .digest('hex')
+    .slice(0, 16); // 64 Bit; ausreichend für Log-Korrelation bis ~10 Mio. distinct IDs (Birthday-Bound). Bei größeren Beständen 24 Hex-Stellen / 96 Bit nehmen.
+}
+```
+
+**Anti-Pattern: SHA-256 ohne Salt** → jede User-ID hat denselben Hash über alle Logs hinweg. Bei int-User-IDs lässt sich eine Rainbow-Table in Sekunden bauen.
+
+**Anti-Pattern: MD5 oder SHA-1** → kryptographisch gebrochen, nicht für Pseudonymisierung verwenden. Auch nicht „nur als Korrelations-ID".
+
+**Anti-Pattern: Salt im selben System wie die Logs** → bei einem Leak ist der Salt mit-geleakt. Der Salt gehört in einen Secret-Manager (AWS Secrets Manager, GCP Secret Manager, HashiCorp Vault). Drittland-Aspekt der Manager-Wahl: `dsgvo-third-country-transfer/PROVIDERS.md`.
+
+> **EuGH C-413/23 P SRB/EDPS (04.09.2025):** Sauber getrennte Pseudonymisierung kann externe Log-Aggregatoren aus dem DSGVO-Anwendungsbereich nehmen. Wenn der Cloud-Anbieter nur den HMAC-Hash sieht und der Salt im eigenen Secret-Manager bleibt, hat der Anbieter keine vernünftigerweise einsetzbaren Mittel zur Re-Identifikation — die Daten sind für **ihn** anonym, für **dich** als Verantwortlichen weiterhin personenbezogen. Voraussetzung: architektonisch saubere Trennung (Salt nie zusammen mit Logs übermitteln, kein Mapping-Lookup-Service, der dem Anbieter zugänglich ist). Detail: `IP-ADDRESSES.md` Rechtliche Einordnung.
+
+## Quellen
+
+- [DSGVO Art. 5 Volltext (eur-lex)](https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679#d1e1888-1-1)
+- [DSK-Orientierungshilfen (datenschutzkonferenz-online.de)](https://www.datenschutzkonferenz-online.de/orientierungshilfen.html)
+- [BfDI Tätigkeitsberichte](https://www.bfdi.bund.de/DE/Service/Taetigkeitsberichte/taetigkeitsberichte_node.html)
+- [OWASP Logging Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html)
+- [Sentry Data Filtering Docs](https://docs.sentry.io/platforms/javascript/data-management/sensitive-data/)
+- [Pino Redaction Docs](https://github.com/pinojs/pino/blob/master/docs/redaction.md)

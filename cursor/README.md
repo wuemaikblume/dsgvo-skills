@@ -1,8 +1,8 @@
 # DSGVO Rules für Cursor
 
-Sechs **Agent Requested**-Rules im `.cursor/rules/*.mdc`-Format, die Cursor's Agent automatisch lädt, wenn DSGVO-Themen relevant werden — auch ohne dass der User „DSGVO" oder „GDPR" tippt.
+Neun **Agent Requested**-Rules im `.cursor/rules/*.mdc`-Format, die Cursor's Agent automatisch lädt, wenn DSGVO-Themen relevant werden — auch ohne dass der User „DSGVO" oder „GDPR" tippt.
 
-**Stand:** v1.3, parallel zur Claude-Variante. Inhaltlich identisch, technisch an Cursor's Rules-Engine angepasst.
+**Stand:** v1.5, parallel zur Claude-Variante. Inhaltlich identisch, technisch an Cursor's Rules-Engine angepasst.
 
 ## Inhalt
 
@@ -14,6 +14,9 @@ Sechs **Agent Requested**-Rules im `.cursor/rules/*.mdc`-Format, die Cursor's Ag
 | [`dsgvo-cloud-sovereignty.mdc`](rules/dsgvo-cloud-sovereignty.mdc) | Datensouveränität, Art. 48, US CLOUD Act, BCRs, EU-Alternativen |
 | [`dsgvo-eprivacy-tracking.mdc`](rules/dsgvo-eprivacy-tracking.mdc) | TTDSG §25, Cookies, Tracking-Pixel, Consent |
 | [`dsgvo-revdsg-ch.mdc`](rules/dsgvo-revdsg-ch.mdc) | Schweiz revDSG, Swiss-US DPF, EDÖB |
+| [`dsgvo-auth-and-logging.mdc`](rules/dsgvo-auth-and-logging.mdc) | Auth-Code, Login/Logout, Audit-Logs, Sentry/Datadog/Pino-Scrubbing, Art. 5/6/25/32 |
+| [`dsgvo-auth-tom.mdc`](rules/dsgvo-auth-tom.mdc) | Hash-Parameter (argon2id/bcrypt), Cookie-Flags, Session-Timeouts, MFA, Rate-Limits |
+| [`dsgvo-ip-addresses.mdc`](rules/dsgvo-ip-addresses.mdc) | IP=personenbezogen (Breyer), Kürzung, X-Forwarded-For, Retention-Bänder |
 
 ## Installation
 

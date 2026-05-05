@@ -1,6 +1,6 @@
 # Cursor — Installation
 
-Diese Cursor-Adaption liefert sechs Regeln im `.cursor/rules/`-Format. Alle sind als **Agent Requested**-Rules konfiguriert (`alwaysApply: false`) — Cursor's Agent lädt die Regel nur, wenn die `description` zur Aufgabe passt. Das spart Kontext und vermeidet Fehl-Trigger.
+Diese Cursor-Adaption liefert neun Regeln im `.cursor/rules/`-Format. Alle sind als **Agent Requested**-Rules konfiguriert (`alwaysApply: false`) — Cursor's Agent lädt die Regel nur, wenn die `description` zur Aufgabe passt. Das spart Kontext und vermeidet Fehl-Trigger.
 
 ## Option 1 — Pro Projekt (empfohlen)
 
@@ -44,6 +44,9 @@ Cursor sollte die Regel laden und in der Antwort den Decision Tree für Drittlan
 | `dsgvo-cloud-sovereignty` | US-Konzern als Cloud-Provider, CLOUD-Act-Risiko, BCRs, BYOK |
 | `dsgvo-eprivacy-tracking` | Cookies, Tracking-Pixel, Analytics-Setup, Consent Management |
 | `dsgvo-revdsg-ch` | Schweizer Kunden/Verantwortliche, EDÖB-Fragen |
+| `dsgvo-auth-and-logging` | Auth-Code (bcrypt/argon2/JWT), Login-Endpoints, Sentry/Datadog/Pino-Setup, Audit-Log mit IP, Brute-Force-Schutz, MFA/TOTP/WebAuthn |
+| `dsgvo-auth-tom` | Konkrete TOM-Parameter (Hash-Cost, Session-Timeouts, Cookie-Flag-Matrix, MFA-Pflichtfälle, Rate-Limit-Werte) |
+| `dsgvo-ip-addresses` | IP-Speicherung, X-Forwarded-For, IP-Kürzung (/24, /48), Pseudonymisierung, Retention-Bänder |
 
 ## Unterschiede zur Claude-Variante
 

@@ -2,7 +2,7 @@
 
 > Diese Datei ist gleichzeitig öffentliche Roadmap UND **Onboarding-Doku für die nächste Arbeits-Session**. Sie enthält genug Kontext, dass weder ein neuer Claude-Lauf noch ein menschlicher Mitwirkender eine separate Erklärung braucht.
 
-**Stand:** 2026-05-04, Version 1.3 live über alle drei Tool-Targets (Claude / Cursor / Codex+Copilot). Re-Tests unter Claude Code: Opus + Sonnet 4.6 beide PASS für Re-Test 1 (S3-Upload, beide Varianten generiert) und Re-Test 3 (OpenAI + Patient-Allergie, Cloud Act + § 203 StGB führend). v1.2 hatte unter Sonnet 4.6 Trigger-Probleme, die v1.3 mit geschärfter Description schließt.
+**Stand:** 2026-05-05, Version 1.5 live über alle drei Tool-Targets (Claude / Cursor / Codex+Copilot). Zweiter Skill der Familie veröffentlicht: `dsgvo-auth-and-logging`. Trigger-Tests: Opus 6/6 PASS, Sonnet 4.6 3/6 PASS — Modell-Hinweis in README/INSTALL dokumentiert.
 
 ---
 
@@ -62,6 +62,7 @@ dsgvo-skills/
 | v1.2 | `42be843` | Cloud-Act-Trigger geschärft + neue „Code-Generierungs-Regel" für explizite Drittland-Wünsche |
 | v1.3 | `ccc453f` | Description-Härtung für Sonnet-4.6-Trigger: Avatar/Upload/Signup explizit, „any user data = personal data unter GDPR"-Klausel, Art. 9-Trigger-Liste, § 203 StGB + revDSG im Scope |
 | v1.4 | (siehe Tag) | Faktenkorrektur DPF-Status (verifiziert gegen offizielle ITA-Excel-Liste 2026-05-04): Anthropic und OpenAI sind NICHT DPF-zertifiziert — Transfermechanismus auf SCCs Modul 2 (Anthropic) bzw. Modul 3 (OpenAI via Ireland) korrigiert. Clerk-Detail erweitert (Participant ID 2718, Status „Active - Re-certification under Review", Re-Cert-Fenster bis 27.2.2026). Stichtag mit Verifikations-Quelle aktualisiert. Korrekturen über Claude / Cursor / Codex / Copilot synchron. |
+| v1.5 | (siehe Tag) | `dsgvo-auth-and-logging` v1.0 — vier Sub-Files (SKILL/LOGGING/AUTH-TOM/IP-ADDRESSES). Drei Cross-Reviews (Sonnet intern, GPT-5.5 extern, Tiefenrecherche extern) eingearbeitet. Trigger-Tests Opus 6/6 PASS, Sonnet 4.6 3/6 PASS — Modell-Hinweis in README+INSTALL ergänzt (Sonnet erfordert ggf. expliziten Skill-Aufruf bei Setup-Fragen). Cursor + Codex/Copilot synchron mitversioniert. |
 
 ### Drei Cross-Reviews (alle Befunde im Repo eingearbeitet)
 
@@ -117,7 +118,9 @@ Plus `cursor/INSTALL.md` (Agent-Requested-Erklärung, Verifikations-Prompt, Upda
 
 Alle nach demselben Schema: Prototyp → drei Reviews (Sonnet + extern × 2) → Korrekturen → Tests → Veröffentlichung.
 
-- [ ] **`dsgvo-auth-and-logging`** — Audit-Logs, IP-Speicherung, Login-Tracking, Zweckbindung, Speicherbegrenzung, Pseudonymisierung in Logs. Trigger: Auth-Code, Logging-Setup, Sentry-Scrubbing-Fragen, Login-Flow, Session-Management.
+**Vor jedem neuen Skill verbindlich:** [SKILL-BOUNDARIES.md](SKILL-BOUNDARIES.md) abgleichen, damit kein Thema doppelt gehört wird und keines verloren geht.
+
+- [x] **`dsgvo-auth-and-logging`** ✅ live (v1.5) — Audit-Logs, IP-Speicherung, Login-Tracking, Zweckbindung, Speicherbegrenzung, Pseudonymisierung in Logs. Vier Sub-Files: `SKILL.md`, `LOGGING.md`, `AUTH-TOM.md`, `IP-ADDRESSES.md`. Cursor + Codex/Copilot synchron.
 - [ ] **`dsgvo-subject-rights`** — Auskunft (Art. 15), Berichtigung (16), Löschung (17), Einschränkung (18), Portabilität (20), Widerspruch (21). Trigger: User-Account-Features, „Konto löschen"-Endpoints, Datenexport-APIs, Auskunfts-Tickets.
 - [ ] **`dsgvo-personal-data-storage`** — Verschlüsselung at-rest und in-transit, Aufbewahrungsfristen pro Datenkategorie, Backups + Löschkonzept, Pseudonymisierung-Patterns. Trigger: DB-Schema, S3-Bucket-Konfig, Encryption-Settings, Backup-Strategien.
 - [ ] **`nis2-security-baseline`** — NIS2-Umsetzungsgesetz Deutschland (Stand prüfen), Mindestmaßnahmen Art. 21, 24/72h-Meldepflichten, Risikomanagement, Incident-Response. Trigger: Security-relevante Architektur, Auth-Hardening, Backup-Strategien, KRITIS-Sektor-Hinweise.

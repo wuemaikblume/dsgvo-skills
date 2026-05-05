@@ -5,7 +5,7 @@ Konsolidierte DSGVO-Compliance-Anweisungen für Tools, die statische Markdown-Fi
 - [`AGENTS.md`](AGENTS.md) — Codex CLI (im Projekt-Root)
 - [`copilot-instructions.md`](copilot-instructions.md) — GitHub Copilot (`.github/copilot-instructions.md`)
 
-**Stand:** v1.3, parallel zur Claude- und Cursor-Variante. Inhaltlich kondensiert, weil Codex/Copilot die Datei bei jeder Anfrage komplett mitladen — kein Auto-Trigger, kein Sub-File-Loading.
+**Stand:** v1.5, parallel zur Claude- und Cursor-Variante. Inhaltlich kondensiert, weil Codex/Copilot die Datei bei jeder Anfrage komplett mitladen — kein Auto-Trigger, kein Sub-File-Loading.
 
 ## Was drin ist
 
@@ -16,6 +16,7 @@ Konsolidierte DSGVO-Compliance-Anweisungen für Tools, die statische Markdown-Fi
 - US CLOUD Act-Hinweis als eigener Pflicht-Branch bei Art. 9 / KRITIS / § 203 StGB
 - Pflicht-Dokumentation (VVT, Art. 30) + häufige Fallen
 - Schweiz revDSG, ePrivacy/TTDSG, NIS2, DSFA-Pflichtfälle als Kurzhinweise
+- **Auth & Logging (ab v1.5):** Decision Tree für Hashing/Sessions/IP-Logging/Sentry/MFA/Brute-Force, Code-Patterns (Argon2id, Cookie-Flags, IP-Truncation, Rate-Limit, Sentry-Scrubbing), Audit-Log-Schema mit gestaffelter Retention
 
 ## Was bewusst NICHT drin ist
 
@@ -41,7 +42,7 @@ curl -fsSL https://raw.githubusercontent.com/wuemaikblume/dsgvo-skills/main/code
 Pinning auf einen Tag empfohlen — DPF-Status, Schrems-III-Lage und Adäquanzbeschlüsse ändern sich:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wuemaikblume/dsgvo-skills/v1.3/codex/AGENTS.md -o AGENTS.md
+curl -fsSL https://raw.githubusercontent.com/wuemaikblume/dsgvo-skills/v1.5/codex/AGENTS.md -o AGENTS.md
 ```
 
 Releases auf <https://github.com/wuemaikblume/dsgvo-skills/releases>.
