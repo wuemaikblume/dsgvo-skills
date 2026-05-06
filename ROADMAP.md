@@ -2,7 +2,7 @@
 
 > Diese Datei ist gleichzeitig öffentliche Roadmap UND **Onboarding-Doku für die nächste Arbeits-Session**. Sie enthält genug Kontext, dass weder ein neuer Claude-Lauf noch ein menschlicher Mitwirkender eine separate Erklärung braucht.
 
-**Stand:** 2026-05-05, Version 1.5 live über alle drei Tool-Targets (Claude / Cursor / Codex+Copilot). Zweiter Skill der Familie veröffentlicht: `dsgvo-auth-and-logging`. Trigger-Tests: Opus 6/6 PASS, Sonnet 4.6 3/6 PASS — Modell-Hinweis in README/INSTALL dokumentiert.
+**Stand:** 2026-05-06, Version 1.6 live über alle drei Tool-Targets (Claude / Cursor / Codex+Copilot). Dritter Skill der Familie veröffentlicht: `dsgvo-email-marketing` (UWG § 7 + DSGVO Art. 6/7/21 + TDDDG § 25 für werbliche E-Mail in DACH). PROVIDERS.md des `dsgvo-third-country-transfer`-Skills um 8 Newsletter-Anbieter erweitert (Mailchimp, Klaviyo, HubSpot, ActiveCampaign mit verifizierten DPF-Participant-IDs; Brevo, CleverReach, Rapidmail, MailerLite als EU-Alternativen).
 
 ---
 
@@ -63,6 +63,7 @@ dsgvo-skills/
 | v1.3 | `ccc453f` | Description-Härtung für Sonnet-4.6-Trigger: Avatar/Upload/Signup explizit, „any user data = personal data unter GDPR"-Klausel, Art. 9-Trigger-Liste, § 203 StGB + revDSG im Scope |
 | v1.4 | (siehe Tag) | Faktenkorrektur DPF-Status (verifiziert gegen offizielle ITA-Excel-Liste 2026-05-04): Anthropic und OpenAI sind NICHT DPF-zertifiziert — Transfermechanismus auf SCCs Modul 2 (Anthropic) bzw. Modul 3 (OpenAI via Ireland) korrigiert. Clerk-Detail erweitert (Participant ID 2718, Status „Active - Re-certification under Review", Re-Cert-Fenster bis 27.2.2026). Stichtag mit Verifikations-Quelle aktualisiert. Korrekturen über Claude / Cursor / Codex / Copilot synchron. |
 | v1.5 | (siehe Tag) | `dsgvo-auth-and-logging` v1.0 — vier Sub-Files (SKILL/LOGGING/AUTH-TOM/IP-ADDRESSES). Drei Cross-Reviews (Sonnet intern, GPT-5.5 extern, Tiefenrecherche extern) eingearbeitet. Trigger-Tests Opus 6/6 PASS, Sonnet 4.6 3/6 PASS — Modell-Hinweis in README+INSTALL ergänzt (Sonnet erfordert ggf. expliziten Skill-Aufruf bei Setup-Fragen). Cursor + Codex/Copilot synchron mitversioniert. |
+| v1.6 | (siehe Tag) | `dsgvo-email-marketing` v1.0 — fünf Sub-Files (SKILL/CONSENT-AND-DOI/UWG-7/TRACKING-IN-MAIL/UNSUBSCRIBE-AND-RETENTION/SERVICE-VS-MARKETING). UWG § 7 (DE) + AT TKG § 174 + CH UWG Art. 3 I o + DSGVO Art. 6/7/21 + TDDDG § 25. BGH-Linie zur Service-vs-Werbung-Abgrenzung (I ZR 218/07, VI ZR 225/17, I ZR 164/09, OLG Hamm 4 U 121/13). DPF-Status der vier US-Newsletter-Provider live verifiziert (Mailchimp 7693, Klaviyo 6149, HubSpot 5812, ActiveCampaign 4495 — alle Active). PROVIDERS.md um 8 Profile erweitert (4 US + 4 EU). Cursor + Codex/Copilot synchron. |
 
 ### Drei Cross-Reviews (alle Befunde im Repo eingearbeitet)
 
@@ -125,7 +126,7 @@ Alle nach demselben Schema: Prototyp → drei Reviews (Sonnet + extern × 2) →
 - [ ] **`dsgvo-personal-data-storage`** — Verschlüsselung at-rest und in-transit, Aufbewahrungsfristen pro Datenkategorie, Backups + Löschkonzept, Pseudonymisierung-Patterns. Trigger: DB-Schema, S3-Bucket-Konfig, Encryption-Settings, Backup-Strategien.
 - [ ] **`nis2-security-baseline`** — NIS2-Umsetzungsgesetz Deutschland (Stand prüfen), Mindestmaßnahmen Art. 21, 24/72h-Meldepflichten, Risikomanagement, Incident-Response. Trigger: Security-relevante Architektur, Auth-Hardening, Backup-Strategien, KRITIS-Sektor-Hinweise.
 - [ ] **`dsgvo-employment`** — § 26 BDSG (Beschäftigtendatenschutz), Bewerber-Daten, Performance-Tracking, HR-Tools (Personio, BambooHR, etc.), Krankenakten. Trigger: HR-System-Integrationen, Performance-Monitoring, Bewerber-Tools.
-- [ ] **`email-marketing-compliance`** — UWG §7 (Werbung), Double-Opt-In, B2B-Privileg, Werbung vs. Service-Mail, Tracking-Pixel in E-Mails. Trigger: Newsletter-Setup, Mailgun/SendGrid-Konfig, Tracking-URLs in Mails.
+- [x] **`dsgvo-email-marketing`** ✅ live (v1.6) — UWG §7 + AT TKG § 174 + CH UWG Art. 3 I o + DSGVO Art. 6/7/21 + TDDDG § 25. Fünf Sub-Files: `SKILL.md`, `CONSENT-AND-DOI.md`, `UWG-7.md`, `TRACKING-IN-MAIL.md`, `UNSUBSCRIBE-AND-RETENTION.md`, `SERVICE-VS-MARKETING.md`. Trigger: Newsletter-Provider-SDKs (Mailchimp/Klaviyo/HubSpot/Brevo/CleverReach/Rapidmail/MailerLite/ActiveCampaign), DOI-Endpoints, Mail-Tracking-Pixel, List-Unsubscribe-Header (RFC 8058), Service-vs-Werbung-Abgrenzung. Cursor + Codex/Copilot synchron.
 
 **Empfohlene Reihenfolge:** Auth-Logging zuerst (am meisten Synergie zum Drittlandtransfer-Skill), dann Subject-Rights, dann NIS2, dann Marketing/Employment.
 
