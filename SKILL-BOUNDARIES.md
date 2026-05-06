@@ -50,9 +50,9 @@ Wenn ein neuer Skill ein neues Querschnitts-Thema braucht, das nirgendwo passt: 
 | Bewerber-Daten, Performance-Tracking, HR-Tools | `employment` 📋 | |
 | Beschäftigten-Login-Monitoring | `employment` 📋 | aber: Auth-Log-Mechanik in `auth-and-logging` |
 | Krankenakten / Gesundheitsdaten am Arbeitsplatz | `employment` 📋 | |
-| UWG § 7 Werbung, Double-Opt-In, B2B-Privileg | `email-marketing` 🔜 | DOI-Flow + Bestandskunden + Cold-B2B + AT TKG + CH UWG |
-| Tracking-Pixel in E-Mails | `email-marketing` 🔜 | Open-Pixel + Click-Redirect + externe Bilder; Norm bleibt EPRIVACY.md |
-| Werbung vs. Service-Mail-Abgrenzung | `email-marketing` 🔜 | BGH-Linie I ZR 218/07, VI ZR 225/17, I ZR 164/09 |
+| UWG § 7 Werbung, Double-Opt-In, B2B-Privileg | `email-marketing` ✅ | DOI-Flow + Bestandskunden + Cold-B2B + AT TKG + CH UWG |
+| Tracking-Pixel in E-Mails | `email-marketing` ✅ | Open-Pixel + Click-Redirect + externe Bilder; Norm bleibt EPRIVACY.md |
+| Werbung vs. Service-Mail-Abgrenzung | `email-marketing` ✅ | BGH-Linie I ZR 218/07, VI ZR 225/17, I ZR 164/09 |
 
 ✅ Live · 🔜 In Arbeit · 📋 Geplant
 
@@ -63,6 +63,10 @@ Wenn zwei Skills bei demselben Code anschlagen können, gilt:
 - **Drittland-Auth-Provider** (z.B. Auth0): `third-country` triggert auf den Anbieter-Aspekt, `auth-and-logging` auf den Code-Pattern. Beide Skills sollten so geschrieben sein, dass sie aneinander vorbeiarbeiten — nicht beide den vollen Decision Tree durchlaufen.
 - **Sentry-Integration**: `third-country` zeigt EU-DSN + minimalen Scrubbing-Patch + Verweis. `auth-and-logging` zeigt den vollen Scrubbing-Code (Stack-Traces, Header, Body-Felder). Keine Doppelung der Anbieter-Pflichten.
 - **Backup eines Auth-Logs**: `auth-and-logging` liefert Aufbewahrungsfrist + Pseudonymisierungs-Pflicht. `personal-data-storage` liefert Verschlüsselung + Löschkonzept. Cross-Link in beide Richtungen.
+- **Newsletter-SDK-Calls** (`mailchimp.lists.addListMember`, `klaviyo.profile.subscribe` etc.): `email-marketing` triggert auf den Code-Pattern (DOI-Flow, Subscribe-Endpoint, Confirm-Mail). `third-country` triggert nur ergänzend bei Provider-Wahl-Diskussion (DPF-Status, AVV) — nicht bei jedem Call.
+- **Tracking-Pixel in Mail-HTML**: `email-marketing/TRACKING-IN-MAIL.md` triggert (Code-Pattern). `third-country/EPRIVACY.md` bleibt Norm-Wohnsitz für TDDDG § 25 / Cookies / Local Storage außerhalb von Mail.
+- **IP-Speicherung beim DOI-Confirm**: `auth-and-logging/IP-ADDRESSES.md` bleibt Wohnsitz; `email-marketing/CONSENT-AND-DOI.md` zitiert nur 1 Satz + Cross-Link.
+- **Versand-Log eines Newsletters**: `auth-and-logging/LOGGING.md` regelt PII-Scrubbing-Format. `email-marketing/UNSUBSCRIBE-AND-RETENTION.md` regelt Aufbewahrungsfristen für Versand-Status. Cross-Link in beide Richtungen.
 
 Faustregel: Wer den **Code-Pattern** liefert, gewinnt den Trigger. Der andere Skill liefert die **Datenebene** (was darf rein/raus, wie lange).
 
@@ -95,6 +99,14 @@ dsgvo-auth-and-logging/              ✅ live, v1.0
 ├── LOGGING.md         (Wohnsitz: Log-Inhalte, Scrubbing, Retention für Auth-Logs)
 ├── AUTH-TOM.md        (Wohnsitz: Hashing, Sessions, Cookies, MFA, Rate-Limit — Art. 32)
 └── IP-ADDRESSES.md    (Wohnsitz: IP als Personendatum, EuGH/BGH, Kürzung)
+
+dsgvo-email-marketing/               ✅ live, v1.0
+├── SKILL.md
+├── CONSENT-AND-DOI.md            (Wohnsitz: Art. 6/7 für Marketing-Mail, DOI-Flow, Confirm-Mail-Inhalt)
+├── UWG-7.md                      (Wohnsitz: UWG § 7 DE + AT TKG § 174 + CH UWG Art. 3 I o)
+├── TRACKING-IN-MAIL.md           (Wohnsitz: Open-Pixel, Click-Redirect, externe Bilder als Code-Pattern)
+├── UNSUBSCRIBE-AND-RETENTION.md  (Wohnsitz: One-Click, RFC 8058, Suppression-Hash, Aufbewahrungsfristen)
+└── SERVICE-VS-MARKETING.md       (Wohnsitz: BGH-Linie Service vs Werbung, Mail-Template-Klassifikation)
 ```
 
 Künftige Skills tragen ihre Sub-Files hier ein, sobald veröffentlicht.
