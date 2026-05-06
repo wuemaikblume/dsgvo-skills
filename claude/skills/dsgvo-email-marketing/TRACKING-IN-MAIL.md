@@ -1,3 +1,223 @@
-# TRACKING-IN-MAIL — STUB
+# Tracking in Marketing-Mail (Open-Pixel, Click-Redirect, externe Bilder)
 
-> Wird in Phase 3.3 befüllt. Spec § 3.4.
+> Wohnsitz für **Code-Pattern** des E-Mail-Trackings. Die Norm TDDDG § 25 (vormals TTDSG, umbenannt 14.05.2024 — Speichern und Auslesen von Information im Endgerät des Endnutzers) wohnt in `dsgvo-third-country-transfer/EPRIVACY.md`. Diese Datei zeigt, wie der konkrete Mail-Versand-Code DSGVO + TDDDG einhält.
+
+## Drei Verarbeitungs-Tatbestände in einer Mail
+
+Eine HTML-Mail kann beim Empfänger drei verschiedene Datenverarbeitungs-Vorgänge auslösen, die rechtlich getrennt zu prüfen sind:
+
+1. **Open-Tracking-Pixel** — eingebettetes 1×1-Bild lädt beim Öffnen der Mail vom Sender-Server. Erfasst: Öffnungs-Zeitpunkt, IP, User-Agent.
+2. **Click-Tracking-Redirect** — Links in der Mail führen über Sender-Domain um. Erfasst: Klick-Zeitpunkt, IP, geklickte Ziel-URL.
+3. **Externe Bilder vom CDN** — jedes referenzierte Bild (Logo, Produkt-Foto, Header-Banner) lädt beim Öffnen vom Sender-CDN. Erfasst: Lade-Zeitpunkt, IP, User-Agent — auch wenn nicht „Tracking" beabsichtigt.
+
+Alle drei Tatbestände setzen Daten beim Empfänger und beim Versender voraus → **TDDDG § 25** (Endgerät) **+ Art. 6 DSGVO** (personenbezogene Verarbeitung).
+
+## Open-Tracking-Pixel
+
+### Anti-Pattern: Pixel immer aktiv
+
+```html
+<!-- Anti-Pattern: kein Einwilligungs-Check -->
+<img src="https://provider.example/open?id={{ recipient.id }}"
+     width="1" height="1" alt="" />
+```
+
+Konsequenz: jede Öffnung wird getrackt, auch von Empfängern, die der Verarbeitung nicht zugestimmt haben. DSK-Position 2021: regelmäßig einwilligungspflichtig — kein berechtigtes Interesse für offenes Tracking ohne Einwilligung.
+
+### Pattern: einwilligungs-gekoppelt
+
+```html
+{% if recipient.consent_tracking %}
+  <img src="https://provider.example/open?id={{ recipient.id }}"
+       width="1" height="1" alt="" />
+{% endif %}
+```
+
+`consent_tracking` ist ein eigenes Feld im Empfänger-Datensatz, getrennt von `consent_marketing` (Trennungsgebot Art. 7 II DSGVO). Empfänger kann Newsletter erhalten, ohne in Open-Tracking einzuwilligen.
+
+### Pattern in Provider-Konfiguration
+
+Bei Mailchimp / Klaviyo / Brevo das Open-Tracking pro Audience oder Liste deaktivieren, wenn die Einwilligung nicht generell vorliegt:
+
+| Provider | Pfad zur Einstellung |
+|---|---|
+| Mailchimp | Audience → Settings → Tracking → Track Opens (Häkchen entfernen) |
+| Klaviyo | Settings → Email → Tracking → Open tracking |
+| HubSpot | Marketing → Email → Settings → Tracking |
+| Brevo | Account → Tracking Settings → Email Open Tracking |
+| CleverReach | List Settings → Tracking → Öffnungs-Tracking |
+
+(UI-Pfade verändern sich; Stand Mai 2026, vor Code-Generierung verifizieren.)
+
+## Click-Tracking-Redirects
+
+### Anti-Pattern
+
+```html
+<!-- Anti-Pattern: alle Links über Tracking-Redirect, unabhängig von Einwilligung -->
+<a href="https://provider.example/c/{{ token }}?u={{ target | url_encode }}">
+  Mehr erfahren
+</a>
+```
+
+### Pattern: zwei Link-Versionen
+
+```html
+{% if recipient.consent_tracking %}
+  <a href="https://provider.example/c/{{ token }}?u={{ target | url_encode }}">
+    Mehr erfahren
+  </a>
+{% else %}
+  <a href="{{ target }}">
+    Mehr erfahren
+  </a>
+{% endif %}
+```
+
+Hinweise:
+
+- Die Tracking-Redirect-Domain muss DKIM/SPF-konform zur Sender-Domain stehen — sonst klassifizieren E-Mail-Filter die Mails zunehmend als Phishing-Versuche. Eigene Tracking-Subdomain (z.B. `track.example.com`) mit korrekter Authentifizierung einrichten.
+- UTM-Parameter (`?utm_source=newsletter&utm_medium=email&utm_campaign=...`) sind technisch eigenständig vom Tracking-Redirect — sie speichern keine personenbezogenen Daten beim Sender. UTMs ohne Klick-Tracking-Redirect bleiben zulässig, weil sie nur an die Ziel-Webseite weitergegeben werden (deren Tracking-Logik wiederum eine eigene TDDDG-Frage ist).
+
+## Externe Bilder als Tracking-Pixel by design
+
+Jedes `<img src="https://cdn.sender.example/...">` in einer Mail überträgt beim Öffnen IP, User-Agent und Timestamp an das Sender-CDN — auch wenn nicht als „Tracking" gedacht. Das ist faktisches Open-Tracking durch die Hintertür.
+
+### Lösung A: Inline-Einbettung via Content-ID (CID)
+
+```text
+Content-Type: multipart/related; boundary="..."
+
+--...
+Content-Type: text/html; charset="utf-8"
+
+<img src="cid:logo123" alt="Logo" />
+--...
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+Content-ID: <logo123>
+
+iVBORw0KGgoAAAANSUhEUgAA...
+--...
+```
+
+CID-eingebettete Bilder sind Teil der Mail selbst — kein externer Abruf, kein IP-Transfer. Nachteil: Mail-Größe steigt, einige Mail-Clients zeigen schlechter, Caching wird verhindert.
+
+### Lösung B: Datenschutzerklärung-Transparenz + opt-in für CDN-Bilder
+
+Wenn CID nicht praktikabel ist (große Produkt-Galerien): in der Datenschutzerklärung explizit darstellen, dass externe Bilder beim Öffnen an Sender-CDN geladen werden, und im Anmelde-Formular eine separate Checkbox „Erlaubnis zum Laden externer Bilder/Tracking" anbieten.
+
+### Maintainer-Pragmatik
+
+Für DACH-Newsletter mit ~1.000–10.000 Empfängern und einfachen Mail-Layouts ist CID praktikabel. Für E-Commerce-Stacks mit großen Produkt-Karussells lohnt sich der Aufwand selten — dort ist die einwilligungs-gekoppelte CDN-Variante der saubere Pfad.
+
+## A/B-Test- und Personalisierungs-Tracking
+
+Personalisierungs-Tracking pro Empfänger (Klick-History, Open-History, Lese-Dauer, Interessen-Tag) erzeugt ein Profil iSd Art. 4 Nr. 4 DSGVO. Bei großer Reichweite + automatisierter Inhalts-Anpassung greift Art. 35 DSGVO (DPIA-Pflicht).
+
+| Tracking-Tiefe | DPIA-Pflicht? |
+|---|---|
+| Subject-A/B-Test (zwei Versionen, aggregierte Auswertung, < 5.000 Empfänger) | nein |
+| Open- + Click-Aggregat ohne Empfänger-ID-Speicherung | nein |
+| Pro-Empfänger-Profil mit Klick-History + Interessen-Tags + > 50.000 Empfänger | DPIA prüfen, Cross-Link `dsgvo-third-country-transfer/DPIA.md` |
+| Automatisierte Empfehlung (KI-basiertes Inhalt-Tailoring pro Empfänger) | DPIA + Art. 22 prüfen |
+
+Trennungsgebot (Art. 7 II DSGVO): Personalisierungs-Tracking braucht eigene Einwilligung, getrennt von Newsletter-Anmeldung und Open-Tracking. Drei Häkchen, drei Zwecke:
+
+```html
+<label><input type="checkbox" name="consent_marketing" /> Newsletter-Anmeldung</label>
+<label><input type="checkbox" name="consent_tracking" /> Öffnungs-/Klick-Tracking</label>
+<label><input type="checkbox" name="consent_personalization" /> Personalisierte Inhalte (Profil)</label>
+```
+
+## Provider-Defaults — Vorsicht
+
+Die meisten US-Newsletter-Provider haben Open- und Click-Tracking **standardmäßig aktiviert**. Wer das DSGVO-konform betreiben will, muss aktiv deaktivieren:
+
+| Provider | Open-Tracking Default | Click-Tracking Default | Personalisierung Default |
+|---|---|---|---|
+| Mailchimp | aktiv | aktiv | optional pro Audience |
+| Klaviyo | aktiv | aktiv | aktiv (Profile-Tracking) |
+| HubSpot | aktiv | aktiv | aktiv (Lifecycle-Tracking) |
+| ActiveCampaign | aktiv | aktiv | aktiv (Site-Tracking) |
+| Brevo | aktiv | aktiv | optional |
+| CleverReach | aktiv | aktiv | optional |
+| Rapidmail | aktiv | aktiv | nicht zentral |
+| MailerLite | aktiv | aktiv | optional |
+
+Konsequenz: bei Provider-Onboarding **erste Code-Aktion** ist das Deaktivieren der Default-Tracking-Schalter oder die Implementierung der einwilligungs-gekoppelten Pattern (siehe oben).
+
+## Bounce-Tracking als Service-Pflicht (Art. 6 I f)
+
+Bounce-Tracking (Erkennung, dass eine Mail nicht zustellbar war) ist **keine Werbe-Datenverarbeitung**. Es dient der Versandqualität und Listen-Hygiene. Rechtsgrundlage: Art. 6 I f DSGVO (berechtigtes Interesse — Versand effizient durchführen, Spam-Reputation schützen). Keine separate Einwilligung erforderlich.
+
+Pattern:
+
+```sql
+CREATE TABLE bounce_log (
+  id BIGSERIAL PRIMARY KEY,
+  email_hash CHAR(64) NOT NULL,
+  bounce_type TEXT NOT NULL CHECK (bounce_type IN ('hard','soft','complaint')),
+  reason_code TEXT,
+  bounced_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  campaign_id BIGINT REFERENCES campaigns(id)
+);
+
+CREATE INDEX ON bounce_log (email_hash);
+CREATE INDEX ON bounce_log (bounced_at);
+```
+
+Aufbewahrung: max. 30 Tage in lesbarer Form, danach hashen oder anonymisieren — siehe `UNSUBSCRIBE-AND-RETENTION.md`. Cross-Link `dsgvo-auth-and-logging/LOGGING.md` für Format-Standards.
+
+## Confirm-Mail rendert NIE Tracking-Pixel
+
+Eine Bestätigungs-Mail im DOI-Flow ist eine reine Service-Mail (BGH I ZR 164/09 — keine Werbung). Tracking-Pixel zählen als Marketing-Datenverarbeitung — sie gehören NIE in Confirm-Mails, auch wenn der Provider sie standardmäßig einbaut.
+
+Code-Pattern:
+
+```ts
+async function sendConfirmationMail(to: string, token: string) {
+  await provider.send({
+    to,
+    subject: 'Bestätigen Sie Ihre Anmeldung',
+    template: 'confirm-doi',
+    // Provider-spezifisch Tracking explizit deaktivieren:
+    trackOpens: false,
+    trackClicks: false,
+    // Externe Bilder im Template vermeiden — nur CID-Logo
+  });
+}
+```
+
+Bei Mailchimp/HubSpot: Confirm-Mail über separate Trans-Account-Variante schicken (z.B. Mailchimp Mandrill / HubSpot Transactional), nicht über die Marketing-Send-Pipeline.
+
+## Cross-Links
+
+| Thema | siehe |
+|---|---|
+| TDDDG § 25 als Norm (allgemeine Cookie-/Tracking-Regeln außerhalb von Mail) | `dsgvo-third-country-transfer/EPRIVACY.md` |
+| US-Provider DPF-Status für Tracking-Daten-Transfer | `dsgvo-third-country-transfer/PROVIDERS.md` |
+| Cloud Act bei US-Tracking-Anbietern | `dsgvo-third-country-transfer/CLOUD-ACT.md` |
+| DPIA bei Profiling großer Reichweite | `dsgvo-third-country-transfer/DPIA.md` |
+| IP-Speicherung beim Open-Pixel-Hit | `dsgvo-auth-and-logging/IP-ADDRESSES.md` |
+| Versand-Log-Format | `dsgvo-auth-and-logging/LOGGING.md` |
+| Confirm-Mail darf keine Werbung enthalten | `CONSENT-AND-DOI.md` |
+| Trennungsgebot — drei Häkchen für drei Zwecke | `CONSENT-AND-DOI.md` |
+| Bounce-Aufbewahrung + Soft-/Hard-Bounce-Logik | `UNSUBSCRIBE-AND-RETENTION.md` |
+| Service-Mail-Klassifikation (kein Pixel in Trans-Mails) | `SERVICE-VS-MARKETING.md` |
+
+## Quellen
+
+- [DSGVO Art. 4 Nr. 4 (Profiling)](https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679)
+- [DSGVO Art. 6, 7, 35](https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679)
+- [TDDDG § 25 (gesetze-im-internet.de)](https://www.gesetze-im-internet.de/tddg/) — vormals TTDSG, umbenannt 14.05.2024
+- [DSK-Orientierungshilfe Telemedien 2021](https://www.datenschutzkonferenz-online.de/) — Tracking-Pixel-Position
+- [BfDI Hinweise zu Tracking](https://www.bfdi.bund.de/) — laufend prüfen
+- [EDPB Guidelines 8/2020 on Targeting](https://edpb.europa.eu/) — Profiling im Marketing-Kontext
+- [RFC 2392 — Content-ID and Message-ID URLs](https://www.rfc-editor.org/rfc/rfc2392)
+
+## Disclaimer
+
+Best-Practice-Sammlung, **keine Rechtsberatung**. Bei Tracking großer Reichweite, automatisierter Inhalt-Personalisierung mit KI, plattformübergreifendem Cross-Device-Tracking oder kombiniertem Web+Mail-Tracking: DPB-Beauftragte / Anwalt für Datenschutzrecht konsultieren. DPIA prüfen.
+
+**Stand:** Mai 2026. DSK-Position zu Tracking, EDPB-Targeting-Guidelines, BGH-/EuGH-Updates zu Profiling quartalsweise prüfen.
