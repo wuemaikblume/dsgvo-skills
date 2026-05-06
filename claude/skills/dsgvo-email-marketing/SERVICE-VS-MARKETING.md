@@ -1,3 +1,225 @@
-# SERVICE-VS-MARKETING — STUB
+# Service-Mail vs. Werbung — wo zieht der BGH die Grenze?
 
-> Wird in Phase 3.5 befüllt. Spec § 3.6.
+> Diese Datei beantwortet die häufigste Frage in Code-Reviews: „Ist dieser Block in meiner Mail schon Werbung?". Antwort: oft ja, deutlich öfter als der Sender denkt. Klassifikation entscheidet, ob die Mail Marketing-Einwilligung braucht oder nicht.
+
+## BGH-Linie kurz und scharf
+
+| Aktenzeichen | Datum | Kernaussage |
+|---|---|---|
+| BGH I ZR 218/07 | 10.02.2011 | Werbung iSd UWG § 7 ist „jede Form der Anpreisung mit dem Ziel der Förderung des Absatzes" — auch mittelbar |
+| BGH I ZR 164/09 | 16.07.2008 | Bestätigungs-Mail im Double-Opt-In darf selbst keine Werbung enthalten |
+| BGH VI ZR 225/17 | 10.07.2018 | „Bewertungs-Bitte" nach abgeschlossenem Kauf zählt als Werbung iSd UWG § 7 |
+| OLG Hamm 4 U 121/13 | 26.11.2013 | Cross-Sell-Hinweis in transaktionaler Mail (Versandbestätigung mit Produkt-Empfehlung) erfüllt den Werbungsbegriff |
+
+Die Linie der Gerichte: jede Form der Absatzförderung — auch ein kleiner Hinweis am Rand, eine Bewertungs-Bitte, ein Kontextwerbeblock — macht aus einer Trans-Mail eine Werbe-Mail.
+
+## Service-Mail-Whitelist — was darf ohne Marketing-Einwilligung versendet werden
+
+Reine Trans-Mails ohne Werbe-Anteil sind einwilligungsfrei (Art. 6 I b — Vertragserfüllung — oder Art. 6 I f — berechtigtes Interesse — je nach Anwendungsfall):
+
+- **Bestellbestätigung** mit Bestelldaten, Lieferadresse, Rechnungsnummer, Versandtyp
+- **Versand-Status, Tracking-Link, Liefer-Avis** — Lieferdienst-Updates
+- **Passwort-Reset, Verify-E-Mail, MFA-Code, Magic-Link**
+- **Vertragsinformationen, Rechnung, Mahnung, Vertragsänderung** mit gesetzlicher Wirkung
+- **Sicherheitsbenachrichtigungen** (Login von neuem Gerät, Passwort geändert, Datenpanne nach Art. 34)
+- **Pflichtinformationen aufgrund von Gesetz** (z.B. AGB-Änderung mit Wirkung, Widerrufsbelehrung-Update)
+- **Antwort auf direkte User-Anfrage** (Support-Reply, Auskunftsbescheid nach Art. 15)
+
+Charakteristisch: das Mail-Anliegen entspringt einem konkreten Empfänger-Vorgang. Ohne diesen Vorgang würde die Mail nicht entstehen.
+
+## Häufige Fallen — was ist schon Werbung
+
+Diese Inhalte machen aus einer Service-Mail eine Marketing-Mail (Einwilligung erforderlich):
+
+- **„Schauen Sie auch in unserem Shop"** in Order-Confirmation
+- **„Diese Produkte könnten Sie auch interessieren"** als Karussell unter Bestelldaten
+- **„Bewerten Sie Ihren Kauf"** Re-Engagement (BGH VI ZR 225/17)
+- **„Vervollständigen Sie Ihr Profil und sichern Sie sich 10 % Rabatt"** — Mischmail
+- **„Wir vermissen Sie"** Win-Back-Mail
+- **Footer-Banner mit Produktangebot** in beliebiger Service-Mail
+- **„Jetzt Premium upgraden — günstiger"** in Trans-Mail
+- **Rechnung mit „Empfehlung: weitere Produkte"**
+- **Newsletter-Anmeldung als „Bonus"** zu einer Service-Aktion
+- **Onboarding-Mail „Erste Schritte + 20 % Rabatt auf Premium"**
+
+Maintainer-Faustregel: wenn der Block ohne den unmittelbaren Empfänger-Vorgang noch sinnvoll ist (er ließe sich auch in einem Newsletter unterbringen), ist es Werbung.
+
+## Onboarding-Drip — das Mischmail-Problem
+
+Onboarding-Drip-Kampagnen sind die häufigste Mischmail-Quelle. Beispiel: User registriert sich für ein Tool, erhält dann 7 Tage lang täglich eine Mail.
+
+| Mail | Inhalt | Klassifikation |
+|---|---|---|
+| Tag 1: „Willkommen — erste Schritte" | reine Anleitung, Hilfe-Center-Links | Service |
+| Tag 2: „Ihre Top-3-Funktionen" | Anleitung + Demo-Video | Service (sofern keine Promo) |
+| Tag 3: „Tipp des Tages" | Anleitung | Service |
+| Tag 4: „Power-Tipps + 20 % auf Premium-Upgrade" | Anleitung + Promo | **Werbung** — braucht Marketing-Einwilligung |
+| Tag 5: „Anwendungsfall: Kunde X spart 30 %" | Case-Study mit Konversions-Aufruf | **Werbung** |
+| Tag 6: „Brauchen Sie Hilfe? Sprechen Sie mit uns" | Support-Angebot | Service-grenzwertig (wenn ohne Verkaufsdruck) |
+| Tag 7: „Dauerhaft nutzen — Premium-Plan" | reine Promo | **Werbung** |
+
+Lösung: zwei getrennte Drip-Tracks.
+
+```ts
+// Bei Signup: nur Service-Drip starten
+async function startSignupDrip(userId: string) {
+  await dripQueue.enqueue(userId, 'service-onboarding'); // 7 Tage Anleitung, 0 Promo
+}
+
+// Beim separaten Häkchen „Marketing-Mails erlauben":
+async function startMarketingDrip(userId: string) {
+  if (await getConsent(userId).marketing) {
+    await dripQueue.enqueue(userId, 'marketing-onboarding'); // ~Promos parallel
+  }
+}
+```
+
+Konsequenz: jede Mail im Service-Drip muss promo-frei sein. Wer sie mit Werbe-Block einbaut, hebt die ganze Drip-Klassifikation als Marketing an und braucht für alle Empfänger eine Marketing-Einwilligung.
+
+## Code-Pattern: Mail-Template-Klassifizierung
+
+Templates explizit typisieren, Send-Funktion erzwingt Einwilligungs-Check:
+
+```ts
+type MailType = 'transactional' | 'marketing';
+
+interface MailTemplate {
+  id: string;
+  type: MailType;
+  subject: string;
+  bodyHtml: string;
+  // weitere Felder ...
+}
+
+interface Subscriber {
+  id: string;
+  email: string;
+  consent: {
+    marketing: boolean;       // Marketing-Mails erlaubt?
+    tracking: boolean;        // Open-/Click-Tracking erlaubt?
+    personalization: boolean; // Profiling erlaubt?
+  };
+}
+
+async function send(template: MailTemplate, recipient: Subscriber) {
+  if (template.type === 'marketing' && !recipient.consent.marketing) {
+    throw new ConsentError(
+      `Recipient ${recipient.id} has not consented to marketing — cannot send marketing template ${template.id}`
+    );
+  }
+  await provider.send({
+    to: recipient.email,
+    subject: template.subject,
+    html: renderHtml(template, recipient),
+    trackOpens: template.type === 'marketing' && recipient.consent.tracking,
+    trackClicks: template.type === 'marketing' && recipient.consent.tracking,
+  });
+}
+```
+
+Eigenschaften des Patterns:
+
+- **Trans-Templates dürfen kein Open-/Click-Tracking enthalten** — dieselbe Logik wie in `TRACKING-IN-MAIL.md`. Confirm-Mails sind Trans-Mails (siehe `CONSENT-AND-DOI.md`).
+- **Werbung-Werte in Trans-Templates** brechen die Klassifikation: das Template muss als Marketing umgeflaggt werden, und der Send greift erst bei vorhandener Marketing-Einwilligung. Im Zweifel Banner entfernen.
+- **Hybrid-Versuch (Trans + kleiner Werbe-Block)** → Template-Type auf `marketing` setzen oder den Werbe-Block entfernen. Kein Mittelweg.
+
+## Mini-Patches für gängige Stacks
+
+### a) React Email + Resend
+
+```tsx
+// Anti-Pattern: Trans-Mail mit Cross-Sell
+export const OrderConfirmation = ({ order, recommendedProducts }) => (
+  <Html>
+    <Body>
+      <Heading>Vielen Dank für Ihre Bestellung #{order.id}</Heading>
+      <OrderItems items={order.items} />
+      {/* ❌ Werbe-Block in Trans-Mail */}
+      <Section>
+        <Heading as="h2">Diese Produkte könnten Sie auch interessieren:</Heading>
+        <ProductGrid products={recommendedProducts} />
+      </Section>
+    </Body>
+  </Html>
+);
+```
+
+```tsx
+// Pattern: Trans-Mail rein
+export const OrderConfirmation = ({ order }) => (
+  <Html>
+    <Body>
+      <Heading>Vielen Dank für Ihre Bestellung #{order.id}</Heading>
+      <OrderItems items={order.items} />
+      <Text>
+        Bei Fragen zu Ihrer Bestellung wenden Sie sich an unseren Support unter
+        support@example.com.
+      </Text>
+    </Body>
+  </Html>
+);
+
+// Cross-Sell als separate Marketing-Mail, einwilligungs-gekoppelt
+async function sendOrderConfirmation(order: Order, recipient: Subscriber) {
+  await send({ id: 'order_confirmation', type: 'transactional', ... }, recipient);
+
+  if (recipient.consent.marketing) {
+    await scheduleMarketingMail(recipient, 'cross-sell-after-order', { delayDays: 3 });
+  }
+}
+```
+
+### b) MJML + Postmark
+
+Bei MJML-Templates die Klassifikation in den Template-Metadaten festhalten:
+
+```xml
+<!-- transactional-template -->
+<mjml>
+  <mj-head>
+    <mj-attributes>
+      <mj-class name="template-type" value="transactional" />
+    </mj-attributes>
+    <mj-title>Bestellbestätigung #{{ orderNumber }}</mj-title>
+  </mj-head>
+  <mj-body>
+    <!-- KEIN Open-Pixel, KEIN Cross-Sell -->
+    ...
+  </mj-body>
+</mjml>
+```
+
+Postmark-spezifisch: Trans-Mails über den Transactional-Stream senden (`MessageStream: 'outbound'`), Marketing-Mails über den Broadcast-Stream (`MessageStream: 'broadcast'`). Stream-Trennung verhindert versehentlich falsche Zustellung.
+
+### c) Mailchimp Templates (UI-Anweisung)
+
+- **Audience-Type:** für Trans-Mails NICHT die normale Audience nutzen — stattdessen Mandrill (Mailchimp Transactional) als separates Konto.
+- **In Standard-Audiences:** Open- und Click-Tracking pro Audience deaktivieren (Audience → Settings → Tracking) oder per E-Mail einwilligungs-gekoppelt steuern.
+- **Footer-Banner-Vorlagen:** prüfen, ob die Default-Templates Werbe-Banner enthalten — bei Trans-Audiences entfernen.
+
+## Cross-Links
+
+| Thema | siehe |
+|---|---|
+| UWG-Werbungsbegriff (BGH-Linie weit auslegen) | `UWG-7.md` |
+| Bewertungs-Mail nach Kauf (BGH VI ZR 225/17) | `UWG-7.md` |
+| Confirm-Mail = Trans-Mail-Klassifikation | `CONSENT-AND-DOI.md` |
+| Mail-Template-Klassifikation für Tracking-Pixel | `TRACKING-IN-MAIL.md` |
+| Versand-Log-Format trennt Trans vs Marketing | `dsgvo-auth-and-logging/LOGGING.md` |
+| Aufbewahrung Versand-Logs | `UNSUBSCRIBE-AND-RETENTION.md` |
+
+## Quellen
+
+- BGH I ZR 218/07 (10.02.2011) — Werbungsbegriff weit
+- BGH I ZR 164/09 (16.07.2008) — Confirm-Mail-Werbungsfreiheit
+- BGH VI ZR 225/17 (10.07.2018) — Bewertungs-Bitte als Werbung
+- OLG Hamm 4 U 121/13 (26.11.2013) — Cross-Sell in Trans-Mail
+- [DSGVO Art. 6 I b, 6 I f, 13](https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679)
+- [UWG § 7 II Nr. 3](https://www.gesetze-im-internet.de/uwg_2004/__7.html)
+- [DSK-Orientierungshilfe Direktwerbung 2022](https://www.datenschutzkonferenz-online.de/) — laufend prüfen
+
+## Disclaimer
+
+Best-Practice-Sammlung, **keine Rechtsberatung**. Bei Streitfällen über die Klassifikation (Anwalt schreibt Abmahnung wegen vermeintlicher Werbung in Trans-Mail), Multi-Mandanten-Systemen mit White-Label-Versand, automatisierten Cross-Sell-Empfehlungen aus KI-Modellen: DPB-Beauftragte / Anwalt für Wettbewerbsrecht konsultieren.
+
+**Stand:** Mai 2026. BGH-/OLG-Rechtsprechung zur Service-Mail-vs-Werbungs-Abgrenzung quartalsweise prüfen.
