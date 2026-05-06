@@ -139,6 +139,43 @@
 - **DPF-Status:** zertifiziert.
 - **Wichtig:** Domain muss bei Anlage der EU-Region zugeordnet werden — nachträglicher Wechsel zwingt zu DNS-Änderung.
 
+## Mailchimp (Intuit / Rocket Science Group LLC)
+
+- **Sitz:** USA, Mutter Intuit Inc. seit November 2021. Operative Entity: The Rocket Science Group LLC d/b/a Mailchimp.
+- **EU-Region:** keine separate; Verarbeitung in US-Rechenzentren laut Mailchimp-Subprocessor-Liste.
+- **DPF-Status:** Active (Stand 2026-05-06, Participant-ID 7693). Deckt EU-US DPF + UK-Extension + Swiss-US DPF.
+- **Hauptrisiko:** Cloud Act greift (US-Konzern Intuit). Open- und Click-Tracking by default aktiv — DSGVO/TDDDG verlangt Einwilligung pro Empfänger oder explizite Deaktivierung pro Audience.
+- **Pflichten:** AVV per Mailchimp-Standard-DPA (Art. 28). DPF reicht als Transfer-Grundlage; bei DPF-Wegfall fallen SCCs als Backup ein.
+- **Code-Default:** Open- und Click-Tracking pro Audience deaktivieren oder einwilligungs-gekoppelt schalten — siehe `dsgvo-email-marketing/TRACKING-IN-MAIL.md`.
+- **Migration-Hinweis:** häufige DACH-Migration zu EU-Anbietern (Brevo, CleverReach, Rapidmail) aus Drittland-Skepsis — Datenexport via Mailchimp-API möglich.
+
+## Klaviyo (Klaviyo, Inc.)
+
+- **Sitz:** USA (Boston, MA).
+- **EU-Region:** keine; Verarbeitung in US-Rechenzentren.
+- **DPF-Status:** Active (Stand 2026-05-06, Participant-ID 6149). Deckt EU-US DPF + UK-Extension + Swiss-US DPF.
+- **Hauptrisiko:** Cloud Act. Sehr granulares Verhaltens-Tracking (E-Commerce-Profil pro Kontakt: Klick-, Open-, Kauf-, Browse-Verhalten) → DPIA-Bedarf bei großer Reichweite (`dsgvo-third-country-transfer/DPIA.md`).
+- **Pflichten:** AVV per Klaviyo-DPA. SCCs als Fallback im DPA enthalten.
+- **Verbreitung:** E-Commerce-/Shopify-Standard im DACH-Markt — bei Online-Shops häufigster Marketing-Provider.
+
+## HubSpot (HubSpot, Inc.)
+
+- **Sitz:** USA (Cambridge, MA).
+- **EU-Region:** EU-Hosting-Option seit 2022 (Frankfurt) — muss beim Tenant-Anlegen aktiv gewählt werden, nachträglicher Wechsel nicht trivial. Default ohne Auswahl: US-Hosting.
+- **DPF-Status:** Active (Stand 2026-05-06, Participant-ID 5812). Deckt EU-US DPF + UK-Extension + Swiss-US DPF.
+- **Hauptrisiko:** Cloud Act gilt auch für EU-Hosting (US-Mutter zugriffsberechtigt). All-in-One-Suite (CRM + Marketing + Service) — Marketing-Daten und CRM-Daten verschmelzen, Zweckbindung schwerer einzuhalten.
+- **Pflichten:** AVV im Standard-DPA. Bei EU-Hosting-Tenant prüfen, dass Sub-Prozessoren ebenfalls EU-Region nutzen.
+- **Code-Default:** Tenant-Region zwingend explizit setzen, nicht auf Default vertrauen.
+
+## ActiveCampaign (ActiveCampaign, LLC)
+
+- **Sitz:** USA (Chicago, IL).
+- **EU-Region:** keine; klassische US-only-Lösung.
+- **DPF-Status:** Active (Stand 2026-05-06, Participant-ID 4495). Deckt EU-US DPF (seit 11.07.2023) + UK-Extension (seit 12.10.2023) + Swiss-US DPF (seit 15.09.2024).
+- **Hauptrisiko:** Cloud Act. Marketing-Automation-Workflows mit weitreichendem Verhaltens-Tracking (Site-Tracking, Lead-Scoring, automatische Tag-Vergabe) → bei großer Reichweite DPIA prüfen.
+- **Pflichten:** AVV per ActiveCampaign-DPA. SCCs als Fallback.
+- **Code-Default:** Site-Tracking-Snippet nur nach expliziter Einwilligung laden — siehe `dsgvo-email-marketing/TRACKING-IN-MAIL.md`.
+
 ## EU-Anbieter (Hetzner, IONOS, Scaleway, OVHcloud EU)
 
 - **Status:** EU/EEA-Sitz und -Hosting → kein Drittlandtransfer im Hauptverhältnis.
