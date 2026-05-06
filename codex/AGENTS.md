@@ -347,6 +347,121 @@ CREATE TABLE auth_audit_log (
 
 Detail siehe Repo: <https://github.com/wuemaikblume/dsgvo-skills/tree/main/claude/skills/dsgvo-auth-and-logging> (SKILL/AUTH-TOM/IP-ADDRESSES/LOGGING).
 
+## E-Mail-Marketing (UWG § 7 + Art. 6 / 7 / 21 DSGVO + TDDDG § 25)
+
+Greift bei: Newsletter-/Drip-/Re-Engagement-/Win-Back-Code, Newsletter-Provider-SDKs (Mailchimp, Klaviyo, HubSpot, Brevo, ActiveCampaign, MailerLite, CleverReach, Rapidmail), DOI-Endpoints, Tracking-Pixel und Click-Redirects in Mail-HTML, List-Unsubscribe-Header, Suppression-Logik, Service-Mails mit Werbe-Anteil. Gilt parallel zu UWG-Lauterkeitsrecht (DE/AT/CH).
+
+### Decision Tree
+
+1. **Ist der Mail-Inhalt Werbung iSd UWG § 7?** → Werbung weit auszulegen (BGH I ZR 218/07): Cross-Sell, Bewertungs-Bitte, Upgrade-Promotion = Werbung. Reine Trans-Mails (Versandstatus, Reset, MFA-Code, Rechnung) bleiben einwilligungsfrei.
+2. **DOI dokumentiert?** → Token + IP + UA + Form-URL + Zeitstempel + `confirmed_at` müssen beweisbar sein (BGH I ZR 218/07 Beweislast). Single-Opt-In ist in DE/AT abmahnfähig; CH-Sonderfall bei reiner CH-Liste tolerabel, bei DACH-Mischliste unsicher.
+3. **Bestandskunden-Privileg (UWG § 7 III)?** → Vier Voraussetzungen kumulativ: (a) Adresse aus Verkauf, (b) Werbung für ähnliche Waren/DL, (c) klarer Hinweis bei Erhebung + jeder Mail, (d) Widerruf kostenfrei. Lead-Magnet ≠ Verkauf. Cold-B2B ist NICHT erlaubt (§ 7 II Nr. 3 macht keine B2B-Ausnahme; LinkedIn-DM zählt analog BGH I ZR 169/04).
+4. **Service vs. Werbung sauber getrennt?** → Mail-Templates explizit als `transactional` oder `marketing` typisieren. Cross-Sell-Block in Order-Confirmation = Werbung (OLG Hamm 4 U 121/13). Bewertungs-Bitte = Werbung (BGH VI ZR 225/17). Confirm-Mail darf KEINE Werbung enthalten (BGH I ZR 164/09).
+5. **Tracking-Pixel oder Click-Redirect aktiv?** → Eigene Einwilligung pro Empfänger (TDDDG § 25 + Art. 6 + DSK 2021). Confirm-Mail rendert NIE Pixel. Externe Bilder via CID inline einbetten oder einwilligungs-gekoppelt rendern.
+6. **One-Click-Unsubscribe + List-Unsubscribe-Header?** → Pflicht für Bulk-Sender ≥ 5.000 Mails/Tag (Gmail/Yahoo Sender Requirements Februar 2024 + Microsoft 2025). RFC 8058 + DKIM/SPF/DMARC + Spam-Rate < 0,3 %. Suppression-Hash (SHA-256) statt Klartext-E-Mail nach Widerruf.
+
+### Code-Generation-Regel
+
+**Default ist immer DSGVO-/UWG-konform.** Wenn der User explizit eine schwächere Variante will („Single-Opt-In reicht", „Pixel immer aktiv", „Confirm-Mail mit Promo", „kalte B2B-Liste"), zwei Varianten liefern:
+
+- **A — DSGVO-/UWG-konform** als Default
+- **B — Wunsch-Variante** mit Pflicht-Tabelle (Norm, Risiko, Konsequenz: UWG-Abmahnung mit 100–500 € Streitwert pro Mail / Bußgeld Art. 83 DSGVO / Aufsichtsbeanstandung)
+
+Bei Cold-B2B-Mailing in DACH: **nur Variante A** — Cold-Outreach via E-Mail/LinkedIn-DM ist seit 2010 nicht erlaubt; alternativ DOI-Funnel statt Cold-Liste.
+
+### Anbieter-Quick-Ref (DPF Mai 2026)
+
+- **Mailchimp** (US, Intuit) — DPF Active (ID 7693). Open- und Click-Tracking by default aktiv → pro Audience deaktivieren oder einwilligungs-gekoppelt schalten. Confirm-Mails über Mailchimp Transactional / separat, nicht Marketing-Audience.
+- **Klaviyo** (US) — DPF Active (ID 6149). Sehr granulares Profiling — DPIA prüfen bei großer Reichweite. Cross-Link `dsgvo-third-country-transfer/DPIA.md`.
+- **HubSpot** (US) — DPF Active (ID 5812). EU-Hosting-Option seit 2022, muss aktiv gewählt werden — Default ist US.
+- **ActiveCampaign** (US) — DPF Active (ID 4495). Site-Tracking-Snippet nur nach expliziter Einwilligung laden.
+- **Brevo** (FR, Paris) — EU-Server Default, AVV im Standard-DPA. Häufige Migration weg von Mailchimp.
+- **CleverReach** (DE, Rastede) / **Rapidmail** (DE, Freiburg) — DACH-Spezialisten, ISO 27001, EU-only.
+- **MailerLite** (LT, Vilnius) — EU-Server Default, preisgünstige EU-Alternative.
+
+### Code-Patterns
+
+#### Double-Opt-In mit Token (TypeScript + Postgres)
+
+```ts
+import crypto from 'node:crypto';
+
+const tokenBytes = crypto.randomBytes(32);
+const token = tokenBytes.toString('hex');
+const tokenHash = crypto.createHash('sha256').update(tokenBytes).digest('hex');
+const emailHash = crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
+
+await db.query(
+  `INSERT INTO subscription_consents
+   (email, email_hash, ip_address, user_agent, form_url, purposes,
+    confirmation_token_hash, confirmation_token_expires_at)
+   VALUES ($1, $2, $3, $4, $5, $6, $7, NOW() + INTERVAL '7 days')`,
+  [email, emailHash, truncateIp(req.ip), req.headers['user-agent'],
+   formUrl, JSON.stringify(purposes), tokenHash]
+);
+await sendConfirmationMail(email, token); // Confirm-Mail OHNE Werbung, OHNE Pixel
+```
+
+#### Mail-Template-Klassifikation mit Send-Guard
+
+```ts
+type MailType = 'transactional' | 'marketing';
+
+async function send(template: { id: string; type: MailType; ... }, recipient: Subscriber) {
+  if (template.type === 'marketing' && !recipient.consent.marketing) {
+    throw new ConsentError(`Recipient ${recipient.id} not consented to marketing.`);
+  }
+  await provider.send({
+    to: recipient.email,
+    template: template.id,
+    trackOpens: template.type === 'marketing' && recipient.consent.tracking,
+    trackClicks: template.type === 'marketing' && recipient.consent.tracking,
+  });
+}
+```
+
+#### One-Click-Unsubscribe + Suppression-Hash
+
+```sql
+CREATE TABLE email_suppression_list (
+  id BIGSERIAL PRIMARY KEY,
+  email_hash CHAR(64) NOT NULL UNIQUE,
+  suppressed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  reason TEXT NOT NULL CHECK (reason IN
+    ('user_unsubscribe','hard_bounce','spam_complaint','manual','re_permission_failed'))
+);
+```
+
+```ts
+// Versand-Filter
+const eligible = await db.query(
+  `SELECT email FROM subscribers
+   WHERE active AND consent_marketing
+     AND NOT EXISTS (SELECT 1 FROM email_suppression_list
+                     WHERE email_hash = sha256(LOWER(TRIM(subscribers.email))))`
+);
+```
+
+#### List-Unsubscribe-Header (RFC 8058)
+
+```text
+List-Unsubscribe: <mailto:unsubscribe@example.com?token=XYZ>, <https://example.com/unsubscribe?token=XYZ>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+```
+
+### Häufige Fallen
+
+- **Confirm-Mail mit „Übrigens, hier unsere Angebote"** — BGH I ZR 164/09: Confirm-Mail darf keine Werbung. Gesamter DOI-Beweis fällt.
+- **Cross-Sell-Block in Order-Confirmation** — OLG Hamm 4 U 121/13: macht aus Trans-Mail eine Werbe-Mail.
+- **Mailchimp-Audience mit Default-Tracking** — TDDDG § 25 + DSK 2021: separate Einwilligung erforderlich, nicht im Newsletter-Häkchen mit-eingewilligt.
+- **„LinkedIn-DM ist keine E-Mail"** — falsch; § 7 II Nr. 3 erfasst „elektronische Post" weit (BGH I ZR 169/04 zu SMS analog).
+- **Re-Subscribe alter Listen ohne neuen DOI** — nach Widerruf ist alter Eintrag nicht reaktivierbar; neuer DOI nötig.
+- **„CAN-SPAM reicht für Europa"** — falsch; UWG + DSGVO + ePrivacy gelten zusätzlich.
+- **Klartext-E-Mail nach Unsubscribe in DB lassen** — Art. 5 I c verlangt Hash + Klartext-Löschung; Suppression läuft via Hash.
+- **Bewertungs-Bitte ohne Marketing-Einwilligung** — BGH VI ZR 225/17: Werbung iSd § 7.
+
+Detail siehe Repo: <https://github.com/wuemaikblume/dsgvo-skills/tree/main/claude/skills/dsgvo-email-marketing> (SKILL/CONSENT-AND-DOI/UWG-7/TRACKING-IN-MAIL/UNSUBSCRIBE-AND-RETENTION/SERVICE-VS-MARKETING).
+
 ## Quellen
 
 - DSGVO: <https://eur-lex.europa.eu/eli/reg/2016/679/oj>
@@ -360,6 +475,16 @@ Detail siehe Repo: <https://github.com/wuemaikblume/dsgvo-skills/tree/main/claud
 - Latombe-Urteil (3.9.2025): <https://iapp.org/news/a/european-general-court-dismisses-latombe-challenge-upholds-eu-us-data-privacy-framework>
 - UK-Adäquanz erneuert (19.12.2025): <https://ec.europa.eu/commission/presscorner/detail/en/ip_25_3059>
 - Brasilien-Adäquanz (10.2.2026): <https://iapp.org/news/a/brazil-eu-mutual-adequacy-what-changes-for-data-transfers-and-what-doesn-t>
+- UWG § 7 (DE): <https://www.gesetze-im-internet.de/uwg_2004/__7.html>
+- TKG 2021 § 174 (AT): <https://www.ris.bka.gv.at/>
+- UWG Art. 3 (CH): <https://www.fedlex.admin.ch/eli/cc/1988/223_223_223>
+- TDDDG § 25 (DE, vormals TTDSG): <https://www.gesetze-im-internet.de/tddg/>
+- BGH I ZR 218/07 (10.02.2011) — DOI-Beweislast
+- BGH I ZR 164/09 (16.07.2008) — Confirm-Mail-Werbungsfreiheit
+- BGH VI ZR 225/17 (10.07.2018) — Bewertungs-Bitte = Werbung
+- OLG Hamm 4 U 121/13 (26.11.2013) — Cross-Sell in Trans-Mail
+- RFC 8058 — One-Click-Unsubscribe: <https://www.rfc-editor.org/rfc/rfc8058>
+- Gmail Sender Requirements: <https://support.google.com/mail/answer/81126>
 
 ## Disclaimer
 
