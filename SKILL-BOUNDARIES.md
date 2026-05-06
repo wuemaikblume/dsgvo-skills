@@ -50,9 +50,9 @@ Wenn ein neuer Skill ein neues Querschnitts-Thema braucht, das nirgendwo passt: 
 | Bewerber-Daten, Performance-Tracking, HR-Tools | `employment` 📋 | |
 | Beschäftigten-Login-Monitoring | `employment` 📋 | aber: Auth-Log-Mechanik in `auth-and-logging` |
 | Krankenakten / Gesundheitsdaten am Arbeitsplatz | `employment` 📋 | |
-| UWG § 7 Werbung, Double-Opt-In, B2B-Privileg | `email-marketing-compliance` 📋 | |
-| Tracking-Pixel in E-Mails | `email-marketing-compliance` 📋 | |
-| Werbung vs. Service-Mail-Abgrenzung | `email-marketing-compliance` 📋 | |
+| UWG § 7 Werbung, Double-Opt-In, B2B-Privileg | `email-marketing` 🔜 | DOI-Flow + Bestandskunden + Cold-B2B + AT TKG + CH UWG |
+| Tracking-Pixel in E-Mails | `email-marketing` 🔜 | Open-Pixel + Click-Redirect + externe Bilder; Norm bleibt EPRIVACY.md |
+| Werbung vs. Service-Mail-Abgrenzung | `email-marketing` 🔜 | BGH-Linie I ZR 218/07, VI ZR 225/17, I ZR 164/09 |
 
 ✅ Live · 🔜 In Arbeit · 📋 Geplant
 
