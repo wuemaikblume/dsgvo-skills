@@ -1,0 +1,510 @@
+---
+description: Use whenever code touches newsletter, marketing-email, drip-campaign, re-engagement, win-back, lead-magnet, or any outbound email with promotional content — even if the user's prompt doesn't mention DSGVO, GDPR, UWG, privacy, or "personal data". Triggers on Mailchimp / @mailchimp/mailchimp_marketing, Brevo / @getbrevo/brevo / sib-api-v3-sdk (Sendinblue legacy), Klaviyo / klaviyo-api / klaviyo-php, HubSpot Marketing / @hubspot/api-client, ActiveCampaign, MailerLite / @mailerlite/mailerlite-nodejs, CleverReach, Rapidmail, GetResponse, Kit / ConvertKit, Constant Contact, Resend / Postmark / Amazon SES / SendGrid / Mailgun / Mailjet when used for marketing or bulk newsletter sends. Triggers on email-template frameworks React Email / MJML / Maizzle / Handlebars when the template contains promotional content, unsubscribe footers, or tracking pixels. Triggers on endpoints /newsletter/subscribe, /confirm-email, /unsubscribe, /opt-in, /opt-out, lists.addListMember, sendCampaign, broadcastEmail. Triggers on email-header logic List-Unsubscribe, List-Unsubscribe-Post (RFC 8058). Triggers on tracking pixels (1x1.gif, open-tracking image src, /open?id=, /c/<token>?u=). Triggers on DB-schema work involving subscribers, audience, contacts, mailing_list, consent_log, email_suppression_list, double_opt_in_tokens. Also triggers on phrases like "Newsletter einrichten", "DOI-Flow", "Double-Opt-In implementieren", "Abmelde-Link einbauen", "Bestätigungs-Mail", "Tracking-Pixel im Newsletter", "B2B Cold-Mailing", "Bewertungs-Mail nach Kauf", "Cross-Sell in Bestellbestätigung". Covers UWG § 7 (DE) inkl. § 7 II Nr. 3 + § 7 III Bestandskunden-Privileg, AT TKG 2021 § 174, CH UWG Art. 3 I o, DSGVO Art. 6 I a + Art. 7 (Marketing-Einwilligung), Art. 7 IV (Kopplungsverbot), Art. 8 (Kinder), Art. 21 II (Direktwerbungs-Widerspruch), TDDDG § 25, BGH I ZR 218/07 (DOI-Beweislast), BGH I ZR 164/09 (Confirm-Mail-Werbungsfreiheit), BGH VI ZR 225/17 (Bewertungs-Bitte), DSK-Direktwerbung, EDPB 05/2020 Consent, RFC 8058, Gmail/Yahoo Sender Requirements Feb 2024. Cross-Link: dsgvo-third-country-transfer (US-Provider DPF/SCCs); dsgvo-auth-and-logging (IP-Speicherung beim DOI + Versand-Log).
+globs:
+alwaysApply: false
+---
+
+
+# DSGVO E-Mail-Marketing (UWG § 7 + Art. 6 / 7 / 21 DSGVO + TDDDG § 25)
+
+## Kernprinzip
+
+Drei Sätze, die für jede Marketing-Mail gelten:
+
+1. **Werbung per E-Mail braucht in DACH grundsätzlich Double-Opt-In.** Single-Opt-In ist abmahnfähig (UWG § 7 II Nr. 3, DE). Das Bestandskunden-Privileg (UWG § 7 III) greift nur unter vier kumulativen Voraussetzungen — Detail in `UWG-7.md`. Schweiz-Sonderfall: SOI praktisch tolerierter, aber für DACH-Mischlisten unsicher.
+2. **„Werbung" ist weit auszulegen** (BGH I ZR 218/07): jede Form mittelbarer Absatzförderung. Bewertungsbitte (BGH VI ZR 225/17), Cross-Sell-Banner in Bestellbestätigungen, „wir vermissen Sie"-Mails — alles zählt. Rein transaktionale Inhalte (Versandstatus, Rechnung, Sicherheitswarnung) bleiben einwilligungsfrei.
+3. **Open-Tracking-Pixel und Click-Tracking sind eigenständige Datenverarbeitung** mit eigener Rechtsgrundlage (TDDDG § 25 + Art. 6 DSGVO). Separate Einwilligung; nicht im Schwarm-Häkchen mit der Newsletter-Anmeldung mitfangen.
+
+## Wann dieser Skill greift
+
+**Trigger-Symptome (Code-Patterns):**
+
+- **Imports / SDKs:** `@mailchimp/mailchimp_marketing`, `@getbrevo/brevo`, `sib-api-v3-sdk`, `klaviyo-api`, `@hubspot/api-client`, `mailerlite`, `cleverreach`, `rapidmail`, `getresponse`, `convertkit` / `kit`. Auch `resend`, `postmark`, `@aws-sdk/client-sesv2`, `@sendgrid/mail`, `mailgun`, `node-mailjet` — wenn für Marketing-Versand verwendet (Trans-Only ist OUT, siehe Skip-Liste).
+- **Endpoints:** `/newsletter/subscribe`, `/subscribe`, `/confirm-email`, `/confirm-newsletter`, `/unsubscribe`, `/opt-in`, `/opt-out`, `/preferences-center`
+- **API-Methoden:** `lists.addListMember`, `lists.members.create`, `contacts.createOrUpdate`, `subscribers.upsert`, `sendCampaign`, `createCampaign`, `sendNewsletter`, `broadcastEmail`
+- **Mail-Header:** `List-Unsubscribe`, `List-Unsubscribe-Post: List-Unsubscribe=One-Click` (RFC 8058)
+- **Tracking-Code in Mail-HTML:** `<img src=".../open?id=">`, `<img src=".../1x1.gif">`, Klick-Redirect-Domains (`/c/{token}?u=`), UTM-Parameter in Outbound-Links
+- **DB-Schema:** Tabellen `subscribers`, `audience`, `contacts`, `mailing_list`, `newsletter_subscriptions`, `consent_log`, `email_suppression_list`, `double_opt_in_tokens`, `bounce_log`, `unsubscribe_log`
+- **Mail-Template-Frameworks:** React Email / MJML / Maizzle / Handlebars-Templates mit Werbe-Inhalt, Unsubscribe-Footer oder Tracking-Pixel
+
+**Skip wenn:**
+
+- Reine **Transactional-Mails ohne Werbe-Anteil** (Order-Confirmation ohne Cross-Sell, Password-Reset, MFA-Code, Verify-Email, Versand-Status, Liefer-Avis, Rechnung, Mahnung, Vertragsinformation, Sicherheits-Benachrichtigung) — kein UWG, kein Marketing-DSGVO. Log-Scrubbing dafür wohnt in `dsgvo-auth-and-logging/LOGGING.md`.
+- Interne Mails an Mitarbeiter ohne Werbe-Inhalt (Onboarding-Doku, Compliance-Erinnerungen) — § 26 BDSG, geplanter `dsgvo-employment`-Skill.
+- Behördlich vorgeschriebene Pflicht-Mails (z.B. AGB-Änderung mit gesetzlicher Wirkung) — Art. 6 I c, kein UWG.
+- US-Empfänger-Versand außerhalb DACH (CAN-SPAM ist eigene Rechtsordnung, nicht Scope dieses Skills).
+
+## Decision Tree
+
+```
+1. Ist der Mail-Inhalt Werbung iSd UWG § 7?
+   ├─ Reine Service-Mail (Versandstatus, Rechnung, Sicherheitswarnung, Reset)
+   │   → kein UWG, weiter zu 5 (Tracking-Pixel-Check)
+   │   → Logging via dsgvo-auth-and-logging/LOGGING.md
+   ├─ Werbung (Cross-Sell, Bewertungsbitte, Drip, Win-Back, Cross-Promo)
+   │   → weiter zu 2
+   └─ Mischmail (Service-Onboarding mit Promo-Anteil)
+       → klassifiziert als Marketing — siehe SERVICE-VS-MARKETING.md
+
+2. Einwilligung dokumentiert mit Double-Opt-In?
+   ├─ DOI mit IP, User-Agent, Form-URL, Zeitstempel beweisbar (siehe CONSENT-AND-DOI.md)
+   │   → weiter zu 3
+   ├─ Single-Opt-In oder kein Confirm-Klick
+   │   → STOP: abmahnfähig in DE / AT
+   │   → CH-Sonderfall: SOI tolerierbar, aber bei DACH-Mischliste unsicher (UWG-7.md)
+   └─ DOI älter als 24 Monate ohne Aktivität
+       → Re-Permission empfohlen (UNSUBSCRIBE-AND-RETENTION.md)
+
+3. Greift das Bestandskunden-Privileg (UWG § 7 III, DE)?
+   Vier Voraussetzungen kumulativ — Details UWG-7.md:
+   (a) Adresse aus Kauf erlangt (nicht Lead-Liste)
+   (b) Werbung für ähnliche Waren / DL
+   (c) Klare Hinweise bei Erhebung + jeder Mail
+   (d) Widerruf kostenfrei
+   ├─ alle vier ✓ → vereinfachter Pfad ohne separate Einwilligung
+   └─ eine Voraussetzung fehlt → DOI-Pfad notwendig
+
+4. Ist Werbung von Service sauber getrennt?
+   → SERVICE-VS-MARKETING.md
+   → Mail-Templates explizit klassifizieren (transactional | marketing)
+   → Marketing-Templates nur an Empfänger mit gesetzter Marketing-Einwilligung
+
+5. Tracking-Pixel oder Click-Tracking aktiv?
+   → TRACKING-IN-MAIL.md
+   → Separate Einwilligung Pflicht (TDDDG § 25 + Art. 6 DSGVO, DSK-Orientierungshilfe)
+   → Confirm-Mail rendert NIE Tracking-Pixel (Service-Mail-Charakter)
+
+6. Unsubscribe-Mechanik korrekt?
+   → UNSUBSCRIBE-AND-RETENTION.md
+   ├─ One-Click + List-Unsubscribe-Header (RFC 8058) → ✓
+   ├─ Login-Pflicht oder Pflichtformular → STOP
+   └─ Suppression-Hash nach Abmeldung statt Klartext-E-Mail
+```
+
+## Code-Generation-Regel
+
+1. **Default:** DSGVO-/UWG-konforme Variante schreiben — DOI-Token kryptographisch erzeugen, Confirm-Mail werbefrei, One-Click-Unsubscribe + List-Unsubscribe-Header gesetzt, Tracking-Pixel einwilligungs-gekoppelt, Suppression-Hash nach Unsubscribe. Kein Hinweis nötig, wenn der User nichts Schwächeres verlangt.
+
+2. **Wenn der User explizit eine schwächere Variante will** — erkennbar an Phrasen wie:
+   - „Single-Opt-In reicht uns"
+   - „Confirm-Mail soll auch Promo enthalten"
+   - „Pixel immer aktiv, ist doch nur Statistik"
+   - „kalte B2B-Liste anmailen"
+   - „Bewertungs-Mail brauchen wir nicht extra einwilligen"
+
+   → **Zwei Code-Blöcke** generieren:
+
+   - **Variante A: DSGVO-/UWG-konform** (Default-Implementation, lauffähig)
+   - **Variante B: Wunsch-Variante** mit Tabelle der konkreten Pflichten, die verletzt werden (Norm + erwartete Konsequenz: Abmahn-Risiko UWG § 8 / Bußgeld nach Art. 83 DSGVO / DSFA-Pflicht / Aufsichtsbehörde-Beanstandung). Die Tabelle steht **vor** dem Code, nicht versteckt darunter.
+
+3. **Drei Top-Code-Smells, die der Skill sofort fixt:**
+
+### a) Confirm-Mail enthält Werbe-Block (BGH I ZR 164/09)
+
+**Vorher** (TypeScript + React Email):
+
+```tsx
+export const ConfirmEmail = ({ confirmUrl, firstName }) => (
+  <Html>
+    <Body>
+      <Heading>Hallo {firstName}, fast geschafft!</Heading>
+      <Text>Bitte bestätige deine Anmeldung:</Text>
+      <Button href={confirmUrl}>Anmeldung bestätigen</Button>
+      <Section>
+        <Heading as="h2">Übrigens — diese Angebote nur für dich:</Heading>
+        <ProductCarousel products={topProducts} />  {/* ❌ Werbung in Confirm-Mail */}
+      </Section>
+    </Body>
+  </Html>
+);
+```
+
+**Nachher:**
+
+```tsx
+export const ConfirmEmail = ({ confirmUrl, firstName }) => (
+  <Html>
+    <Body>
+      <Heading>Hallo {firstName}, fast geschafft!</Heading>
+      <Text>Bitte bestätige deine Anmeldung:</Text>
+      <Button href={confirmUrl}>Anmeldung bestätigen</Button>
+      <Text>
+        Du hast den Newsletter angefordert. Wenn nicht, ignoriere diese Mail —
+        ohne Bestätigung wird keine Anmeldung wirksam.
+      </Text>
+      <Text>
+        Datenschutz: <Link href={privacyUrl}>Datenschutzerklärung</Link> ·
+        Widerruf jederzeit per <Link href={unsubscribeUrl}>Abmelde-Link</Link>.
+      </Text>
+    </Body>
+  </Html>
+);
+```
+
+### b) Order-Confirmation hat Cross-Sell-Block (OLG Hamm 4 U 121/13, BGH-Linie)
+
+**Vorher** (Python + Jinja2):
+
+```jinja
+<h1>Vielen Dank für Ihre Bestellung #{{ order.id }}</h1>
+<p>Wir haben Ihre Bestellung erhalten und verarbeiten sie...</p>
+
+{# Bestelldaten ... #}
+
+<h2>Diese Produkte könnten Sie auch interessieren:</h2>  {# ❌ Werbung in Trans-Mail #}
+{% for p in recommended_products %}
+  <a href="{{ p.url }}?utm_source=order_confirmation">...</a>
+{% endfor %}
+```
+
+**Nachher:** Cross-Sell-Block entfernen. Wenn der Empfänger Marketing-Einwilligung hat, separate Marketing-Mail im Drip ausliefern; Trans-Mail bleibt rein.
+
+### c) Open-Pixel ohne Einwilligung (TDDDG § 25 + DSK 2021)
+
+**Vorher** (PHP + Twig):
+
+```twig
+{# Always-on Open-Tracking #}
+<img src="https://provider/open?id={{ recipient.id }}" width="1" height="1" alt="" />
+```
+
+**Nachher:**
+
+```twig
+{# Pixel nur bei expliziter Tracking-Einwilligung #}
+{% if recipient.consent_tracking %}
+  <img src="https://provider/open?id={{ recipient.id }}" width="1" height="1" alt="" />
+{% endif %}
+```
+
+Dasselbe Pattern für Click-Redirects: `if recipient.consent_tracking → URL via /c/{token}; else → direkter Link`.
+
+**Refusal-Klausel:** Bei B2B-Cold-Mailing-Anfragen für DACH-Empfänger NICHT die kalt-versendende Variante generieren — UWG § 7 II Nr. 3 verbietet das auch im B2B (entgegen häufiger Annahme). Hinweis stattdessen: ausdrückliche Rücksprache mit Anwalt oder DSB; alternativ DOI-basierter Lead-Funnel statt Cold-Mailing.
+
+## In diesem Skill
+
+| Sub-File | Wann laden |
+|---|---|
+| `CONSENT-AND-DOI.md` | DOI-Flow, Confirm-Mail-Inhalt, Re-Subscribe, Lead-Magnet-Kopplung, Kinder-Newsletter |
+| `UWG-7.md` | UWG § 7 (DE), TKG § 174 (AT), UWG Art. 3 I o (CH), Cold-B2B, LinkedIn-DM |
+| `TRACKING-IN-MAIL.md` | Open-Pixel, Click-Redirect, externe Bilder, Personalisierungs-Tracking |
+| `UNSUBSCRIBE-AND-RETENTION.md` | One-Click, RFC 8058, Suppression-Hash, Bounce, Aufbewahrung, Art. 21 II |
+| `SERVICE-VS-MARKETING.md` | BGH-Linie, Trans-Mail-mit-Werbung, Onboarding-Drip-Mischmails |
+
+## Cross-Links
+
+| Thema | siehe |
+|---|---|
+| US-Newsletter-Provider Drittland-Aspekt (Mailchimp / Klaviyo / HubSpot / ActiveCampaign DPF + Cloud Act) | `dsgvo-third-country-transfer/PROVIDERS.md` |
+| TDDDG § 25 als Norm (generelle Cookie-/Tracking-Pflichten außerhalb von Mail) | `dsgvo-third-country-transfer/EPRIVACY.md` |
+| Cloud Act / Konzernzugriff auf Newsletter-Daten US-Provider | `dsgvo-third-country-transfer/CLOUD-ACT.md` |
+| Schweiz revDSG für CH-Empfänger | `dsgvo-third-country-transfer/CH-REVDSG.md` |
+| Art. 6 / 7 generell, Art. 28 AVV mit Newsletter-Provider | `dsgvo-third-country-transfer/ROLES.md` |
+| DPIA-Pflicht (Art. 35) bei Profiling großer Reichweite | `dsgvo-third-country-transfer/DPIA.md` |
+| IP-Speicherung beim DOI-Confirm — Pflichten der IP als Datum | `dsgvo-auth-and-logging/IP-ADDRESSES.md` |
+| Versand-Log / Bounce-Log Scrubbing (PII in Logs) | `dsgvo-auth-and-logging/LOGGING.md` |
+| Rate-Limit auf Signup-Endpunkt (Bot-Schutz) | `dsgvo-auth-and-logging/AUTH-TOM.md` |
+| Account-Löschung mit aktivem Newsletter-Abo | `dsgvo-subject-rights` (geplant) |
+| § 26 BDSG bei Beschäftigten-Newsletter | `dsgvo-employment` (geplant) |
+
+## Häufige Fallen
+
+- **Confirm-Mail mit „Übrigens, hier unsere aktuellen Angebote"** — BGH I ZR 164/09: Confirm-Mail darf keine Werbung enthalten. Das Confirm-Klick zählt sonst als unwirksam, der gesamte DOI-Beweis fällt. Fix: Confirm-Mail nur Bestätigungs-Bitte + Datenschutz-Hinweis + Widerruf.
+- **Order-Confirmation mit Footer-Banner „Diese Produkte könnten Sie auch interessieren"** — OLG Hamm 4 U 121/13 + BGH-Linie: Cross-Sell-Hinweis macht aus Trans-Mail eine Werbe-Mail; ohne Marketing-Einwilligung abmahnfähig. Fix: Cross-Sell aus Trans-Mail rausnehmen oder Trans-Mail explizit als Marketing klassifizieren.
+- **Mailchimp-Audience mit Open- und Click-Tracking by default** — Mailchimp aktiviert Tracking automatisch; ohne Einwilligung kollidiert das mit TDDDG § 25 + DSK-Position 2021. Fix: in der Audience-Einstellung Tracking deaktivieren oder pro Kontakt einwilligungs-gesteuert schalten.
+- **Cold-B2B-Akquise „LinkedIn-DM ist ja keine E-Mail"** — falsch; § 7 II Nr. 3 UWG erfasst „elektronische Post" weit; LinkedIn-/XING-Direktnachrichten sind erfasst. Fix: nur an Empfänger schreiben, die ausdrücklich zugestimmt haben (DOI-Funnel) oder das Bestandskunden-Privileg klar greift.
+- **Newsletter-Pflichtfeld „Geburtsdatum"** beim Anmeldeformular — Art. 5 I c Datenminimierung: nur E-Mail darf Pflichtfeld sein. Fix: alle anderen Felder optional, Default unmarkiert.
+- **Lead-Magnet ohne separate Newsletter-Checkbox** — „PDF-Download → Newsletter automatisch" verstößt gegen Art. 7 IV DSGVO (Kopplungsverbot). Fix: PDF auch ohne Newsletter-Anmeldung; Newsletter als zusätzliche Opt-In-Checkbox, default unchecked.
+- **Re-Subscribe alter Listen aus 2018 nach DSGVO-Inkrafttreten** — der ursprüngliche Confirm-Datensatz ist nach Widerruf nicht reaktivierbar. Fix: vor Re-Anschreiben neuen DOI durchführen; ohne erneute Bestätigung keine Werbe-Mails.
+- **„CAN-SPAM reicht für Europa"** — falsche Annahme. UWG + DSGVO + ePrivacy-Bestimmungen gelten zusätzlich; CAN-SPAM regelt nur den US-Markt. Fix: für EU-/DACH-Empfänger DOI-Pfad und Unsubscribe-Mechanik nach EU-Recht aufsetzen.
+- **Bewertungsbitte 14 Tage nach Kauf ohne separate Marketing-Einwilligung** — BGH VI ZR 225/17: Bewertungsbitte = Werbung iSd UWG § 7. Fix: nur an Empfänger schicken, die der Marketing-Verarbeitung zugestimmt haben.
+- **Single-Opt-In für CH-Empfänger generell tolerieren** — CH UWG Art. 3 I o + revDSG-Transparenzpflichten greifen weiter; bei DACH-Mischlisten ist DOI für alle die sichere Linie. Fix: einheitlich DOI fahren.
+- **One-Click-Unsubscribe + List-Unsubscribe-Header fehlen** — Gmail/Yahoo Sender-Anforderungen Februar 2024 verlangen für Bulk-Sender (≥ 5.000 Mails/Tag) RFC 8058 + DKIM/SPF/DMARC. Ohne diese landen Mails dauerhaft im Spam. Fix: List-Unsubscribe-Header korrekt setzen, One-Click-Endpoint implementieren.
+- **Klartext-E-Mail nach Unsubscribe in der DB lassen** — Art. 5 I c + e: nach Widerruf nur Suppression-Hash speichern (Schutzfunktion), Klartext löschen. Fix: SHA-256-Hash der E-Mail in `email_suppression_list`, Klartext entfernen.
+
+## Quellen
+
+- [DSGVO Volltext (eur-lex)](https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679) — Art. 6 / 7 / 8 / 21
+- [UWG § 7 (gesetze-im-internet.de)](https://www.gesetze-im-internet.de/uwg_2004/__7.html) — DE
+- [UWG § 8 (gesetze-im-internet.de)](https://www.gesetze-im-internet.de/uwg_2004/__8.html) — Unterlassungsanspruch
+- [TKG Österreich 2021 § 174 (RIS)](https://www.ris.bka.gv.at/) — Direktwerbung per E-Mail
+- [UWG Schweiz Art. 3 (admin.ch)](https://www.fedlex.admin.ch/eli/cc/1988/223_223_223) — lit. o Massen-E-Mail-Werbung
+- [TDDDG (gesetze-im-internet.de)](https://www.gesetze-im-internet.de/tddg/) — § 25 (vormals TTDSG, umbenannt 14.05.2024)
+- BGH I ZR 218/07 (10.02.2011) — Double-Opt-In Beweislast
+- BGH I ZR 164/09 (16.07.2008) — Bestätigungs-Mail darf keine Werbung enthalten
+- BGH VI ZR 225/17 (10.07.2018) — Bewertungs-Bitte ist Werbung
+- OLG Hamm 4 U 121/13 — Cross-Sell-Hinweis in Trans-Mail
+- BGH I ZR 169/04 — SMS-Werbung; per analoge Auslegung relevant für Plattform-DMs
+- [DSK-Orientierungshilfe Direktwerbung 2022](https://www.datenschutzkonferenz-online.de/) — aktuelle Version vor jeder Code-Generierung live prüfen
+- [EDPB Guidelines 05/2020 on Consent](https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-052020-consent-under-regulation-2016679_en)
+- [RFC 8058 — One-Click List-Unsubscribe](https://www.rfc-editor.org/rfc/rfc8058)
+- [RFC 2369 — List-Unsubscribe-Header](https://www.rfc-editor.org/rfc/rfc2369)
+- [Gmail Sender Requirements (postmaster.google.com)](https://support.google.com/mail/answer/81126) — Februar 2024 Update; Stand laufend prüfen
+
+## Disclaimer
+
+Best-Practice-Sammlung, **keine Rechtsberatung**. Bei Massen-Versand mit > 100.000 Empfängern, Health-/Finanz-/KRITIS-Newsletter, Beschäftigten-Versand (§ 26 BDSG), Cross-Border-EU-Versand außerhalb DACH oder Aufsichts-/Abmahn-Anfragen: Anwalt oder Datenschutzbeauftragten konsultieren.
+
+**Stand:** Mai 2026. UWG-/TKG-/CH-UWG-Änderungen, DSK-Beschlüsse, Sender-Anforderungen Gmail / Yahoo / Microsoft, neue BGH-Rechtsprechung und DPF-Status quartalsweise live prüfen — Verweis-URLs in Sektion „Quellen".
+
+---
+
+# Einwilligung & Double-Opt-In für Marketing-Mail
+
+> **Wohnsitz** für Art. 6 I a + Art. 7 DSGVO **im Marketing-Kontext**. Norm-Wohnsitz Art. 6 / 7 generell und Art. 28 AVV bleibt `dsgvo-third-country-transfer/ROLES.md`. Diese Datei zeigt, was Einwilligung für werbliche E-Mail in DACH praktisch heißt: Beweisbarkeit, Confirm-Mail-Inhalt, Re-Subscribe-Falle, Kopplungsverbot, Kinder-Newsletter, Co-Sponsor.
+
+## Was hier anders ist als in `ROLES.md`
+
+`ROLES.md` erklärt Art. 6 / 7 DSGVO als Norm allgemein — wann Einwilligung Rechtsgrundlage ist, was Bedingungen sind. Diese Datei behandelt drei Marketing-spezifische Fragen:
+
+1. **Beweisbarkeit:** Werbe-Einwilligung muss vor Gericht beweisbar sein (BGH I ZR 218/07). Welche Felder muss der DOI-Datensatz enthalten?
+2. **Confirm-Mail-Inhalt:** Was darf und was darf nicht in der Bestätigungs-Mail stehen (BGH I ZR 164/09)?
+3. **Lead-Magnet, Kinder, Shared Lists, Re-Subscribe:** Sonderkonstellationen, die im Marketing-Code regelmäßig auftauchen.
+
+UWG-Lauterkeitsrecht (§ 7 UWG, AT TKG, CH UWG) wohnt in `UWG-7.md` — diese Datei behandelt nur die DSGVO-Einwilligung.
+
+## Bedingungen einer wirksamen Marketing-Einwilligung (Art. 7 DSGVO)
+
+Vier Bedingungen kumulativ:
+
+1. **Freiwillig (Art. 7 II + IV)** — kein Kopplungsverbots-Verstoß: die Einwilligung darf nicht Bedingung für einen Vertrag sein, der ohne sie auskommt. „Newsletter-Anmeldung erforderlich für PDF-Download" verletzt Art. 7 IV.
+2. **Informiert (Art. 13)** — Empfänger weiß, wer der Verantwortliche ist, welche Daten verarbeitet werden, zu welchem Zweck, an welche Empfänger, wie lange, mit welchen Rechten. Der Hinweis auf die Datenschutzerklärung muss am Anmeldeformular sichtbar sein, nicht im AGB-Footer versteckt.
+3. **Spezifisch (EDPB Guidelines 05/2020)** — pro Zweck eine Einwilligung. Newsletter-Anmeldung + Personalisierungs-Tracking + Drittland-Übertragung sind drei verschiedene Zwecke und brauchen drei separate Häkchen. Pauschale „Ich stimme allem zu"-Klauseln sind unwirksam.
+4. **Eindeutig (Art. 4 Nr. 11)** — aktive Handlung. Default-aktivierte Checkboxes sind keine Einwilligung (EuGH C-673/17 Planet49). Die Box muss leer sein, der Empfänger setzt das Häkchen aktiv.
+
+## Double-Opt-In-Flow als Code-Skizze
+
+Das DOI-Verfahren teilt die Einwilligung in zwei Schritte: Anmeldung (mit Eingabe der E-Mail) und Bestätigung (Klick auf Confirm-Link). Erst der Klick macht die Einwilligung beweissicher.
+
+### DB-Schema (PostgreSQL)
+
+```sql
+CREATE TABLE subscription_consents (
+  id BIGSERIAL PRIMARY KEY,
+  email TEXT NOT NULL,                          -- Klartext bis Widerruf, danach löschen
+  email_hash CHAR(64) NOT NULL,                 -- SHA-256, dauerhaft (für Suppression-Pflicht)
+  ip_address INET,                              -- siehe IP-ADDRESSES.md (Kürzung nach Zweckende)
+  user_agent TEXT,
+  form_url TEXT NOT NULL,                       -- Seite, auf der die Anmeldung erfolgte
+  purposes JSONB NOT NULL,                      -- {"newsletter":true,"tracking":false,"sharing":false}
+  consented_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  confirmation_token_hash CHAR(64),             -- SHA-256 des Tokens (Token selbst nie speichern)
+  confirmation_token_expires_at TIMESTAMPTZ,
+  confirmed_at TIMESTAMPTZ,                     -- NULL = noch nicht bestätigt
+  withdrawn_at TIMESTAMPTZ,                     -- NULL = aktiv
+  retention_until TIMESTAMPTZ                   -- bei Widerruf: confirmed_at + 3 J UWG-Verjährung
+);
+
+CREATE INDEX ON subscription_consents (email_hash);
+CREATE INDEX ON subscription_consents (confirmation_token_hash) WHERE confirmation_token_hash IS NOT NULL;
+```
+
+### Subscribe-Endpoint (TypeScript / Node)
+
+```ts
+import crypto from 'node:crypto';
+
+export async function POST(req: Request) {
+  const { email, formUrl, purposes } = await req.json();
+
+  // Token kryptographisch erzeugen, NIE den Klartext-Token speichern
+  const tokenBytes = crypto.randomBytes(32);
+  const token = tokenBytes.toString('hex');
+  const tokenHash = crypto.createHash('sha256').update(tokenBytes).digest('hex');
+  const emailHash = crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
+
+  // Suppression-Check vor Insert (siehe UNSUBSCRIBE-AND-RETENTION.md)
+  if (await isSuppressed(emailHash)) {
+    return new Response('Bereits abgemeldet — neue Anmeldung erfordert Bestätigung Ihres Wunschs.', { status: 200 });
+  }
+
+  await db.query(
+    `INSERT INTO subscription_consents
+     (email, email_hash, ip_address, user_agent, form_url, purposes,
+      confirmation_token_hash, confirmation_token_expires_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, NOW() + INTERVAL '7 days')`,
+    [email, emailHash, maskIp(req.headers.get('x-forwarded-for') ?? ''), req.headers.get('user-agent'),
+     formUrl, JSON.stringify(purposes), tokenHash]
+  );
+
+  await sendConfirmationMail(email, token);
+  return Response.json({ ok: true, message: 'Bitte E-Mail-Postfach für Bestätigungs-Mail prüfen.' });
+}
+```
+
+### Confirm-Endpoint
+
+```ts
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const token = url.searchParams.get('t');
+  if (!token) return new Response('Bad request', { status: 400 });
+
+  const tokenHash = crypto.createHash('sha256').update(Buffer.from(token, 'hex')).digest('hex');
+
+  const result = await db.query(
+    `UPDATE subscription_consents
+     SET confirmed_at = NOW(),
+         confirmation_token_hash = NULL,
+         confirmation_token_expires_at = NULL
+     WHERE confirmation_token_hash = $1
+       AND confirmation_token_expires_at > NOW()
+       AND confirmed_at IS NULL
+       AND withdrawn_at IS NULL
+     RETURNING id`,
+    [tokenHash]
+  );
+
+  if (result.rowCount === 0) {
+    return new Response('Token ungültig oder abgelaufen. Neue Anmeldung notwendig.', { status: 400 });
+  }
+  return new Response('Anmeldung bestätigt. Vielen Dank.', { status: 200 });
+}
+```
+
+Maintainer-Faustregel: Token-Lebensdauer **7 Tage**. Manche Provider arbeiten mit 24 h — kürzer ist immer sicherer, aber 7 Tage decken Urlaubs-/Wochenend-Konstellationen ab.
+
+## Confirm-Mail-Inhalt — was darf rein, was nicht (BGH I ZR 164/09)
+
+Der BGH hat 2008 entschieden, dass Bestätigungs-Mails im DOI **selbst keine Werbung** enthalten dürfen. Sonst gilt die Confirm-Mail als unaufgeforderte Werbung — der gesamte DOI-Beweis fällt, und die einzelne Confirm-Mail ist abmahnfähig.
+
+**Erlaubt in der Confirm-Mail:**
+
+- Aufforderung zur Bestätigung mit Confirm-URL und Hinweis, dass ohne Klick keine Anmeldung wirksam wird
+- Hinweis auf die Datenschutzerklärung (Link)
+- Hinweis auf das jederzeitige Widerrufsrecht
+- Absender-Identifikation (Impressums-Pflichten)
+- Kurze Erklärung, was passiert, falls die Anmeldung nicht vom Empfänger stammt (ignorieren genügt)
+
+**Nicht erlaubt:**
+
+- Werbe-Banner, Produkt-Empfehlungen, Cross-Sell
+- Rabatt-Codes „nur für Anmelder", „Bonus zur Anmeldung"
+- Angebot weiterer Newsletter-Listen
+- Open-Tracking-Pixel (zählt als Marketing-Tracking, siehe `TRACKING-IN-MAIL.md`)
+- Klick-Tracking-Redirects auf Werbe-Ziele
+
+Praktische Konsequenz: das Confirm-Mail-Template ist eine reine Service-Mail — Klassifikation `transactional` (siehe `SERVICE-VS-MARKETING.md`).
+
+## Beweisbarkeit (Art. 7 I DSGVO)
+
+Im Streitfall muss der Versender beweisen, dass der konkrete Empfänger eingewilligt hat. Erforderliche Felder im DOI-Datensatz (siehe Schema oben):
+
+| Feld | Zweck | Aufbewahrung |
+|---|---|---|
+| `email` (Klartext) | Identifikation | bis Widerruf |
+| `email_hash` (SHA-256) | Suppression nach Widerruf | dauerhaft |
+| `ip_address` (gekürzt) | Beweis Anmeldung von welchem Anschluss | 30–90 Tage in Klartext, danach hashen — siehe `dsgvo-auth-and-logging/IP-ADDRESSES.md` |
+| `user_agent` | Beweis-Plausibilität | wie IP |
+| `form_url` | Beweis welche Seite, welche AGB-Version | bis Widerruf |
+| `purposes` (JSONB) | welche Zwecke wurden eingewilligt | bis Widerruf |
+| `consented_at` | Zeitstempel Anmeldung | bis Widerruf |
+| `confirmed_at` | Zeitstempel Bestätigung | bis Widerruf |
+
+Aufbewahrung nach Widerruf: 3 Jahre UWG-Verjährung (§ 11 UWG) als Schutz gegen Falsch-Behauptung „nie eingewilligt" — danach löschen oder vollständig pseudonymisieren.
+
+## Re-Subscribe-Falle
+
+Hat ein Empfänger sich abgemeldet, ist der ursprüngliche DOI-Datensatz nicht reaktivierbar. Eine erneute Anmeldung erfordert einen frischen DOI-Durchlauf.
+
+```sql
+-- Pattern: vor dem Insert prüfen, ob es einen Widerruf gibt
+SELECT confirmed_at, withdrawn_at
+FROM subscription_consents
+WHERE email_hash = $1
+ORDER BY id DESC LIMIT 1;
+```
+
+- Wenn `withdrawn_at IS NOT NULL` für die jüngste Zeile → neuer DOI-Flow notwendig (komplett neue Anmeldung mit neuer Bestätigungs-Mail).
+- „Reaktivierung" durch internes Flag-Toggle ohne neue Bestätigung verstößt gegen Art. 7 III DSGVO und ist UWG-§-7-relevant.
+
+## Single-Opt-In als Anti-Pattern
+
+In Deutschland und Österreich gilt Single-Opt-In für Werbe-Mails als abmahnfähig (BGH I ZR 218/07 — Beweislast-Linie). Wer die Einwilligung nicht durch DOI dokumentiert, kann ihre Wirksamkeit nicht beweisen — Beweispflicht trifft den Versender (Art. 7 I DSGVO).
+
+Schweiz-Sonderfall: SOI ist in der Praxis tolerierter, aber bei DACH-Mischlisten unsicher. Details + revDSG-Cross-Link in `UWG-7.md` (CH-Sektion).
+
+Maintainer-Empfehlung: einheitlich DOI fahren, auch wenn der Verteiler nur Schweizer Empfänger enthält — die Komplexität, später Listen zu trennen, ist höher als der Aufwand DOI für alle.
+
+## Kinder-Newsletter (Art. 8 DSGVO)
+
+Wenn die Zielgruppe potenziell Kinder unter 16 Jahren erreicht (Spielzeug, Schule, Gaming, Comics, Kinder-Streaming), greift Art. 8 DSGVO: die Einwilligung von Kindern unter 16 ist nur mit Zustimmung des Inhabers der elterlichen Verantwortung wirksam.
+
+Code-Pattern:
+
+```html
+<form method="post" action="/newsletter/subscribe">
+  <label>Geburtsjahr <input type="number" name="birthYear" min="1900" max="2026" required /></label>
+  <!-- bei Eingabe < 16 Jahre via Client-Side: alternativen Eltern-Mail-Pfad anzeigen -->
+  <label>E-Mail (Empfänger) <input type="email" name="email" required /></label>
+  <label hidden id="parent-email-block">
+    Eltern-/Erziehungs-E-Mail <input type="email" name="parentEmail" />
+  </label>
+  ...
+</form>
+```
+
+Server-Pattern: ist `birthYear` so, dass das Alter < 16 wäre, geht der DOI-Confirm-Link an die Eltern-E-Mail, nicht an die Kinder-E-Mail. Der Kindern-Newsletter wird erst nach Bestätigung durch die Eltern aktiviert. Aufbewahrung des elterlichen Confirm-Datensatzes parallel zur Kinder-Anmeldung.
+
+## Lead-Magnet-Kopplung (Art. 7 IV DSGVO)
+
+Anti-Pattern: „PDF-Download → automatische Newsletter-Anmeldung im Hintergrund". Das ist Kopplung der Vertragserfüllung (PDF-Bereitstellung) an die Einwilligung — verboten nach Art. 7 IV.
+
+Pattern: PDF-Download auch ohne Newsletter-Anmeldung verfügbar. Newsletter als zusätzliche, optionale Checkbox, default unchecked. Beim Anmeldevorgang ist klar, dass die Newsletter-Wahl nichts mit dem PDF zu tun hat.
+
+```html
+<form method="post" action="/leadmagnet/download">
+  <input type="email" name="email" required placeholder="E-Mail für PDF-Versand" />
+
+  <label>
+    <input type="checkbox" name="newsletter" value="1" />
+    Ja, ich möchte zusätzlich den Newsletter erhalten (Anmeldung erfolgt
+    nur nach separater Bestätigungs-Mail).
+  </label>
+
+  <button type="submit">PDF anfordern</button>
+</form>
+```
+
+Wichtig: ist `newsletter=1` gesetzt, separate DOI-Pipeline starten. PDF-Versand erfolgt unabhängig davon (Art. 6 I b — Vertragserfüllung).
+
+## Co-Sponsor / Shared Lists
+
+Werben mehrere Werbetreibende gemeinsam auf einer Liste, braucht jede Partei eine eigene Einwilligung — pauschale „Sie erhalten Mails von uns und unseren Partnern" ist unzureichend.
+
+Anforderungen:
+
+- Liste der Werbetreibenden im Anmeldeformular sichtbar machen (oder transparenter Link auf eine aktuelle Partner-Liste)
+- Pro Werbetreibendem ein eigenes Häkchen, oder
+- Ein Sammel-Häkchen mit ausdrücklichem Hinweis auf die Partner und transparente Liste — aber jeder Partner muss separat aus der Empfängerliste ausgetragen werden können (One-Click pro Partner, nicht Sammel-Unsubscribe)
+
+Aufbewahrung: pro Empfänger Einwilligung pro Werbetreibendem getrennt protokollieren.
+
+## Cross-Links
+
+| Thema | siehe |
+|---|---|
+| IP-Speicherung beim DOI-Confirm — Pflichten der IP-Adresse als Datum | `dsgvo-auth-and-logging/IP-ADDRESSES.md` |
+| Versand-Log und Bounce-Log Format / Scrubbing | `dsgvo-auth-and-logging/LOGGING.md` |
+| Rate-Limit auf `/newsletter/subscribe` (Bot-Schutz) | `dsgvo-auth-and-logging/AUTH-TOM.md` |
+| Art. 28 AVV mit Newsletter-Provider | `dsgvo-third-country-transfer/ROLES.md` |
+| US-Newsletter-Provider DPF-Status + Cloud Act | `dsgvo-third-country-transfer/PROVIDERS.md` |
+| Schweiz-SOI-Sonderfall + revDSG | `UWG-7.md` (CH-Sektion) + `dsgvo-third-country-transfer/CH-REVDSG.md` |
+| Confirm-Mail-Tracking-Pixel (NIE) | `TRACKING-IN-MAIL.md` |
+| Suppression-Hash nach Unsubscribe | `UNSUBSCRIBE-AND-RETENTION.md` |
+| Confirm-Mail = Service-Mail-Klassifikation | `SERVICE-VS-MARKETING.md` |
+
+## Quellen
+
+- [DSGVO Art. 6, 7, 8 (eur-lex)](https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679)
+- BGH I ZR 218/07 (10.02.2011) — Double-Opt-In, Beweislast trifft Versender
+- BGH I ZR 164/09 (16.07.2008) — Bestätigungs-Mail darf keine Werbung enthalten
+- EuGH C-673/17 (01.10.2019) — Planet49: Default-aktivierte Cookie-Boxes sind keine Einwilligung; analoge Anwendung auf Newsletter-Boxen
+- [EDPB Guidelines 05/2020 on Consent](https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-052020-consent-under-regulation-2016679_en) — Bedingungen wirksamer Einwilligung
+- [DSK-Orientierungshilfe Direktwerbung 2022](https://www.datenschutzkonferenz-online.de/) — aktuelle Version vor Code-Entscheidungen live prüfen
+
+## Disclaimer
+
+Best-Practice-Sammlung, **keine Rechtsberatung**. Bei Massen-Versand mit > 100.000 Empfängern, Kinder-/Jugend-Marketing, B2B-Cold-Outreach in regulierten Branchen (Health, Finanz), DACH-übergreifenden Listen oder Aufsichtsanfragen: Anwalt oder Datenschutzbeauftragten konsultieren.
+
+**Stand:** Mai 2026. EDPB-Guidelines, BGH-Rechtsprechung, EuGH-Urteile zur Einwilligung quartalsweise live prüfen.
