@@ -176,6 +176,44 @@
 - **Pflichten:** AVV per ActiveCampaign-DPA. SCCs als Fallback.
 - **Code-Default:** Site-Tracking-Snippet nur nach expliziter Einwilligung laden — siehe `dsgvo-email-marketing/TRACKING-IN-MAIL.md`.
 
+## Brevo (Brevo SAS, ehem. Sendinblue)
+
+- **Sitz:** Frankreich (Paris).
+- **EU-Region:** Default; Daten in EU-Rechenzentren (Frankreich + Deutschland), keine US-Replikation.
+- **DPF-Status:** entfällt (EU-Sitz, kein Drittlandtransfer im Hauptverhältnis).
+- **Hauptrisiko:** Sub-Auftragsverarbeiter prüfen — Brevo nutzt teilweise AWS-EU-Region für Versand-Engine, Stripe (US) für Billing-Daten der Brevo-Kunden. Im AVV-Anhang erfasst.
+- **Pflichten:** AVV nach Art. 28 DSGVO im Standard-Vertrag (BREVO-DPA).
+- **Migration-Pfad:** häufiger Migrations-Zielprovider weg von Mailchimp; Datenexport-API + Listen-Import gut dokumentiert.
+
+## CleverReach (CleverReach GmbH & Co. KG)
+
+- **Sitz:** Deutschland (Rastede, Niedersachsen).
+- **EU-Region:** ausschließlich DE-Server (eigenes Rechenzentrum), kein Sub-Hosting außerhalb EU.
+- **DPF-Status:** entfällt (EU-Sitz).
+- **Zertifikate:** ISO 27001, TÜV Süd geprüft.
+- **Hauptrisiko:** sehr gering im DACH-Kontext; Sub-Auftragsverarbeiter-Liste bleibt routinemäßige Pflichtprüfung.
+- **Pflichten:** AVV nach Art. 28 DSGVO im Standard.
+- **Eignung:** DACH-Mittelstand, Vereine, Behörden mit strikter Drittland-Vermeidung.
+
+## Rapidmail (rapidmail GmbH)
+
+- **Sitz:** Deutschland (Freiburg im Breisgau).
+- **EU-Region:** ausschließlich DE-Server.
+- **DPF-Status:** entfällt (EU-Sitz).
+- **Zertifikate:** ISO 27001, Trusted Shops Partner, CSA Certified Sender.
+- **Hauptrisiko:** sehr gering; reine DACH-Lieferkette.
+- **Pflichten:** AVV nach Art. 28 DSGVO; Auftragsverarbeitungsvertrag als PDF im Account einsehbar.
+- **Eignung:** KMU-Markt im DACH-Raum, einfacher als CleverReach, Schwerpunkt einfache Newsletter ohne komplexe Marketing-Automation.
+
+## MailerLite (MailerLite Limited)
+
+- **Sitz:** Litauen (Vilnius); Mutter UAB, EU-Recht.
+- **EU-Region:** EU-Server Default.
+- **DPF-Status:** entfällt (EU-Sitz).
+- **Hauptrisiko:** Sub-Auftragsverarbeiter prüfen — historisch wurde teilweise AWS verwendet, EU-Region zwingend in der Tenant-Konfig nachweisen.
+- **Pflichten:** AVV nach Art. 28 DSGVO im Standard.
+- **Eignung:** preisgünstige EU-Alternative für Solo-Builder und kleine Listen; weniger Marketing-Automation-Tiefe als Brevo.
+
 ## EU-Anbieter (Hetzner, IONOS, Scaleway, OVHcloud EU)
 
 - **Status:** EU/EEA-Sitz und -Hosting → kein Drittlandtransfer im Hauptverhältnis.
