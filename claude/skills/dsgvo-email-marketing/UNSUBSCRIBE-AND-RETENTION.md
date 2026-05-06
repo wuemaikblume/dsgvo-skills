@@ -1,3 +1,247 @@
-# UNSUBSCRIBE-AND-RETENTION — STUB
+# Abmeldung & Aufbewahrung für Marketing-Mail
 
-> Wird in Phase 3.4 befüllt. Spec § 3.5.
+> One-Click-Unsubscribe ist Pflicht (Art. 7 III + Art. 21 II DSGVO + RFC 8058 + Gmail/Yahoo Sender Requirements Februar 2024). Suppression-Hash ersetzt Klartext-E-Mail nach Abmeldung. Aufbewahrungsfristen folgen Art. 5 I e DSGVO + UWG-Verjährung § 11.
+
+## One-Click-Unsubscribe — was die Norm verlangt
+
+Drei normative Quellen, alle mit demselben Ergebnis:
+
+- **Art. 7 III DSGVO:** Widerruf der Einwilligung muss so einfach sein wie deren Erteilung. Wer mit einem Klick anmelden konnte, muss mit einem Klick abmelden können.
+- **Art. 21 II DSGVO:** Widerspruch gegen Direktwerbung ist absolut, ohne Interessenabwägung. Empfänger braucht keinen Grund zu nennen.
+- **RFC 8058 (Februar 2018):** technische Spezifikation für Mail-Provider-konforme One-Click-Unsubscription.
+
+### Anti-Patterns (alle verboten)
+
+```
+✗ Login-Pflicht zum Abmelden („Bitte melden Sie sich an, um Ihre Einstellungen zu ändern")
+✗ Pflichtfelder im Abmelde-Formular („Bitte teilen Sie uns mit, warum Sie abmelden")
+✗ Mehrstufiger Abmelde-Flow („Schritt 1 von 3", „Bestätigen Sie nochmal")
+✗ Sammel-Optionen „Alle Listen" als einzige Variante (jede Liste muss separat abmeldbar sein)
+✗ „Sie sind ab jetzt 30 Tage gesperrt" (Re-Subscribe muss sofort möglich sein)
+✗ Confirm-Page mit Werbe-Banner („Bevor Sie gehen — schauen Sie sich noch dies an")
+✗ Captcha/CAPTCHA als Hürde
+```
+
+### Pattern: GET /unsubscribe?token=...
+
+```ts
+// Ein einziger Klick, sofortige Wirkung
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const token = url.searchParams.get('token');
+  if (!token) return new Response('Missing token', { status: 400 });
+
+  const tokenHash = sha256Hex(Buffer.from(token, 'hex'));
+
+  // Atomic: Status setzen + Klartext-E-Mail löschen + Suppression-Hash anlegen
+  await db.transaction(async (tx) => {
+    const consent = await tx.query(
+      `UPDATE subscription_consents
+       SET withdrawn_at = NOW(),
+           email = NULL,
+           retention_until = NOW() + INTERVAL '3 years'
+       WHERE confirmation_token_hash = $1
+          OR id IN (SELECT id FROM unsubscribe_tokens WHERE token_hash = $1)
+       RETURNING email_hash`,
+      [tokenHash]
+    );
+
+    if (consent.rowCount > 0) {
+      await tx.query(
+        `INSERT INTO email_suppression_list (email_hash, reason)
+         VALUES ($1, 'user_unsubscribe')
+         ON CONFLICT (email_hash) DO UPDATE
+         SET suppressed_at = NOW(), reason = 'user_unsubscribe'`,
+        [consent.rows[0].email_hash]
+      );
+    }
+  });
+
+  return new Response('Sie sind abgemeldet. Vielen Dank.', {
+    status: 200,
+    headers: { 'Content-Type': 'text/html; charset=utf-8' },
+  });
+}
+```
+
+Wichtig: kein POST, kein zusätzlicher „Bestätigen"-Schritt. Der Klick auf den Link ist die Abmeldung.
+
+## List-Unsubscribe-Header (RFC 2369 + RFC 8058)
+
+Pflicht für Bulk-Sender ab 5.000 Mails/Tag an Gmail/Yahoo (Februar 2024 Update). Microsoft hat 2025 nachgezogen mit ähnlichen Anforderungen.
+
+```text
+List-Unsubscribe: <mailto:unsubscribe@example.com?subject=unsubscribe&token=XYZ>, <https://example.com/unsubscribe?token=XYZ>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+```
+
+Erläuterungen:
+
+- **Zwei URI-Varianten** (mailto + https) im `List-Unsubscribe`-Header — Mail-Clients wählen die für sie passende.
+- **`List-Unsubscribe-Post: List-Unsubscribe=One-Click`** signalisiert, dass die HTTPS-URL ohne weitere Bestätigung POST-fähig ist (RFC 8058). Mail-Provider können automatisch abmelden, wenn der Empfänger den Provider-internen Unsubscribe-Button drückt.
+- **Token mit Single-Use-Logik:** das Token im URL-Parameter sollte nach erfolgreichem Unsubscribe verbrannt sein — verhindert Replay-Attacken durch Mail-Provider-Crawler oder Spam-Scanner, die alle Links präventiv besuchen.
+
+### Endpoint-Pattern für RFC 8058 (POST-fähig)
+
+```ts
+export async function POST(req: Request) {
+  const url = new URL(req.url);
+  const token = url.searchParams.get('token');
+  if (!token) return new Response('Missing token', { status: 400 });
+
+  // Identische Logik wie GET /unsubscribe — RFC 8058 erlaubt POST ohne Body
+  await unsubscribeByToken(token);
+  return new Response('OK', { status: 200 });
+}
+```
+
+### Stand der Sender-Anforderungen Mai 2026
+
+- **Gmail / Yahoo:** für Bulk-Sender ≥ 5.000 Mails/Tag verlangt: SPF + DKIM + DMARC (mind. `p=none`) + One-Click-Unsubscribe (RFC 8058) + Spam-Komplaint-Rate < 0,3 %. Verstoß führt zu temporärer oder dauerhafter Ablehnung der Mails.
+- **Microsoft / Outlook:** 2025 nachgezogen mit ähnlichen Anforderungen.
+
+Quellen-URL und exakte Schwellen vor jedem Code-Generierungs-Lauf live prüfen — die Anforderungen werden tendenziell verschärft.
+
+## Suppression-Liste mit Hash
+
+Nach Unsubscribe (oder Hard-Bounce, Spam-Komplaint) muss der Versender sicherstellen, dass die Adresse **nie wieder** angeschrieben wird. Klartext-E-Mail nach Widerruf zu speichern ist unverhältnismäßig (Art. 5 I c) — stattdessen Hash.
+
+```sql
+CREATE TABLE email_suppression_list (
+  id BIGSERIAL PRIMARY KEY,
+  email_hash CHAR(64) NOT NULL UNIQUE,
+  suppressed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  reason TEXT NOT NULL CHECK (reason IN
+    ('user_unsubscribe','hard_bounce','spam_complaint','manual','re_permission_failed'))
+);
+
+CREATE INDEX ON email_suppression_list (email_hash);
+```
+
+Pre-Versand-Filter:
+
+```sql
+-- Beim Kampagnen-Versand: nur Empfänger ohne Suppression-Eintrag
+SELECT email
+FROM subscribers
+WHERE active = true
+  AND consent_marketing = true
+  AND NOT EXISTS (
+    SELECT 1 FROM email_suppression_list
+    WHERE email_hash = sha256_hex(LOWER(TRIM(subscribers.email)))
+  );
+```
+
+Aufbewahrung des Hashes: zeitlich unbegrenzt — er erfüllt die Schutzfunktion nach DSGVO Art. 21 II (verhindert weiteren Werbe-Versand). Ohne den Hash könnte ein versehentliches Re-Add die Werbe-Sperrwirkung aushebeln.
+
+## Bounce-Handling
+
+| Bounce-Typ | Aktion | Hinweis |
+|---|---|---|
+| **Hard-Bounce** (z.B. Mailbox existiert nicht, Domain unbekannt) | Sofortige Entfernung aus Versandliste; Hash in Suppression mit `reason='hard_bounce'` | Klartext-E-Mail aus aktiver Liste löschen |
+| **Soft-Bounce** (z.B. Mailbox voll, temporäre Server-Probleme) | Bis zu 5 Versuche über mehrere Tage; danach behandeln wie Hard-Bounce | Maintainer-Faustregel; manche Stacks 3 Versuche |
+| **Spam-Komplaint** (Empfänger drückt „Spam"-Button bei Provider) | Sofortige Entfernung; Hash in Suppression mit `reason='spam_complaint'` | Niemals wieder anschreiben — auch nicht nach Re-Permission-Versuch |
+
+Provider-Webhooks für Bounces aktivieren (Mailchimp, Postmark, AWS SES, Brevo). Code-Pattern:
+
+```ts
+// Webhook-Handler für Provider-Bounce-Events
+export async function POST(req: Request) {
+  const event = await req.json();
+  const emailHash = sha256Hex(event.recipient.toLowerCase().trim());
+
+  await db.query(
+    `INSERT INTO email_suppression_list (email_hash, reason)
+     VALUES ($1, $2)
+     ON CONFLICT (email_hash) DO UPDATE
+     SET suppressed_at = NOW(), reason = EXCLUDED.reason`,
+    [emailHash, event.type === 'spam_complaint' ? 'spam_complaint' : 'hard_bounce']
+  );
+
+  return new Response('OK', { status: 200 });
+}
+```
+
+## Re-Permission bei Inaktivität
+
+Empfänger, die seit längerer Zeit weder geöffnet noch geklickt haben, sind nach Art. 5 I e DSGVO problematisch — die Speicherung lässt sich kaum noch rechtfertigen.
+
+| Inaktivitäts-Dauer | Empfehlung |
+|---|---|
+| 12 Monate | Re-Permission-Mail oder Listenbereinigung |
+| 24 Monate | Maintainer-Faustregel obere Grenze; danach ohne neue Bestätigung kein Versand |
+
+### Re-Permission-Mail-Inhalt
+
+Selbe Regeln wie Confirm-Mail (BGH I ZR 164/09 — Cross-Link `CONSENT-AND-DOI.md`):
+
+- Aufforderung zur Bestätigung mit Confirm-URL
+- Hinweis auf Datenschutzerklärung + Widerruf
+- **Keine Werbung**, kein Rabatt-Code, keine Produkt-Empfehlung — sonst gilt die Re-Permission-Mail als unaufgeforderte Werbung
+
+Bestätigt der Empfänger nicht innerhalb von z.B. 30 Tagen, → Suppression-Eintrag mit `reason='re_permission_failed'`, kein weiterer Versand.
+
+## Aufbewahrungsfristen — Übersicht
+
+| Datenart | Frist | Rechtsgrund |
+|---|---|---|
+| Einwilligungs-Nachweis (DOI-Datensatz) | Dauer der Einwilligung + 3 Jahre | UWG-Verjährung § 11 (Schutz gegen „nie eingewilligt"-Behauptung) |
+| Klartext-E-Mail bei aktiven Empfängern | bis Widerruf | Art. 6 I a DSGVO |
+| Klartext-E-Mail nach Widerruf | sofort löschen | Art. 5 I c (Datenminimierung) — Suppression läuft via Hash |
+| Suppression-Hash | unbegrenzt | Schutzfunktion nach Art. 21 II DSGVO |
+| Versand-Logs (E-Mail in Klartext, Subject, Status) | 30–90 Tage, dann scrubben | Art. 5 I e + Cross-Link `dsgvo-auth-and-logging/LOGGING.md` |
+| Bounce-Logs in Klartext | max. 30 Tage | Art. 5 I e |
+| Open-/Click-Tracking-Daten (pro Empfänger) | 12 Monate aggregiert; bei DPIA prüfen | Faustregel; bei großer Reichweite verkürzen |
+| Confirm-Tokens | bis Confirm oder Expiry (max. 7 Tage) + danach löschen | nach Confirm Token nicht mehr nötig |
+| Unsubscribe-Tokens | unbegrenzt single-use Hash; Klartext nicht speichern | Replay-Schutz |
+
+## Direkt-Marketing-Widerspruchsrecht (Art. 21 II + IV)
+
+- **Art. 21 II:** absolutes Widerspruchsrecht gegen Werbe-Verarbeitung — keine Interessenabwägung. Bedeutet: Empfänger kann jederzeit, ohne Begründung, der Werbe-Verwendung seiner Daten widersprechen. Versender muss sofort einstellen.
+- **Art. 21 IV:** Hinweis auf das Widerspruchsrecht muss **bei der ersten Kommunikation** spätestens deutlich erteilt werden, getrennt von anderen Informationen.
+
+Code-Pattern Welcome-Mail:
+
+```html
+<!-- Direkt-Marketing-Widerspruch in Welcome-Mail prominent -->
+<section style="border:1px solid #ccc; padding:1em; margin:2em 0;">
+  <h2>Ihr Recht auf Widerspruch</h2>
+  <p>
+    Sie können der Verwendung Ihrer Daten zu Werbezwecken jederzeit ohne
+    Angabe von Gründen kostenfrei widersprechen.
+    <a href="{{ unsubscribeUrl }}">Hier abmelden</a>
+  </p>
+</section>
+```
+
+In jeder weiteren Werbe-Mail genügt der Footer-Link — aber nur, wenn der prominente Erst-Hinweis erfolgte.
+
+## Cross-Links
+
+| Thema | siehe |
+|---|---|
+| DOI-Token-Generierung + Lifecycle | `CONSENT-AND-DOI.md` |
+| Confirm-Mail-Inhalt-Regeln (BGH I ZR 164/09) — analog Re-Permission | `CONSENT-AND-DOI.md` |
+| UWG-Lauterkeitsrecht — Cold-Mailing-Verbot | `UWG-7.md` |
+| Versand-Log-Format + IP-Scrubbing | `dsgvo-auth-and-logging/LOGGING.md` |
+| IP-Aufbewahrung beim Open-Pixel-Hit | `dsgvo-auth-and-logging/IP-ADDRESSES.md` |
+| Tracking-Aufbewahrung bei Profiling | `TRACKING-IN-MAIL.md` |
+| Service-Mail-Klassifikation (kein Tracking auf Trans-Mails) | `SERVICE-VS-MARKETING.md` |
+| US-Provider DPF-Aspekt bei Suppression-Replikation | `dsgvo-third-country-transfer/PROVIDERS.md` |
+
+## Quellen
+
+- [DSGVO Art. 7 III, 17, 21 (eur-lex)](https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679)
+- [RFC 2369 — List-Unsubscribe-Header](https://www.rfc-editor.org/rfc/rfc2369)
+- [RFC 8058 — One-Click-Unsubscribe](https://www.rfc-editor.org/rfc/rfc8058)
+- [Gmail Sender Guidelines (postmaster.google.com)](https://support.google.com/mail/answer/81126) — Stand Mai 2026, laufend prüfen
+- [Yahoo Sender Best Practices](https://senders.yahooinc.com/best-practices/) — laufend prüfen
+- [§ 11 UWG (Verjährung)](https://www.gesetze-im-internet.de/uwg_2004/__11.html)
+- BGH I ZR 164/09 (16.07.2008) — Re-Permission-Mail-Inhalt analog Confirm
+- [DSK-Orientierungshilfe Direktwerbung 2022](https://www.datenschutzkonferenz-online.de/) — Aufbewahrungsfristen-Praxis
+
+## Disclaimer
+
+Best-Practice-Sammlung, **keine Rechtsberatung**. Bei großen Suppression-Listen (> 1 Mio.), Multi-Mandanten-Newsletter-Plattformen, internationalem Versand mit US-/UK-/CH-Mischempfängern oder Aufsichtsanfragen: DPB-Beauftragte / Anwalt für Datenschutzrecht konsultieren.
+
+**Stand:** Mai 2026. Sender-Anforderungen Gmail / Yahoo / Microsoft, RFC-Updates, BGH-Rechtsprechung zur Aufbewahrung quartalsweise live prüfen.
