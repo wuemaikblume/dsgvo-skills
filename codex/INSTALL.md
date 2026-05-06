@@ -8,7 +8,7 @@ Inhaltlich nahezu identisch — nur der einleitende Hinweis nennt das jeweilige 
 
 ## Wichtig: Always-on, keine Trigger
 
-Anders als Claude Skills oder Cursor Rules lädt Codex CLI **`AGENTS.md` bei jeder Anfrage komplett mit** — es gibt keinen Auto-Trigger pro Thema. Daher ist die Datei bewusst kompakt gehalten (~370 Zeilen, mit Auth/Logging-Sektion ab v1.5) und enthält nur die kritischen Regeln. Detail-Profile (PROVIDERS.md), DSFA-Schwellenanalyse, Cloud-Act-Tiefenmaterial usw. liegen ausschließlich im [Repo](https://github.com/wuemaikblume/dsgvo-skills) — für vertieftes Nachschlagen.
+Anders als Claude Skills oder Cursor Rules lädt Codex CLI **`AGENTS.md` bei jeder Anfrage komplett mit** — es gibt keinen Auto-Trigger pro Thema. Daher ist die Datei bewusst kompakt gehalten (~490 Zeilen, mit Auth/Logging ab v1.5 und E-Mail-Marketing ab v1.6) und enthält nur die kritischen Regeln. Detail-Profile (PROVIDERS.md), DSFA-Schwellenanalyse, Cloud-Act-Tiefenmaterial, BGH-Rechtsprechung-Vertiefung usw. liegen ausschließlich im [Repo](https://github.com/wuemaikblume/dsgvo-skills) — für vertieftes Nachschlagen.
 
 GitHub Copilot lädt `.github/copilot-instructions.md` ähnlich permanent für den Workspace.
 

@@ -5,7 +5,7 @@ Konsolidierte DSGVO-Compliance-Anweisungen für Tools, die statische Markdown-Fi
 - [`AGENTS.md`](AGENTS.md) — Codex CLI (im Projekt-Root)
 - [`copilot-instructions.md`](copilot-instructions.md) — GitHub Copilot (`.github/copilot-instructions.md`)
 
-**Stand:** v1.5, parallel zur Claude- und Cursor-Variante. Inhaltlich kondensiert, weil Codex/Copilot die Datei bei jeder Anfrage komplett mitladen — kein Auto-Trigger, kein Sub-File-Loading.
+**Stand:** v1.6, parallel zur Claude- und Cursor-Variante. Inhaltlich kondensiert, weil Codex/Copilot die Datei bei jeder Anfrage komplett mitladen — kein Auto-Trigger, kein Sub-File-Loading.
 
 ## Was drin ist
 
@@ -17,6 +17,7 @@ Konsolidierte DSGVO-Compliance-Anweisungen für Tools, die statische Markdown-Fi
 - Pflicht-Dokumentation (VVT, Art. 30) + häufige Fallen
 - Schweiz revDSG, ePrivacy/TTDSG, NIS2, DSFA-Pflichtfälle als Kurzhinweise
 - **Auth & Logging (ab v1.5):** Decision Tree für Hashing/Sessions/IP-Logging/Sentry/MFA/Brute-Force, Code-Patterns (Argon2id, Cookie-Flags, IP-Truncation, Rate-Limit, Sentry-Scrubbing), Audit-Log-Schema mit gestaffelter Retention
+- **E-Mail-Marketing (ab v1.6):** Decision Tree für UWG § 7 + DSGVO Art. 6/7/21 + TDDDG § 25, Anbieter-Quick-Ref (Mailchimp/Klaviyo/HubSpot/ActiveCampaign/Brevo/CleverReach/Rapidmail/MailerLite mit DPF-IDs), Code-Patterns (DOI-Token, Mail-Template-Klassifikation, Suppression-Hash, RFC 8058 List-Unsubscribe), BGH-Linie zur Service-vs-Werbung-Abgrenzung
 
 ## Was bewusst NICHT drin ist
 
@@ -42,7 +43,7 @@ curl -fsSL https://raw.githubusercontent.com/wuemaikblume/dsgvo-skills/main/code
 Pinning auf einen Tag empfohlen — DPF-Status, Schrems-III-Lage und Adäquanzbeschlüsse ändern sich:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wuemaikblume/dsgvo-skills/v1.5/codex/AGENTS.md -o AGENTS.md
+curl -fsSL https://raw.githubusercontent.com/wuemaikblume/dsgvo-skills/v1.6/codex/AGENTS.md -o AGENTS.md
 ```
 
 Releases auf <https://github.com/wuemaikblume/dsgvo-skills/releases>.

@@ -1,6 +1,6 @@
 # Cursor — Installation
 
-Diese Cursor-Adaption liefert neun Regeln im `.cursor/rules/`-Format. Alle sind als **Agent Requested**-Rules konfiguriert (`alwaysApply: false`) — Cursor's Agent lädt die Regel nur, wenn die `description` zur Aufgabe passt. Das spart Kontext und vermeidet Fehl-Trigger.
+Diese Cursor-Adaption liefert vierzehn Regeln im `.cursor/rules/`-Format. Alle sind als **Agent Requested**-Rules konfiguriert (`alwaysApply: false`) — Cursor's Agent lädt die Regel nur, wenn die `description` zur Aufgabe passt. Das spart Kontext und vermeidet Fehl-Trigger.
 
 ## Option 1 — Pro Projekt (empfohlen)
 
@@ -47,6 +47,11 @@ Cursor sollte die Regel laden und in der Antwort den Decision Tree für Drittlan
 | `dsgvo-auth-and-logging` | Auth-Code (bcrypt/argon2/JWT), Login-Endpoints, Sentry/Datadog/Pino-Setup, Audit-Log mit IP, Brute-Force-Schutz, MFA/TOTP/WebAuthn |
 | `dsgvo-auth-tom` | Konkrete TOM-Parameter (Hash-Cost, Session-Timeouts, Cookie-Flag-Matrix, MFA-Pflichtfälle, Rate-Limit-Werte) |
 | `dsgvo-ip-addresses` | IP-Speicherung, X-Forwarded-For, IP-Kürzung (/24, /48), Pseudonymisierung, Retention-Bänder |
+| `dsgvo-email-marketing` | Newsletter / Marketing-Mail-Code (Mailchimp/Klaviyo/HubSpot/Brevo/CleverReach/Rapidmail), DOI-Flow, Confirm-Mail, Tracking-Pixel, Unsubscribe (Master-Rule mit CONSENT-AND-DOI gebündelt) |
+| `dsgvo-uwg-7` | UWG § 7 (DE), AT TKG § 174, CH UWG Art. 3 I o, Bestandskunden-Privileg, Cold-B2B-Mailing inkl. LinkedIn-DM |
+| `dsgvo-tracking-in-mail` | Open-Tracking-Pixel, Click-Redirect, externe Bilder im Mail-Template (TDDDG § 25 + DSK 2021) |
+| `dsgvo-unsubscribe-and-retention` | One-Click-Unsubscribe (RFC 8058), List-Unsubscribe-Header, Suppression-Hash, Bounce, Aufbewahrung, Re-Permission |
+| `dsgvo-service-vs-marketing` | Mail-Template-Klassifikation (transactional vs marketing), BGH-Linie zu Cross-Sell + Bewertungs-Bitte + Confirm-Mail-Werbungsfreiheit |
 
 ## Unterschiede zur Claude-Variante
 

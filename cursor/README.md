@@ -1,8 +1,8 @@
 # DSGVO Rules für Cursor
 
-Neun **Agent Requested**-Rules im `.cursor/rules/*.mdc`-Format, die Cursor's Agent automatisch lädt, wenn DSGVO-Themen relevant werden — auch ohne dass der User „DSGVO" oder „GDPR" tippt.
+Vierzehn **Agent Requested**-Rules im `.cursor/rules/*.mdc`-Format, die Cursor's Agent automatisch lädt, wenn DSGVO-Themen relevant werden — auch ohne dass der User „DSGVO" oder „GDPR" tippt.
 
-**Stand:** v1.5, parallel zur Claude-Variante. Inhaltlich identisch, technisch an Cursor's Rules-Engine angepasst.
+**Stand:** v1.6, parallel zur Claude-Variante. Inhaltlich identisch, technisch an Cursor's Rules-Engine angepasst.
 
 ## Inhalt
 
@@ -17,6 +17,11 @@ Neun **Agent Requested**-Rules im `.cursor/rules/*.mdc`-Format, die Cursor's Age
 | [`dsgvo-auth-and-logging.mdc`](rules/dsgvo-auth-and-logging.mdc) | Auth-Code, Login/Logout, Audit-Logs, Sentry/Datadog/Pino-Scrubbing, Art. 5/6/25/32 |
 | [`dsgvo-auth-tom.mdc`](rules/dsgvo-auth-tom.mdc) | Hash-Parameter (argon2id/bcrypt), Cookie-Flags, Session-Timeouts, MFA, Rate-Limits |
 | [`dsgvo-ip-addresses.mdc`](rules/dsgvo-ip-addresses.mdc) | IP=personenbezogen (Breyer), Kürzung, X-Forwarded-For, Retention-Bänder |
+| [`dsgvo-email-marketing.mdc`](rules/dsgvo-email-marketing.mdc) | Newsletter / Marketing-Mail / DOI-Flow / Confirm-Mail / BGH-Linie / Master-Rule + CONSENT-AND-DOI gebündelt |
+| [`dsgvo-uwg-7.mdc`](rules/dsgvo-uwg-7.mdc) | UWG § 7 (DE) + AT TKG § 174 + CH UWG Art. 3 I o, Bestandskunden-Privileg, Cold-B2B inkl. LinkedIn-DM |
+| [`dsgvo-tracking-in-mail.mdc`](rules/dsgvo-tracking-in-mail.mdc) | Open-Pixel, Click-Redirect, externe Bilder als Code-Pattern (TDDDG § 25 + DSK 2021) |
+| [`dsgvo-unsubscribe-and-retention.mdc`](rules/dsgvo-unsubscribe-and-retention.mdc) | One-Click-Unsubscribe (RFC 8058), Suppression-Hash, Bounce, Aufbewahrungsfristen, Re-Permission |
+| [`dsgvo-service-vs-marketing.mdc`](rules/dsgvo-service-vs-marketing.mdc) | Mail-Template-Klassifikation Service vs Werbung (BGH I ZR 218/07, VI ZR 225/17, I ZR 164/09, OLG Hamm) |
 
 ## Installation
 
