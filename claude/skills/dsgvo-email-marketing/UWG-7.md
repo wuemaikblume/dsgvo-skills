@@ -1,3 +1,156 @@
-# UWG-7 — STUB
+# UWG § 7 (DE) + AT TKG 2021 § 174 + CH UWG Art. 3 I o
 
-> Wird in Phase 3.2 befüllt. Spec § 3.3.
+> Wohnsitz für lauterkeitsrechtliche Pflichten in DACH bei werblicher E-Mail. DSGVO-Aspekt der Einwilligung wohnt in `CONSENT-AND-DOI.md`. CH revDSG-Pflichten wohnen in `dsgvo-third-country-transfer/CH-REVDSG.md` — diese Datei behandelt nur den lauterkeitsrechtlichen Teil und linkt für Datenschutz-Aspekte zurück.
+
+## Doppelnatur DSGVO + UWG
+
+Werbe-Mail unterliegt in DACH **zwei** parallelen Rechtsordnungen, die unabhängig voneinander geprüft werden:
+
+1. **DSGVO** — Datenschutz: Rechtsgrundlage (Art. 6 I a), Bedingungen Einwilligung (Art. 7), Widerspruchsrecht (Art. 21 II). Aufsichtsbehörde: Landesdatenschutzbehörden + DSK + EDPB. Sanktion: Bußgeld nach Art. 83 (bis 4 % Konzernumsatz).
+2. **Lauterkeitsrecht** — Wettbewerbsrecht: UWG § 7 (DE), TKG § 174 (AT), UWG Art. 3 I o (CH). Aktivlegitimiert: Mitbewerber, Verbraucherzentralen, IDO, Wettbewerbszentrale. Sanktion: Unterlassungsanspruch + Schadensersatz + Abmahnkosten.
+
+In der Praxis ist die UWG-Abmahnung schneller und unmittelbar finanziell spürbar; die DSGVO-Aufsichtsverfahren laufen länger, sind aber bei systematischen Verstößen härter.
+
+## Deutschland — UWG § 7 II Nr. 3 + § 7 III
+
+### § 7 II Nr. 3 (Hauptregel)
+
+> „Eine unzumutbare Belästigung ist stets anzunehmen bei Werbung unter Verwendung […] elektronischer Post, ohne dass eine vorherige ausdrückliche Einwilligung des Adressaten vorliegt."
+
+Konsequenz: Werbe-E-Mail ohne Einwilligung ist **immer** unzulässig. Es gibt keine Verhältnismäßigkeitsprüfung, keine Interessenabwägung, kein „kleiner Verteiler ist OK".
+
+### § 7 III Bestandskunden-Privileg (vier Voraussetzungen kumulativ)
+
+Nur wenn **alle vier** Bedingungen gleichzeitig erfüllt sind, darf an Bestandskunden ohne separate Einwilligung geworben werden:
+
+1. **Adresse aus Verkauf einer Ware oder Dienstleistung** — d.h. der Empfänger hat tatsächlich gekauft. Lead-Listen, Webinar-Anmeldungen, Demo-Requests, Newsletter-Abonnenten ohne Kauf zählen **nicht**.
+2. **Werbung für eigene ähnliche Waren oder Dienstleistungen** — eine Buchhandlung darf nicht Wein bewerben. Maßstab: hätte der Käufer beim Kauf erwarten können, dass auch dieses Angebot kommt? (BGH-Rechtsprechung enge Auslegung)
+3. **Klare und deutliche Hinweise bei Erhebung der Adresse UND in jeder einzelnen Werbe-Mail**, dass der Empfänger der Verwendung jederzeit widersprechen kann. Nicht im AGB-Footer versteckt — sichtbar beim Bestell-Abschluss + im jeden Mail-Footer.
+4. **Widerruf kostenfrei** außer Übermittlungsgrundtarif. Telefon-Hotline mit Premium-Nummer fällt durch; einfacher Klick-Link genügt.
+
+Fehlt eine der vier Voraussetzungen, ist die Werbung ohne Einwilligung unzulässig.
+
+### Werbungsbegriff — weit auszulegen (BGH-Linie)
+
+Der BGH legt „Werbung" iSd § 7 weit aus: jede Form der Anpreisung mit dem Ziel, den Absatz zu fördern — auch mittelbar.
+
+| Aktenzeichen | Datum | Kernaussage |
+|---|---|---|
+| BGH I ZR 218/07 | 10.02.2011 | Beweislast für DOI-Einwilligung trifft den Versender; ohne DOI keine wirksame Einwilligung beweisbar |
+| BGH I ZR 164/09 | 16.07.2008 | Bestätigungs-Mail im DOI darf selbst keine Werbung enthalten |
+| BGH VI ZR 225/17 | 10.07.2018 | „Bewertungs-Bitte" nach abgeschlossenem Kauf ist Werbung iSd UWG § 7 |
+| OLG Hamm 4 U 121/13 | 26.11.2013 | Cross-Sell-Hinweis in transaktionaler Mail (Versandbestätigung mit Produkt-Empfehlung) ist Werbung |
+| BGH I ZR 169/04 | 16.07.2008 | SMS-Werbung — Plattform-/elektronische Post weit verstanden; analog anwendbar auf Plattform-DMs |
+
+### Cold-B2B-Mailing — die drei häufigsten Fehlannahmen
+
+**Fehlannahme 1: „§ 7 UWG gilt nur für Verbraucher, im B2B reicht berechtigtes Interesse."**
+
+Falsch. § 7 II Nr. 3 spricht von „Adressat" — nicht vom Verbraucher. Berufliche E-Mail-Adressen sind genauso geschützt wie private. Cold-B2B-Mailing ohne Einwilligung ist seit 2010 in DE einheitlich unzulässig.
+
+**Fehlannahme 2: „LinkedIn-/XING-Direktnachrichten sind keine E-Mail iSd UWG."**
+
+Falsch. § 7 II Nr. 3 erfasst „elektronische Post" weit. Nachrichten über Plattform-Messaging-Systeme (LinkedIn DM, XING-Nachrichten, Slack-DM-Outreach, WhatsApp-Business-Initial-Message) gelten in der herrschenden Auslegung analog (BGH I ZR 169/04 zur SMS-Werbung — gleicher Schutzgedanke der Privatsphäre).
+
+**Fehlannahme 3: „Wenn die berufliche Adresse im Impressum steht, ist sie öffentlich → Einwilligung implizit."**
+
+Falsch. Das Impressum ist eine gesetzliche Pflichtveröffentlichung für andere Zwecke (Auskunfts-, Streit-Adresse). Es ist keine Einwilligung in Werbung. Die Veröffentlichung im Impressum ändert nichts an § 7.
+
+### Abmahn-Praxis (DE)
+
+- **Aktivlegitimiert:** Mitbewerber, qualifizierte Wirtschaftsverbände (IDO, Wettbewerbszentrale, Vereine bayerischer Wirtschaft), Verbraucherzentralen.
+- **Anspruchsgrundlage:** UWG § 8 (Unterlassung) + § 9 (Schadensersatz; bei Mitbewerber-Abmahnung relevant) + Erstattung der Abmahnkosten.
+- **Streitwert-Rahmen:** 100–500 € Streitwert pro versendeter Werbe-Mail an den Abmahnenden ist branchenüblich; bei systematischem Verstoß (Massen-Liste) mehrere tausend Euro.
+- **Praxis:** Erstabmahnung mit Unterlassungserklärung + Vertragsstrafe-Versprechen. Bei erneutem Verstoß Vertragsstrafe (typisch 5.000 € pro weiteren Verstoß).
+
+## Österreich — TKG 2021 § 174
+
+> „Die Zusendung einer elektronischen Post ist ohne vorherige Einwilligung des Empfängers unzulässig, wenn sie zu Zwecken der Direktwerbung erfolgt […]"
+
+Inhaltlich vergleichbar mit UWG § 7 (DE):
+
+- DOI-Pflicht für Werbe-Mail
+- Bestandskunden-Privileg in § 174 Abs. 4 TKG vergleichbar zu DE § 7 III, wenn die vier Bedingungen erfüllt sind
+- Aktivlegitimiert: Empfänger selbst (Unterlassungsklage), Konsumentenschutzvereine, Mitbewerber
+
+**Cross-Border-Aspekt:** ein deutscher Versender, der an österreichische Empfänger versendet, unterliegt zusätzlich AT-Recht (Marktortprinzip — die Belästigung tritt am Empfangsort ein). Bei DACH-übergreifenden Listen also DOI-Pflicht beachten, auch wenn das Sender-Unternehmen in DE sitzt.
+
+**Aufsichtsstellen:** RTR-GmbH (Regulierungsbehörde) für Telekommunikations-Aufsicht; Datenschutzbehörde (DSB) für DSGVO-Aspekte parallel.
+
+## Schweiz — UWG (CH) Art. 3 Abs. 1 lit. o
+
+Schweizer Lauterkeitsrecht (UWG/CH) regelt in Art. 3 I lit. o den Massen-E-Mail-Versand:
+
+> „Unlauter handelt insbesondere, wer […] Massenwerbung ohne direkten Zusammenhang mit einem angeforderten Inhalt fernmeldetechnisch sendet oder solche Sendungen veranlasst und es dabei unterlässt, vorher die Einwilligung der Kunden einzuholen, den korrekten Absender anzugeben oder auf eine problemlose und kostenlose Ablehnungsmöglichkeit hinzuweisen."
+
+Kernpunkte:
+
+- **Einwilligung erforderlich** — vergleichbar zu § 7 UWG (DE), wenngleich der CH-Wortlaut explizit drei Anforderungen kombiniert: Einwilligung + Absender-Angabe + Ablehnungsmöglichkeit.
+- **„Massenwerbung"** — der CH-Gesetzgeber stellt auf das Massen-Element ab; einzelne, persönlich verfasste Mails an wenige bekannte Empfänger sind nicht zwingend erfasst (anders als DE, wo § 7 schon bei einer einzigen Mail greift).
+- **SOI-Praxis:** in der Schweiz ist Single-Opt-In in der Praxis tolerierter — aber Vorsicht: revDSG (in Kraft seit 01.09.2023) verlangt Transparenz und Widerspruchsrecht, und Schweizer Gerichte können bei DACH-Mischlisten die deutsche Linie als Auslegungsmaßstab heranziehen. Maintainer-Empfehlung: einheitlich DOI fahren.
+
+**Sanktion:** Schweiz UWG kennt straf- und zivilrechtliche Sanktionen. Art. 23 UWG (CH) ermöglicht Strafanzeige; Art. 9 + 10 UWG (CH) die zivilrechtliche Unterlassungsklage durch Mitbewerber, Konsumentenschutzorganisationen oder Bund.
+
+**Cross-Link revDSG:** für die datenschutzrechtliche Seite (Transparenz, Auskunftsrecht, Widerrufsrecht in CH) siehe `dsgvo-third-country-transfer/CH-REVDSG.md`.
+
+## Mailings für KMU mit DACH-Liste — der einheitliche Pfad
+
+Wenn die Empfängerliste Empfänger aus DE, AT und CH enthält (Standard im DACH-KMU-Markt), gilt die jeweils strengste Regel pro Empfänger. Praktisch heißt das:
+
+- **DOI für alle** — nicht differenziert nach Land
+- **Bestandskunden-Privileg** nur greifen, wenn alle vier UWG-Voraussetzungen erfüllt sind und auch in AT/CH zulässig
+- **Widerspruchs-Hinweis in jeder Mail** (DE § 7 III + DSGVO Art. 21 IV + CH UWG Art. 3 I o)
+- **Eindeutiger Absender mit Impressum**
+
+Komplexere Land-spezifische Differenzierung lohnt sich erst bei großen Listen mit klarer Landeszuordnung.
+
+## Doppel-Trigger-Hinweis
+
+> Wenn ein Code-Pattern gleichzeitig **DSGVO-Einwilligung** und **UWG-Pflicht** berührt:
+> - Einwilligungs-Mechanik (Token-Generierung, Confirm-Mail, Beweis-Schema) → `CONSENT-AND-DOI.md`
+> - Lauterkeitsrechtliche Bewertung (Werbung ja/nein, Bestandskunden, Cold-B2B, AT/CH-Aspekt) → diese Datei
+>
+> Beide Sub-Files sind komplementär. Nicht beide den vollen Decision Tree durchlaufen — wer den Code-Pattern liefert (DOI-Schema), führt; der andere Skill liefert die rechtliche Wertung über Cross-Link.
+
+## Häufige Fallen
+
+- **„Kalter Verteiler aus Lead-Liste, kein Direktverkauf" + Bestandskunden-Privileg ausnutzen** — die Liste fällt durch Voraussetzung (1) (kein Verkauf erlangt). Nicht zulässig.
+- **B2B-Cold-Mailing aus „Lead-Magnet"-Funnel** — der Lead-Magnet-Klick ist kein Verkauf iSd UWG § 7 III. Lead bleibt Lead, kein Bestandskunde.
+- **„Wir machen nur Newsletter, keine Werbung"** — der Werbungsbegriff ist weit. Newsletter mit Produkt-Hinweisen, Aktionen, Rabatten, Veranstaltungs-Hinweisen ist Werbung.
+- **„LinkedIn-DM nicht UWG-relevant"** — Plattform-DMs sind elektronische Post, BGH-Rechtsprechung zu SMS analog.
+- **„Bewertungs-Mail ist doch nur Service"** — BGH VI ZR 225/17 stellt klar: Werbung. Erfordert Marketing-Einwilligung.
+- **„Im Impressum steht die Mail, also öffentlich"** — keine Einwilligung. Pflichtveröffentlichung ist nicht Werbe-Freigabe.
+- **„Schweiz hat eh kein DOI-Erfordernis"** — bei DACH-Mischlisten ist DOI praktisch immer der sichere Pfad. CH-SOI-Toleranz schützt nicht vor deutschen Mitbewerber-Abmahnungen, wenn die Mail auch DE-Empfänger erreicht.
+- **„Bestandskunden-Privileg gilt für alle Produkte des Hauses"** — nur für ähnliche Waren/DL. Rest braucht Einwilligung.
+
+## Cross-Links
+
+| Thema | siehe |
+|---|---|
+| DOI-Flow + Token-Schema | `CONSENT-AND-DOI.md` |
+| Confirm-Mail-Inhalt-Regeln (BGH I ZR 164/09) | `CONSENT-AND-DOI.md` |
+| Service-Mail-Klassifikation gegen Werbung | `SERVICE-VS-MARKETING.md` |
+| Bewertungs-Mail (BGH VI ZR 225/17) | `SERVICE-VS-MARKETING.md` |
+| Cross-Sell-Banner (OLG Hamm) | `SERVICE-VS-MARKETING.md` |
+| Schweiz revDSG / EDÖB / Auskunftsrecht | `dsgvo-third-country-transfer/CH-REVDSG.md` |
+| Drittland-Aspekt US-Newsletter-Provider | `dsgvo-third-country-transfer/PROVIDERS.md` |
+| Direkt-Marketing-Widerspruch (Art. 21 II DSGVO) | `UNSUBSCRIBE-AND-RETENTION.md` |
+
+## Quellen
+
+- [UWG § 7 (gesetze-im-internet.de)](https://www.gesetze-im-internet.de/uwg_2004/__7.html) — Deutschland
+- [UWG § 8 (Unterlassung)](https://www.gesetze-im-internet.de/uwg_2004/__8.html) — Deutschland
+- [TKG 2021 § 174 (RIS, Bundesgesetzblatt Österreich)](https://www.ris.bka.gv.at/) — Österreich
+- [UWG Schweiz Art. 3 (admin.ch)](https://www.fedlex.admin.ch/eli/cc/1988/223_223_223) — Schweiz
+- BGH I ZR 218/07 (10.02.2011) — Double-Opt-In, Beweislast
+- BGH I ZR 164/09 (16.07.2008) — Confirm-Mail-Werbungsfreiheit
+- BGH VI ZR 225/17 (10.07.2018) — Bewertungs-Bitte als Werbung
+- BGH I ZR 169/04 (16.07.2008) — SMS / elektronische Post weit verstanden
+- OLG Hamm 4 U 121/13 (26.11.2013) — Cross-Sell in Trans-Mail
+- [DSK-Orientierungshilfe Direktwerbung 2022](https://www.datenschutzkonferenz-online.de/) — laufend prüfen
+
+## Disclaimer
+
+Best-Practice-Sammlung, **keine Rechtsberatung**. Bei Cross-Border-Versand außerhalb DACH (z.B. Italien, Frankreich), Mitbewerber-Abmahnung, Vertragsstrafe-Drohung, Massen-Versand mit > 100.000 Empfängern: Anwalt für Wettbewerbsrecht konsultieren.
+
+**Stand:** Mai 2026. UWG-Novellen, AT-TKG-Updates, CH-UWG-Praxis und neue BGH-/OLG-Entscheidungen quartalsweise prüfen.
