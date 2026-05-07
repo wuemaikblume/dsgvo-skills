@@ -31,7 +31,7 @@ export async function GET(req: Request) {
   const token = url.searchParams.get('token');
   if (!token) return new Response('Missing token', { status: 400 });
 
-  const tokenHash = sha256Hex(Buffer.from(token, 'hex'));
+  const tokenHash = sha256Hex(Buffer.from(token, 'hex')); // Token: 256 bit Zufall — plain SHA-256 reicht (Email-Hash dagegen MUSS HMAC + Pepper sein, siehe unten)
 
   // Atomic: Status setzen + Klartext-E-Mail löschen + Suppression-Hash anlegen
   await db.transaction(async (tx) => {
@@ -68,7 +68,7 @@ Wichtig: kein POST, kein zusätzlicher „Bestätigen"-Schritt. Der Klick auf de
 
 ## List-Unsubscribe-Header (RFC 2369 + RFC 8058)
 
-Pflicht für Bulk-Sender ab 5.000 Mails/Tag an Gmail/Yahoo (Februar 2024 Update). Microsoft hat 2025 nachgezogen mit ähnlichen Anforderungen.
+Pflicht für Bulk-Sender ab 5.000 Mails/Tag an Gmail/Yahoo (Februar 2024 Update) und Microsoft Outlook/Hotmail/Live (Enforcement seit 05.05.2025).
 
 ```text
 List-Unsubscribe: <mailto:unsubscribe@example.com?subject=unsubscribe&token=XYZ>, <https://example.com/unsubscribe?token=XYZ>
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
 ### Stand der Sender-Anforderungen Mai 2026
 
 - **Gmail / Yahoo:** für Bulk-Sender ≥ 5.000 Mails/Tag verlangt: SPF + DKIM + DMARC (mind. `p=none`) + One-Click-Unsubscribe (RFC 8058) + Spam-Komplaint-Rate < 0,3 %. Verstoß führt zu temporärer oder dauerhafter Ablehnung der Mails.
-- **Microsoft / Outlook:** 2025 nachgezogen mit ähnlichen Anforderungen.
+- **Microsoft Outlook / Hotmail / Live (Enforcement seit 05.05.2025):** für High-Volume-Sender > 5.000 Mails/Tag SPF + DKIM + DMARC verpflichtend (alle drei). Anders als bei Gmail anfangs **keine Toleranzphase** — fehlendes oder fehlerhaftes DMARC-Alignment führt zu sofortigen permanenten 5xx-SMTP-Rejects. Funktionierender klarer Unsubscribe-Link Pflicht; RFC 8058 als Best Practice.
 
 Quellen-URL und exakte Schwellen vor jedem Code-Generierungs-Lauf live prüfen — die Anforderungen werden tendenziell verschärft.
 
@@ -106,10 +106,12 @@ Quellen-URL und exakte Schwellen vor jedem Code-Generierungs-Lauf live prüfen �
 
 Nach Unsubscribe (oder Hard-Bounce, Spam-Komplaint) muss der Versender sicherstellen, dass die Adresse **nie wieder** angeschrieben wird. Klartext-E-Mail nach Widerruf zu speichern ist unverhältnismäßig (Art. 5 I c) — stattdessen Hash.
 
+**Wichtig: Plain SHA-256 reicht nicht.** E-Mail-Adressen haben extrem geringe Entropie (begrenzter Zeichenvorrat, vorhersehbare Format-Muster). Bei Datenbank-Exfiltration sind unsalted SHA-256-Hashes über Rainbow-Tables / Brute-Force trivial reversibel — der Hash erfüllt damit keine belastbare Pseudonymisierung iSd Art. 32 DSGVO. Lösung: **HMAC-SHA-256 mit serverseitigem Pepper** aus dem Key-Management-System (KMS).
+
 ```sql
 CREATE TABLE email_suppression_list (
   id BIGSERIAL PRIMARY KEY,
-  email_hash CHAR(64) NOT NULL UNIQUE,
+  email_hash CHAR(64) NOT NULL UNIQUE,  -- HMAC-SHA-256 mit serverseitigem Pepper
   suppressed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   reason TEXT NOT NULL CHECK (reason IN
     ('user_unsubscribe','hard_bounce','spam_complaint','manual','re_permission_failed'))
@@ -118,17 +120,34 @@ CREATE TABLE email_suppression_list (
 CREATE INDEX ON email_suppression_list (email_hash);
 ```
 
+```ts
+// Hash-Funktion einmal zentral, server-seitig — Pepper aus KMS / Secrets-Manager
+import crypto from 'node:crypto';
+
+export function suppressionHash(email: string): string {
+  const norm = email.toLowerCase().trim();
+  return crypto
+    .createHmac('sha256', process.env.SUPPRESSION_PEPPER!)
+    .update(norm)
+    .digest('hex');
+}
+```
+
+**Pepper-Rotation:** der Pepper darf NICHT routinemäßig rotieren — sonst werden alte Suppression-Einträge unbrauchbar und die Werbe-Sperrwirkung bricht. Pepper-Wechsel nur im Notfall (Pepper kompromittiert) und mit gleichzeitiger Migration aller `email_hash`-Einträge per Re-Hash beim nächsten Empfang der Klartext-E-Mail.
+
 Pre-Versand-Filter:
 
 ```sql
--- Beim Kampagnen-Versand: nur Empfänger ohne Suppression-Eintrag
+-- Beim Kampagnen-Versand: nur Empfänger ohne Suppression-Eintrag.
+-- Hash-Berechnung muss server-seitig per HMAC + Pepper erfolgen
+-- (kein SQL-Inline-Hash mehr — dort ist der Pepper nicht verfügbar).
 SELECT email
 FROM subscribers
 WHERE active = true
   AND consent_marketing = true
   AND NOT EXISTS (
     SELECT 1 FROM email_suppression_list
-    WHERE email_hash = sha256_hex(LOWER(TRIM(subscribers.email)))
+    WHERE email_hash = $1  -- $1 = suppressionHash(subscribers.email) berechnet im Versand-Service
   );
 ```
 
@@ -148,7 +167,7 @@ Provider-Webhooks für Bounces aktivieren (Mailchimp, Postmark, AWS SES, Brevo).
 // Webhook-Handler für Provider-Bounce-Events
 export async function POST(req: Request) {
   const event = await req.json();
-  const emailHash = sha256Hex(event.recipient.toLowerCase().trim());
+  const emailHash = suppressionHash(event.recipient); // HMAC-SHA-256 + Pepper, Funktion siehe Sektion „Suppression-Liste"
 
   await db.query(
     `INSERT INTO email_suppression_list (email_hash, reason)
@@ -173,7 +192,7 @@ Empfänger, die seit längerer Zeit weder geöffnet noch geklickt haben, sind na
 
 ### Re-Permission-Mail-Inhalt
 
-Selbe Regeln wie Confirm-Mail (BGH I ZR 164/09 — Cross-Link `CONSENT-AND-DOI.md`):
+Selbe Regeln wie Confirm-Mail (BGH VI ZR 134/15 — „No-Reply": werblicher Zusatz in Auto-Reply / Bestätigungs-Mail = Eingriff Persönlichkeitsrecht; Cross-Link `CONSENT-AND-DOI.md`):
 
 - Aufforderung zur Bestätigung mit Confirm-URL
 - Hinweis auf Datenschutzerklärung + Widerruf
@@ -192,7 +211,7 @@ Bestätigt der Empfänger nicht innerhalb von z.B. 30 Tagen, → Suppression-Ein
 | Versand-Logs (E-Mail in Klartext, Subject, Status) | 30–90 Tage, dann scrubben | Art. 5 I e + Cross-Link `dsgvo-auth-and-logging/LOGGING.md` |
 | Bounce-Logs in Klartext | max. 30 Tage | Art. 5 I e |
 | Open-/Click-Tracking-Daten (pro Empfänger) | 12 Monate aggregiert; bei DPIA prüfen | Faustregel; bei großer Reichweite verkürzen |
-| Confirm-Tokens | bis Confirm oder Expiry (max. 7 Tage) + danach löschen | nach Confirm Token nicht mehr nötig |
+| Confirm-Tokens | bis Confirm oder Expiry (gestaffelt: 24h Health/Finanz, 48h Lead-Magnet, 7d Newsletter) + danach physisch löschen | nach Confirm Token nicht mehr nötig; Detail siehe `CONSENT-AND-DOI.md` (Sektion Token-TTL) |
 | Unsubscribe-Tokens | unbegrenzt single-use Hash; Klartext nicht speichern | Replay-Schutz |
 
 ## Direkt-Marketing-Widerspruchsrecht (Art. 21 II + IV)
@@ -221,7 +240,7 @@ In jeder weiteren Werbe-Mail genügt der Footer-Link — aber nur, wenn der prom
 | Thema | siehe |
 |---|---|
 | DOI-Token-Generierung + Lifecycle | `CONSENT-AND-DOI.md` |
-| Confirm-Mail-Inhalt-Regeln (BGH I ZR 164/09) — analog Re-Permission | `CONSENT-AND-DOI.md` |
+| Confirm-Mail-Inhalt-Regeln (BGH VI ZR 134/15 — „No-Reply") — analog Re-Permission | `CONSENT-AND-DOI.md` |
 | UWG-Lauterkeitsrecht — Cold-Mailing-Verbot | `UWG-7.md` |
 | Versand-Log-Format + IP-Scrubbing | `dsgvo-auth-and-logging/LOGGING.md` |
 | IP-Aufbewahrung beim Open-Pixel-Hit | `dsgvo-auth-and-logging/IP-ADDRESSES.md` |
@@ -236,8 +255,9 @@ In jeder weiteren Werbe-Mail genügt der Footer-Link — aber nur, wenn der prom
 - [RFC 8058 — One-Click-Unsubscribe](https://www.rfc-editor.org/rfc/rfc8058)
 - [Gmail Sender Guidelines (postmaster.google.com)](https://support.google.com/mail/answer/81126) — Stand Mai 2026, laufend prüfen
 - [Yahoo Sender Best Practices](https://senders.yahooinc.com/best-practices/) — laufend prüfen
+- [Microsoft Outlook High-Volume-Sender Requirements (TechCommunity)](https://techcommunity.microsoft.com/blog/microsoftdefenderforoffice365blog/strengthening-email-ecosystem-outlook%E2%80%99s-new-requirements-for-high%E2%80%90volume-senders/4399730) — Enforcement seit 05.05.2025
 - [§ 11 UWG (Verjährung)](https://www.gesetze-im-internet.de/uwg_2004/__11.html)
-- BGH I ZR 164/09 (16.07.2008) — Re-Permission-Mail-Inhalt analog Confirm
+- BGH VI ZR 134/15 (15.12.2015 — „No-Reply") — Auto-Reply / Re-Permission-Mail-Inhalt analog Confirm
 - [DSK-Orientierungshilfe Direktwerbung 2022](https://www.datenschutzkonferenz-online.de/) — Aufbewahrungsfristen-Praxis
 
 ## Disclaimer

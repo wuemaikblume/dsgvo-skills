@@ -1,5 +1,5 @@
 ---
-description: Abgrenzung Service-Mail vs werbliche E-Mail nach BGH-/OLG-Linie (BGH I ZR 218/07, VI ZR 225/17 — Bewertungsbitte = Werbung, I ZR 164/09 — Confirm-Mail darf keine Werbung, OLG Hamm 4 U 121/13 — Cross-Sell in Trans-Mail). Use when classifying Mail-Templates (transactional vs marketing), evaluating Cross-Sell-Block in Bestellbestätigung, Onboarding-Drip-Mischmail, Bewertungs-Mail. Code-Pattern: Mail-Template-Klassifikation mit Send-Funktions-Guard.
+description: Abgrenzung Service-Mail vs werbliche E-Mail nach BGH-/OLG-Linie (BGH I ZR 218/07 vom 20.05.2009 — „E-Mail-Werbung II" / B2B-Eingriff; VI ZR 225/17 vom 10.07.2018 — Bewertungsbitte = Werbung; VI ZR 134/15 vom 15.12.2015 — „No-Reply" / Auto-Reply mit Werbezusatz = Eingriff Persönlichkeitsrecht). Use when classifying Mail-Templates (transactional vs marketing), evaluating Cross-Sell-Block in Bestellbestätigung, Onboarding-Drip-Mischmail, Bewertungs-Mail. Code-Pattern: Mail-Template-Klassifikation mit Send-Funktions-Guard.
 globs:
 alwaysApply: false
 ---
@@ -12,10 +12,10 @@ alwaysApply: false
 
 | Aktenzeichen | Datum | Kernaussage |
 |---|---|---|
-| BGH I ZR 218/07 | 10.02.2011 | Werbung iSd UWG § 7 ist „jede Form der Anpreisung mit dem Ziel der Förderung des Absatzes" — auch mittelbar |
-| BGH I ZR 164/09 | 16.07.2008 | Bestätigungs-Mail im Double-Opt-In darf selbst keine Werbung enthalten |
+| BGH I ZR 218/07 | 20.05.2009 | „E-Mail-Werbung II": einmalige unverlangte Werbe-Mail an Gewerbetreibende = Eingriff Gewerbebetrieb (B2B nicht frei). Werbungsbegriff weit |
+| BGH VI ZR 134/15 | 15.12.2015 | „No-Reply": automatisch generierte Bestätigungs-/Auto-Reply-Mail mit werblichem Zusatz = rechtswidriger Eingriff in das allgemeine Persönlichkeitsrecht; Unterlassungsanspruch |
 | BGH VI ZR 225/17 | 10.07.2018 | „Bewertungs-Bitte" nach abgeschlossenem Kauf zählt als Werbung iSd UWG § 7 |
-| OLG Hamm 4 U 121/13 | 26.11.2013 | Cross-Sell-Hinweis in transaktionaler Mail (Versandbestätigung mit Produkt-Empfehlung) erfüllt den Werbungsbegriff |
+| OLG München 29 U 1682/12 / LG Stendal 22 S 87/20 | Instanzlinie | Werbe-Zusätze in Confirm-Mail (DOI-Bestätigung) machen aus Service-Mail unzulässige Werbe-Mail; Confirm-Klick kann unwirksam werden |
 
 Die Linie der Gerichte: jede Form der Absatzförderung — auch ein kleiner Hinweis am Rand, eine Bewertungs-Bitte, ein Kontextwerbeblock — macht aus einer Trans-Mail eine Werbe-Mail.
 
@@ -216,10 +216,10 @@ Postmark-spezifisch: Trans-Mails über den Transactional-Stream senden (`Message
 
 ## Quellen
 
-- BGH I ZR 218/07 (10.02.2011) — Werbungsbegriff weit
-- BGH I ZR 164/09 (16.07.2008) — Confirm-Mail-Werbungsfreiheit
+- BGH I ZR 218/07 (20.05.2009 — „E-Mail-Werbung II") — einmalige unverlangte Werbe-Mail an Gewerbetreibende = Eingriff Gewerbebetrieb; Werbungsbegriff weit
+- BGH VI ZR 134/15 (15.12.2015 — „No-Reply") — Auto-Reply / Bestätigungs-Mail mit Werbezusatz = Eingriff Persönlichkeitsrecht
 - BGH VI ZR 225/17 (10.07.2018) — Bewertungs-Bitte als Werbung
-- OLG Hamm 4 U 121/13 (26.11.2013) — Cross-Sell in Trans-Mail
+- OLG München 29 U 1682/12, LG Stendal 22 S 87/20 — Instanzlinie zu Werbe-Zusatz in Confirm-Mail
 - [DSGVO Art. 6 I b, 6 I f, 13](https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679)
 - [UWG § 7 II Nr. 3](https://www.gesetze-im-internet.de/uwg_2004/__7.html)
 - [DSK-Orientierungshilfe Direktwerbung 2022](https://www.datenschutzkonferenz-online.de/) — laufend prüfen

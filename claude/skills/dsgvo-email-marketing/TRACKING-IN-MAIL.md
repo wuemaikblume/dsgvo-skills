@@ -113,14 +113,17 @@ Für DACH-Newsletter mit ~1.000–10.000 Empfängern und einfachen Mail-Layouts 
 
 ## A/B-Test- und Personalisierungs-Tracking
 
-Personalisierungs-Tracking pro Empfänger (Klick-History, Open-History, Lese-Dauer, Interessen-Tag) erzeugt ein Profil iSd Art. 4 Nr. 4 DSGVO. Bei großer Reichweite + automatisierter Inhalts-Anpassung greift Art. 35 DSGVO (DPIA-Pflicht).
+Personalisierungs-Tracking pro Empfänger (Klick-History, Open-History, Lese-Dauer, Interessen-Tag) erzeugt ein Profil iSd Art. 4 Nr. 4 DSGVO. Die DPIA-Pflicht (Art. 35 DSGVO) hängt **nicht** an einer starren Empfängerzahl, sondern am **Risiko**: systematisches Profiling, Cross-Device-/Cross-Site-Tracking, sensible Segmente (Art. 9), AI-Scoring, automatisierte Entscheidungen (DSK-Blacklist, EDPB Guidelines 04/2017).
 
 | Tracking-Tiefe | DPIA-Pflicht? |
 |---|---|
-| Subject-A/B-Test (zwei Versionen, aggregierte Auswertung, < 5.000 Empfänger) | nein |
+| Subject-A/B-Test (zwei Versionen, aggregierte Auswertung) | nein |
 | Open- + Click-Aggregat ohne Empfänger-ID-Speicherung | nein |
-| Pro-Empfänger-Profil mit Klick-History + Interessen-Tags + > 50.000 Empfänger | DPIA prüfen, Cross-Link `dsgvo-third-country-transfer/DPIA.md` |
-| Automatisierte Empfehlung (KI-basiertes Inhalt-Tailoring pro Empfänger) | DPIA + Art. 22 prüfen |
+| Pro-Empfänger-Profil mit Klick-History + Interessen-Tags ohne Cross-Site-/Cross-Device-Verknüpfung | nein, aber Art. 21 II Widerspruchsrecht beachten |
+| Profiling mit Cross-Device-/Cross-Site-Tracking, Lookalike-Modelling, sensiblen Segmenten oder Scoring | **DPIA Pflicht**, Cross-Link `dsgvo-third-country-transfer/DPIA.md` |
+| Automatisierte Empfehlung (KI-basiertes Inhalt-Tailoring pro Empfänger), AI-Personalisierung mit LLM-API | **DPIA + Art. 22 prüfen + AI Act Art. 50 ab 02.08.2026** |
+
+**Empfängerzahl ist nicht entscheidend** — auch bei 1.000 Empfängern kann Profiling DPIA-pflichtig sein, bei 500.000 Newsletter-Empfängern ohne Profiling nicht. Maintainer-interner Review-Trigger (≠ Rechtsschwelle): bei jeder Newsletter-Personalisierung über reines Versand-Verhalten hinaus DPIA-Screening fahren.
 
 Trennungsgebot (Art. 7 II DSGVO): Personalisierungs-Tracking braucht eigene Einwilligung, getrennt von Newsletter-Anmeldung und Open-Tracking. Drei Häkchen, drei Zwecke:
 
@@ -171,7 +174,7 @@ Aufbewahrung: max. 30 Tage in lesbarer Form, danach hashen oder anonymisieren �
 
 ## Confirm-Mail rendert NIE Tracking-Pixel
 
-Eine Bestätigungs-Mail im DOI-Flow ist eine reine Service-Mail (BGH I ZR 164/09 — keine Werbung). Tracking-Pixel zählen als Marketing-Datenverarbeitung — sie gehören NIE in Confirm-Mails, auch wenn der Provider sie standardmäßig einbaut.
+Eine Bestätigungs-Mail im DOI-Flow ist eine reine Service-Mail (BGH VI ZR 134/15 — werbliche Zusätze in Auto-Reply/Confirm-Mail = Persönlichkeitsrechtsverletzung). Tracking-Pixel zählen als Marketing-Datenverarbeitung — sie gehören NIE in Confirm-Mails, auch wenn der Provider sie standardmäßig einbaut.
 
 Code-Pattern:
 

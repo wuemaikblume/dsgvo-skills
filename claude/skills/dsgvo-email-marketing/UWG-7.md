@@ -36,11 +36,11 @@ Der BGH legt „Werbung" iSd § 7 weit aus: jede Form der Anpreisung mit dem Zie
 
 | Aktenzeichen | Datum | Kernaussage |
 |---|---|---|
-| BGH I ZR 218/07 | 10.02.2011 | Beweislast für DOI-Einwilligung trifft den Versender; ohne DOI keine wirksame Einwilligung beweisbar |
-| BGH I ZR 164/09 | 16.07.2008 | Bestätigungs-Mail im DOI darf selbst keine Werbung enthalten |
+| BGH I ZR 218/07 | 20.05.2009 | „E-Mail-Werbung II": Bereits einmalige unverlangte Werbe-Mail an Gewerbetreibende = rechtswidriger Eingriff in den Gewerbebetrieb (B2B nicht frei) |
+| BGH I ZR 164/09 | 10.02.2011 | „Telefonaktion II": Rein elektronisches DOI ist als Beweis der Einwilligung in **Telefonwerbung** ungeeignet (keine Identitätssicherung E-Mail-Inhaber ↔ Telefon-Anschlussinhaber). DOI-Beweispflicht bleibt für Werbe-E-Mails. |
+| BGH VI ZR 134/15 | 15.12.2015 | „No-Reply": Automatische Bestätigungs-E-Mail mit werblichem Zusatz = rechtswidriger Eingriff in das allgemeine Persönlichkeitsrecht; Unterlassungsanspruch |
 | BGH VI ZR 225/17 | 10.07.2018 | „Bewertungs-Bitte" nach abgeschlossenem Kauf ist Werbung iSd UWG § 7 |
-| OLG Hamm 4 U 121/13 | 26.11.2013 | Cross-Sell-Hinweis in transaktionaler Mail (Versandbestätigung mit Produkt-Empfehlung) ist Werbung |
-| BGH I ZR 169/04 | 16.07.2008 | SMS-Werbung — Plattform-/elektronische Post weit verstanden; analog anwendbar auf Plattform-DMs |
+| OLG Hamm 18 U 154/22 | 03.05.2023 (Beschluss) | Direktnachrichten in Xing/LinkedIn/Facebook/WhatsApp = elektronische Post iSd § 7 II Nr. 3 UWG; Erstkontakt ohne ausdrückliche Einwilligung verboten; „mutmaßliche Einwilligung" wegen Geschäftsinteresse reicht nicht |
 
 ### Cold-B2B-Mailing — die drei häufigsten Fehlannahmen
 
@@ -50,7 +50,7 @@ Falsch. § 7 II Nr. 3 spricht von „Adressat" — nicht vom Verbraucher. Berufl
 
 **Fehlannahme 2: „LinkedIn-/XING-Direktnachrichten sind keine E-Mail iSd UWG."**
 
-Falsch. § 7 II Nr. 3 erfasst „elektronische Post" weit. Nachrichten über Plattform-Messaging-Systeme (LinkedIn DM, XING-Nachrichten, Slack-DM-Outreach, WhatsApp-Business-Initial-Message) gelten in der herrschenden Auslegung analog (BGH I ZR 169/04 zur SMS-Werbung — gleicher Schutzgedanke der Privatsphäre).
+Falsch. § 7 II Nr. 3 erfasst „elektronische Post" weit. **OLG Hamm 18 U 154/22 vom 03.05.2023** (Beschluss) stellt direkt fest: Direktnachrichten über Plattform-Messaging-Systeme (LinkedIn-DM, XING-Nachrichten, Facebook-Messenger, WhatsApp-Business-Initial-Message) sind elektronische Post iSd § 7 II Nr. 3 UWG. Auch Slack-DM-Outreach an externe Workspaces fällt in der herrschenden Auslegung darunter. Eine „mutmaßliche Einwilligung" allein wegen geschäftlichen Interesses reicht nicht — es braucht eine ausdrückliche Einwilligung wie bei E-Mail.
 
 **Fehlannahme 3: „Wenn die berufliche Adresse im Impressum steht, ist sie öffentlich → Einwilligung implizit."**
 
@@ -128,10 +128,10 @@ Komplexere Land-spezifische Differenzierung lohnt sich erst bei großen Listen m
 | Thema | siehe |
 |---|---|
 | DOI-Flow + Token-Schema | `CONSENT-AND-DOI.md` |
-| Confirm-Mail-Inhalt-Regeln (BGH I ZR 164/09) | `CONSENT-AND-DOI.md` |
+| Confirm-Mail-Inhalt-Regeln (BGH VI ZR 134/15 — „No-Reply") | `CONSENT-AND-DOI.md` |
 | Service-Mail-Klassifikation gegen Werbung | `SERVICE-VS-MARKETING.md` |
 | Bewertungs-Mail (BGH VI ZR 225/17) | `SERVICE-VS-MARKETING.md` |
-| Cross-Sell-Banner (OLG Hamm) | `SERVICE-VS-MARKETING.md` |
+| Cross-Sell-Banner / Auto-Reply mit Werbezusatz (BGH VI ZR 134/15) | `SERVICE-VS-MARKETING.md` |
 | Schweiz revDSG / EDÖB / Auskunftsrecht | `dsgvo-third-country-transfer/CH-REVDSG.md` |
 | Drittland-Aspekt US-Newsletter-Provider | `dsgvo-third-country-transfer/PROVIDERS.md` |
 | Direkt-Marketing-Widerspruch (Art. 21 II DSGVO) | `UNSUBSCRIBE-AND-RETENTION.md` |
@@ -142,11 +142,11 @@ Komplexere Land-spezifische Differenzierung lohnt sich erst bei großen Listen m
 - [UWG § 8 (Unterlassung)](https://www.gesetze-im-internet.de/uwg_2004/__8.html) — Deutschland
 - [TKG 2021 § 174 (RIS, Bundesgesetzblatt Österreich)](https://www.ris.bka.gv.at/) — Österreich
 - [UWG Schweiz Art. 3 (admin.ch)](https://www.fedlex.admin.ch/eli/cc/1988/223_223_223) — Schweiz
-- BGH I ZR 218/07 (10.02.2011) — Double-Opt-In, Beweislast
-- BGH I ZR 164/09 (16.07.2008) — Confirm-Mail-Werbungsfreiheit
-- BGH VI ZR 225/17 (10.07.2018) — Bewertungs-Bitte als Werbung
-- BGH I ZR 169/04 (16.07.2008) — SMS / elektronische Post weit verstanden
-- OLG Hamm 4 U 121/13 (26.11.2013) — Cross-Sell in Trans-Mail
+- BGH I ZR 218/07 (20.05.2009 — „E-Mail-Werbung II") — einmalige unverlangte Werbe-Mail an Gewerbetreibende = Eingriff Gewerbebetrieb (B2B nicht frei)
+- BGH I ZR 164/09 (10.02.2011 — „Telefonaktion II") — rein elektronisches DOI ungeeignet zum Nachweis Telefonwerbungs-Einwilligung
+- BGH VI ZR 134/15 (15.12.2015 — „No-Reply") — Auto-Reply mit Werbezusatz = Eingriff Persönlichkeitsrecht; Unterlassungsanspruch
+- BGH VI ZR 225/17 (10.07.2018) — Bewertungs-/Zufriedenheitsbitte als Werbung
+- OLG Hamm 18 U 154/22 (03.05.2023 — Beschluss) — Direktnachrichten in Xing/LinkedIn/Facebook/WhatsApp = elektronische Post iSd § 7 II Nr. 3 UWG
 - [DSK-Orientierungshilfe Direktwerbung 2022](https://www.datenschutzkonferenz-online.de/) — laufend prüfen
 
 ## Disclaimer

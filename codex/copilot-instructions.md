@@ -353,12 +353,12 @@ Greift bei: Newsletter-/Drip-/Re-Engagement-/Win-Back-Code, Newsletter-Provider-
 
 ### Decision Tree
 
-1. **Ist der Mail-Inhalt Werbung iSd UWG § 7?** → Werbung weit auszulegen (BGH I ZR 218/07): Cross-Sell, Bewertungs-Bitte, Upgrade-Promotion = Werbung. Reine Trans-Mails (Versandstatus, Reset, MFA-Code, Rechnung) bleiben einwilligungsfrei.
-2. **DOI dokumentiert?** → Token + IP + UA + Form-URL + Zeitstempel + `confirmed_at` müssen beweisbar sein (BGH I ZR 218/07 Beweislast). Single-Opt-In ist in DE/AT abmahnfähig; CH-Sonderfall bei reiner CH-Liste tolerabel, bei DACH-Mischliste unsicher.
-3. **Bestandskunden-Privileg (UWG § 7 III)?** → Vier Voraussetzungen kumulativ: (a) Adresse aus Verkauf, (b) Werbung für ähnliche Waren/DL, (c) klarer Hinweis bei Erhebung + jeder Mail, (d) Widerruf kostenfrei. Lead-Magnet ≠ Verkauf. Cold-B2B ist NICHT erlaubt (§ 7 II Nr. 3 macht keine B2B-Ausnahme; LinkedIn-DM zählt analog BGH I ZR 169/04).
-4. **Service vs. Werbung sauber getrennt?** → Mail-Templates explizit als `transactional` oder `marketing` typisieren. Cross-Sell-Block in Order-Confirmation = Werbung (OLG Hamm 4 U 121/13). Bewertungs-Bitte = Werbung (BGH VI ZR 225/17). Confirm-Mail darf KEINE Werbung enthalten (BGH I ZR 164/09).
-5. **Tracking-Pixel oder Click-Redirect aktiv?** → Eigene Einwilligung pro Empfänger (TDDDG § 25 + Art. 6 + DSK 2021). Confirm-Mail rendert NIE Pixel. Externe Bilder via CID inline einbetten oder einwilligungs-gekoppelt rendern.
-6. **One-Click-Unsubscribe + List-Unsubscribe-Header?** → Pflicht für Bulk-Sender ≥ 5.000 Mails/Tag (Gmail/Yahoo Sender Requirements Februar 2024 + Microsoft 2025). RFC 8058 + DKIM/SPF/DMARC + Spam-Rate < 0,3 %. Suppression-Hash (SHA-256) statt Klartext-E-Mail nach Widerruf.
+1. **Ist der Mail-Inhalt Werbung iSd UWG § 7?** → Werbung weit auszulegen (ständige BGH-Rechtsprechung, vgl. BGH VI ZR 225/17, VI ZR 134/15): Cross-Sell, Bewertungs-Bitte, Upgrade-Promotion = Werbung. Reine Trans-Mails (Versandstatus, Reset, MFA-Code, Rechnung) bleiben einwilligungsfrei. Auch im B2B gilt: einmalige unverlangte Werbe-Mail an Gewerbetreibende = Eingriff Gewerbebetrieb (BGH I ZR 218/07 vom 20.05.2009 — „E-Mail-Werbung II").
+2. **DOI dokumentiert?** → Token + IP + UA + Form-URL + Zeitstempel + `confirmed_at` müssen beweisbar sein (Art. 7 I DSGVO Beweislast; BGH I ZR 164/09 — rein elektronisches DOI taugt nicht für Telefon-Einwilligung). Single-Opt-In ist in DE/AT abmahnfähig; CH-Sonderfall bei reiner CH-Liste tolerabel, bei DACH-Mischliste unsicher.
+3. **Bestandskunden-Privileg (UWG § 7 III)?** → Vier Voraussetzungen kumulativ: (a) Adresse aus Verkauf, (b) Werbung für ähnliche Waren/DL, (c) klarer Hinweis bei Erhebung + jeder Mail, (d) Widerruf kostenfrei. Lead-Magnet ≠ Verkauf. Cold-B2B ist NICHT erlaubt (§ 7 II Nr. 3 macht keine B2B-Ausnahme; Plattform-DMs Xing/LinkedIn/Facebook/WhatsApp = elektronische Post nach OLG Hamm 18 U 154/22 vom 03.05.2023).
+4. **Service vs. Werbung sauber getrennt?** → Mail-Templates explizit als `transactional` oder `marketing` typisieren. Cross-Sell-Block in Order-Confirmation, Bewertungs-Bitte, Auto-Reply mit Werbezusatz = Werbung (BGH VI ZR 225/17 / VI ZR 134/15 / ständige Linie). Confirm-Mail darf KEINE Werbung enthalten (BGH VI ZR 134/15 — „No-Reply": Eingriff Persönlichkeitsrecht).
+5. **Tracking-Pixel oder Click-Redirect aktiv?** → Eigene Einwilligung pro Empfänger (TDDDG § 25 + Art. 6 + DSK-Direktwerbung 2022). Confirm-Mail rendert NIE Pixel. Externe Bilder via CID inline einbetten oder einwilligungs-gekoppelt rendern.
+6. **One-Click-Unsubscribe + List-Unsubscribe-Header?** → Pflicht für Bulk-Sender ≥ 5.000 Mails/Tag (Gmail/Yahoo Februar 2024 + Microsoft Outlook seit 05.05.2025 — alle drei: SPF + DKIM + DMARC). RFC 8058 + Spam-Rate < 0,3 %. Suppression-Hash als **HMAC-SHA-256 mit serverseitigem Pepper** (nicht plain SHA-256 — E-Mails sind low-entropy → Rainbow-Table-trivial) statt Klartext-E-Mail nach Widerruf.
 
 ### Code-Generation-Regel
 
@@ -388,8 +388,12 @@ import crypto from 'node:crypto';
 
 const tokenBytes = crypto.randomBytes(32);
 const token = tokenBytes.toString('hex');
+// Token: 256 bit Zufall → plain SHA-256 reicht. Email-Hash: HMAC + Pepper Pflicht (low-entropy).
 const tokenHash = crypto.createHash('sha256').update(tokenBytes).digest('hex');
-const emailHash = crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
+const emailHash = crypto
+  .createHmac('sha256', process.env.SUPPRESSION_PEPPER!)
+  .update(email.toLowerCase().trim())
+  .digest('hex');
 
 await db.query(
   `INSERT INTO subscription_consents
@@ -433,12 +437,12 @@ CREATE TABLE email_suppression_list (
 ```
 
 ```ts
-// Versand-Filter
+// Versand-Filter — Hash server-seitig per HMAC + Pepper, nicht im SQL inline (Pepper-Verfügbarkeit)
 const eligible = await db.query(
   `SELECT email FROM subscribers
    WHERE active AND consent_marketing
-     AND NOT EXISTS (SELECT 1 FROM email_suppression_list
-                     WHERE email_hash = sha256(LOWER(TRIM(subscribers.email))))`
+     AND email_hash NOT IN (SELECT email_hash FROM email_suppression_list WHERE email_hash = ANY($1))`,
+  [recipientHashes] // recipientHashes = subscribers.map(s => suppressionHash(s.email))
 );
 ```
 
@@ -451,10 +455,10 @@ List-Unsubscribe-Post: List-Unsubscribe=One-Click
 
 ### Häufige Fallen
 
-- **Confirm-Mail mit „Übrigens, hier unsere Angebote"** — BGH I ZR 164/09: Confirm-Mail darf keine Werbung. Gesamter DOI-Beweis fällt.
-- **Cross-Sell-Block in Order-Confirmation** — OLG Hamm 4 U 121/13: macht aus Trans-Mail eine Werbe-Mail.
-- **Mailchimp-Audience mit Default-Tracking** — TDDDG § 25 + DSK 2021: separate Einwilligung erforderlich, nicht im Newsletter-Häkchen mit-eingewilligt.
-- **„LinkedIn-DM ist keine E-Mail"** — falsch; § 7 II Nr. 3 erfasst „elektronische Post" weit (BGH I ZR 169/04 zu SMS analog).
+- **Confirm-Mail mit „Übrigens, hier unsere Angebote"** — BGH VI ZR 134/15 („No-Reply"): Auto-Reply / Bestätigungs-Mail mit Werbezusatz = Eingriff Persönlichkeitsrecht; Unterlassungsanspruch.
+- **Cross-Sell-Block in Order-Confirmation** — BGH VI ZR 134/15 + VI ZR 225/17: macht aus Trans-Mail eine Werbe-Mail.
+- **Mailchimp-Audience mit Default-Tracking** — TDDDG § 25 + DSK-Direktwerbung 2022: separate Einwilligung erforderlich, nicht im Newsletter-Häkchen mit-eingewilligt.
+- **„LinkedIn-DM ist keine E-Mail"** — falsch; § 7 II Nr. 3 erfasst „elektronische Post" weit, OLG Hamm 18 U 154/22 (03.05.2023) stellt direkt fest, dass DMs in Xing/LinkedIn/Facebook/WhatsApp elektronische Post sind.
 - **Re-Subscribe alter Listen ohne neuen DOI** — nach Widerruf ist alter Eintrag nicht reaktivierbar; neuer DOI nötig.
 - **„CAN-SPAM reicht für Europa"** — falsch; UWG + DSGVO + ePrivacy gelten zusätzlich.
 - **Klartext-E-Mail nach Unsubscribe in DB lassen** — Art. 5 I c verlangt Hash + Klartext-Löschung; Suppression läuft via Hash.
@@ -479,12 +483,14 @@ Detail siehe Repo: <https://github.com/wuemaikblume/dsgvo-skills/tree/main/claud
 - TKG 2021 § 174 (AT): <https://www.ris.bka.gv.at/>
 - UWG Art. 3 (CH): <https://www.fedlex.admin.ch/eli/cc/1988/223_223_223>
 - TDDDG § 25 (DE, vormals TTDSG): <https://www.gesetze-im-internet.de/tddg/>
-- BGH I ZR 218/07 (10.02.2011) — DOI-Beweislast
-- BGH I ZR 164/09 (16.07.2008) — Confirm-Mail-Werbungsfreiheit
+- BGH I ZR 218/07 (20.05.2009 — „E-Mail-Werbung II") — einmalige unverlangte Werbe-Mail an Gewerbetreibende = Eingriff Gewerbebetrieb
+- BGH I ZR 164/09 (10.02.2011 — „Telefonaktion II") — rein elektronisches DOI ungeeignet zum Nachweis Telefonwerbungs-Einwilligung
+- BGH VI ZR 134/15 (15.12.2015 — „No-Reply") — Auto-Reply mit Werbezusatz = Eingriff Persönlichkeitsrecht
 - BGH VI ZR 225/17 (10.07.2018) — Bewertungs-Bitte = Werbung
-- OLG Hamm 4 U 121/13 (26.11.2013) — Cross-Sell in Trans-Mail
+- OLG Hamm 18 U 154/22 (03.05.2023 — Beschluss) — Direktnachrichten in Xing/LinkedIn/Facebook/WhatsApp = elektronische Post iSd § 7 II Nr. 3 UWG
 - RFC 8058 — One-Click-Unsubscribe: <https://www.rfc-editor.org/rfc/rfc8058>
 - Gmail Sender Requirements: <https://support.google.com/mail/answer/81126>
+- Microsoft Outlook High-Volume-Sender Requirements (Enforcement seit 05.05.2025): <https://techcommunity.microsoft.com/blog/microsoftdefenderforoffice365blog/strengthening-email-ecosystem-outlook%E2%80%99s-new-requirements-for-high%E2%80%90volume-senders/4399730>
 
 ## Disclaimer
 
