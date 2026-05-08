@@ -464,7 +464,84 @@ List-Unsubscribe-Post: List-Unsubscribe=One-Click
 - **Klartext-E-Mail nach Unsubscribe in DB lassen** — Art. 5 I c verlangt Hash + Klartext-Löschung; Suppression läuft via Hash.
 - **Bewertungs-Bitte ohne Marketing-Einwilligung** — BGH VI ZR 225/17: Werbung iSd § 7.
 
-Detail siehe Repo: <https://github.com/wuemaikblume/dsgvo-skills/tree/main/claude/skills/dsgvo-email-marketing> (SKILL/CONSENT-AND-DOI/UWG-7/TRACKING-IN-MAIL/UNSUBSCRIBE-AND-RETENTION/SERVICE-VS-MARKETING).
+Detail siehe Repo: <https://github.com/wuemaikblume/dsgvo-skills/tree/main/claude/skills/dsgvo-email-marketing> (SKILL/CONSENT-AND-DOI/UWG-7/TRACKING-IN-MAIL/UNSUBSCRIBE-AND-RETENTION/SERVICE-VS-MARKETING/AI-CONTENT-AND-TRANSPARENCY).
+
+## AI-personalisierter Newsletter-Content (EU AI Act Art. 50 + DSGVO Art. 13/22)
+
+**Stichtag:** EU AI Act Art. 50 wird am 02.08.2026 unmittelbar anwendbar (Verordnung (EU) 2024/1689). Sanktionen bis € 7,5 Mio. oder 1,5 % weltweiter Konzern-Jahresumsatz (Art. 99 Abs. 4 lit. c).
+
+**Trigger (auch bei rein technischen Prompts):** `openai`, `@openai/sdk`, `@anthropic-ai/sdk`, `@mistralai/mistralai`, `cohere-ai`, AI-Subject-Line-Generation, AI-Body-Variation, dynamische Empfehlungen via LLM in Mail-Templates, AI-Bild-Embedding (Midjourney/DALL-E/Stable Diffusion/Flux), Konversations-Newsletter mit Chatbot, Reply-an-AI-Adressen.
+
+**Häufige Fehlannahme:** „Jede AI-generierte Marketing-Mail muss als KI markiert werden." Stimmt **nicht**. Art. 50 differenziert:
+
+| Absatz | Wer | Gilt für Werbe-Newsletter? |
+|---|---|---|
+| Abs. 1 Interaktions-Transparenz | Provider | Ja, bei interaktivem AI-Element (Reply-an-AI, Chatbot, Konversations-Newsletter) |
+| Abs. 2 Output-Markierung maschinenlesbar | Provider (OpenAI, Anthropic) | Provider-Pflicht. Deployer darf Markierung nicht entfernen. |
+| Abs. 4 Satz 1 Deepfake-Disclosure (Bild/Audio/Video) | Deployer | Ja, bei realistischen AI-Bildern mit Personenbezug |
+| Abs. 4 Satz 2 Text-Disclosure | Deployer | **Nein** für klassische Produkt-Werbung. Ja für Politik/Gesundheit/Journalismus ohne menschliche Editorial-Kontrolle. |
+
+**Praktische Konsequenz für 90 % der Newsletter:** Subject-Lines, Body-Variation, Empfehlungen sind **außerhalb** der Art. 50-Markierungs-Pflicht. Die echten Pflichten kommen aus DSGVO:
+
+1. **Art. 13** — AI-Personalisierung als Verarbeitungs-Zweck im Privacy Notice nennen
+2. **Art. 28 + Kap. V** — DPA + DPF/SCCs für LLM-API (siehe oben Anbieter-Quick-Ref)
+3. **Art. 25** — Pseudonymisierung vor LLM-Call (Profil-Token statt Name/E-Mail)
+4. **Art. 6 + 7 + EDPB 05/2020** — separate granulare Einwilligung für AI-Personalisierung (zusätzlich zum Newsletter-Consent)
+5. **Art. 22** — Edge-Case automatisierte Entscheidung (z. B. dynamic pricing in Mail)
+6. **Art. 30** — VVT-Eintrag „AI-Personalisierung Marketing"
+7. **Art. 35 + EDPB WP 248** — DSFA-Schwelle bei AI-verstärktem Profiling
+
+**Code-Pattern: AI-personalisierte Subject-Line (Datenminimierung + Pseudonymisierung)**
+
+```ts
+async function generatePersonalizedSubject(recipient: Recipient, campaign: Campaign) {
+  if (!isInPrivacyNotice('ai_personalization_marketing')) {
+    throw new Error('AI-Personalisierung nicht im Privacy Notice — Art. 13 verletzt');
+  }
+  if (!hasConsent(recipient, 'ai_personalization')) return campaign.defaultSubject;
+
+  // Pseudonymisierung: Verhaltens-Token statt direkter Identifier
+  const segmentToken = await pseudonymize({
+    interestCategory: recipient.interestCategory,
+    lastEngagementBucket: recipient.lastEngagementBucket,
+    purchaseRange: recipient.purchaseRange,
+  });
+  const subject = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [{ role: 'user',
+      content: `Subject-Line für Profil ${segmentToken}, Thema: ${campaign.theme}. Max 60 Zeichen.` }],
+  });
+  await logAiPersonalization({ campaignId: campaign.id, recipientHash: recipient.hashedId,
+                               profileToken: segmentToken, model: 'gpt-4o' });
+  return subject.choices[0].message.content;
+}
+```
+
+**Code-Pattern: Interaktiver AI-Chatbot in Mail (Art. 50 Abs. 1 — Pflicht-Disclosure)**
+
+```html
+<div style="border-left: 3px solid #c41e1e; padding: 12px; background: #fafafa;">
+  <strong>Hinweis:</strong> Wenn Sie auf diese E-Mail antworten, schreiben Sie
+  mit einem KI-Assistenten. Möchten Sie mit einem Menschen sprechen:
+  <a href="mailto:support@example.de">support@example.de</a>.
+</div>
+```
+
+**Code-Pattern: AI-generiertes Personen-Foto (Art. 50 Abs. 4 Satz 1 — Deepfake)**
+
+```html
+<figure>
+  <img src="${aiImage.cid}" alt="${aiImage.alt}" />
+  <figcaption style="font-size: 11px; color: #666;">
+    Bild mit Künstlicher Intelligenz erzeugt. Die abgebildete Person ist nicht real.
+  </figcaption>
+</figure>
+```
+Provider-seitige C2PA-/Wasserzeichen-Markierung NICHT entfernen (lossy compression vermeiden).
+
+**Voluntary Code of Practice on AI-Generated Content** (digital-strategy.ec.europa.eu) — finaler Stand erwartet Juni 2026, freiwilliges Compliance-Werkzeug. Kein C2PA-Zwang im Verordnungstext, fordert „wirksame, interoperable, robuste, zuverlässige" Lösungen. Für reine Werbung Best-Practice, kein Muss.
+
+**Disclaimer:** Anwalt + DSB konsultieren bei Massen-AI-Personalisierung, Health-/Finanz-Marketing mit AI, AI-Chatbot-Newsletter mit Kindern als Zielgruppe.
 
 ## Quellen
 
@@ -491,6 +568,11 @@ Detail siehe Repo: <https://github.com/wuemaikblume/dsgvo-skills/tree/main/claud
 - RFC 8058 — One-Click-Unsubscribe: <https://www.rfc-editor.org/rfc/rfc8058>
 - Gmail Sender Requirements: <https://support.google.com/mail/answer/81126>
 - Microsoft Outlook High-Volume-Sender Requirements (Enforcement seit 05.05.2025): <https://techcommunity.microsoft.com/blog/microsoftdefenderforoffice365blog/strengthening-email-ecosystem-outlook%E2%80%99s-new-requirements-for-high%E2%80%90volume-senders/4399730>
+- EU AI Act Art. 50 (artificialintelligenceact.eu): <https://artificialintelligenceact.eu/article/50/>
+- Verordnung (EU) 2024/1689 (eur-lex): <https://eur-lex.europa.eu/eli/reg/2024/1689/oj>
+- Code of Practice on AI-Generated Content (voluntary, Final Juni 2026): <https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content>
+- DSK-Orientierungshilfe „KI und Datenschutz" 2025: <https://www.datenschutzkonferenz-online.de/orientierungshilfen.html>
+- BfDI KI-Handreichung 2025: <https://www.bfdi.bund.de/SharedDocs/Downloads/DE/DokumenteBfDI/Dokumente-allg/2025/Handreichung-KI.pdf>
 
 ## Disclaimer
 

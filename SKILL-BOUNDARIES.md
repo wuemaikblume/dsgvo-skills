@@ -53,6 +53,7 @@ Wenn ein neuer Skill ein neues Querschnitts-Thema braucht, das nirgendwo passt: 
 | UWG § 7 Werbung, Double-Opt-In, B2B-Privileg | `email-marketing` ✅ | DOI-Flow + Bestandskunden + Cold-B2B + AT TKG + CH UWG |
 | Tracking-Pixel in E-Mails | `email-marketing` ✅ | Open-Pixel + Click-Redirect + externe Bilder; Norm bleibt EPRIVACY.md |
 | Werbung vs. Service-Mail-Abgrenzung | `email-marketing` ✅ | BGH-Linie I ZR 218/07, VI ZR 225/17, I ZR 164/09 |
+| **EU AI Act Art. 50 für AI-personalisierten Newsletter-Content** | `email-marketing/AI-CONTENT-AND-TRANSPARENCY.md` ✅ | v1.7 (02.08.2026 Stichtag); LLM-Provider-Drittland-Status weiterhin in `third-country-transfer/PROVIDERS.md`, DSFA bei AI-verstärktem Profiling in `third-country-transfer/DPIA.md` |
 
 ✅ Live · 🔜 In Arbeit · 📋 Geplant
 
