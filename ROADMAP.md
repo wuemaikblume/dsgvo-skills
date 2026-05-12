@@ -40,8 +40,8 @@ Sub-Dateien laden via Anthropic-Progressive-Disclosure-Pattern nur on-demand.
 
 ```
 dsgvo-skills/
-├── claude/      # Anthropic Skills (Hauptdatei + 6 Sub-Files)
-├── cursor/      # 6 .cursor/rules/*.mdc (Agent Requested)
+├── claude/      # Anthropic Skills: 3 Skill-Familien mit insgesamt 14 Sub-Files
+├── cursor/      # 15 .cursor/rules/*.mdc (Agent Requested)
 ├── codex/       # AGENTS.md (Codex CLI) + copilot-instructions.md
 ├── README.md
 ├── DISCLAIMER.md
@@ -86,38 +86,17 @@ dsgvo-skills/
 
 ## 3. Offene Punkte (priorisiert + handlungsfertig)
 
-### v1.7 Tiefenrecherche-Review (durchgeführt 2026-05-12)
+### Auslegung in Bewegung (extern beobachten, ggf. Patch nachschieben)
 
-Drei voneinander unabhängige Tiefenrecherchen (Grok + GPT-5.5/ChatGPT + Gemini Deep Research) zur AI-Act-Art-50-Sektion. Primärquellen-Verifikation gegen AI Act Service Desk der EU-Kommission und artificialintelligenceact.eu (Erwägungsgründe 132/133/134).
+Punkte, an denen die Rechtslage noch unter Vorbehalt steht — werden in den jeweiligen Skill-Sub-Files dokumentiert (`AI-CONTENT-AND-TRANSPARENCY.md`, `UWG-7.md`, `CONSENT-AND-DOI.md`, `UNSUBSCRIBE-AND-RETENTION.md`):
 
-**Eingearbeitete Korrekturen (Commit auf Branch `feat/ai-act-art50-email-marketing`):**
-
-- Sanktionsnorm: **Art. 99 Abs. 4 lit. g** (€ 15 Mio. / 3 %) statt fälschlich lit. c (€ 7,5 Mio. / 1,5 %) — lit. g listet explizit Art. 50; lit. c betrifft Verstöße gegen Anbieter-Pflichten aus Art. 16
-- Erwägungsgrund-Zuordnung: **EG 132** (Interaktions-Transparenz Abs. 1) / **EG 133** (Anbieter-Markierung Abs. 2) / **EG 134** (Betreiber-Disclosure Abs. 4)
-- Werke-Ausnahme statt vager „offensichtlich künstlich"-Ausnahme: Abs. 4 enthält **keine** separate Generalausnahme für offensichtlich künstliche Inhalte. Die einschlägige Ausnahme reduziert die Pflicht bei „künstlerischem, kreativem, satirischem, fiktionalem oder analogem Werk" auf eine „werkschonende" Offenlegung
-- Deepfake-Definition (Art. 3 Nr. 60) strikt am Wortlaut: Bezug zu **wirklichen** Personen/Objekten/Orten/Einrichtungen/Ereignissen + Echtheits-Eindruck. Fiktiv-fotorealistische „Kunden"-Testimonials erfüllen den engen Wortlaut nicht zwingend
-- **Neue Sektion UWG-Schiene:** § 3a UWG (Marktverhaltensregelung), § 5 / § 5a UWG (Irreführung), Schwarze Liste (Fake-Testimonials per se unlauter). Mitbewerber- und Verbraucherschutzverbands-Abmahnvektor unabhängig von Aufsicht
-- Editorial-Control-Ausnahme strikt: namentlich benannte Verantwortung + dokumentierte manuelle Vorab-Prüfung. Reines Template-Approval und reine Stichprobenkontrolle reichen nicht
-- Pseudonymisierung risikoadjustiert (Art. 25/32 DSGVO), nicht als ausnahmslose Pflicht formuliert
-- DSFA-Schwelle: keine starre 100k-Empfänger-Zahl mehr; DSK-Blacklist Nr. 11 (KI-Profiling) als zwingender Auslöser
-- Code of Practice präziser: 1. Entwurf 17.12.2025, 2. Entwurf 05.03.2026, Final Juni 2026 erwartet. Multi-Layer-Ansatz (C2PA + Wasserzeichen + Fingerprinting + EU-Piktogramm). Compliance-Demonstration für Signatories statt klassischer Konformitätsvermutung
-- Entwurfsleitlinien der Kommission zu Art. 50 in Konsultation seit 08.05.2026 ergänzt
-- Art. 2 Abs. 7 AI Act (DSGVO bleibt unberührt) als Klammer eingefügt
-- Chatbot-Pattern: Offensichtlichkeits-Ausnahme bei `chatbot@…`/`ai@…`-Sender-Adresse ergänzt
-- BfDI-Handreichung korrekt zitiert: „KI in Behörden — Datenschutz von Anfang an mitdenken", 22.12.2025
-- DSK-Quellen entwirrt: „KI und Datenschutz" 06.05.2024 / „TOMs bei KI-Systemen" Juni 2025 / „RAG-Systeme" Oktober 2025
-
-Spiegelung auf `cursor/rules/dsgvo-ai-content-marketing.mdc`, `codex/AGENTS.md`, `codex/copilot-instructions.md`, `claude/skills/dsgvo-email-marketing/SKILL.md` durchgeführt.
-
-**Verbleibende offene Punkte (Auslegung in Bewegung, dokumentiert in `AI-CONTENT-AND-TRANSPARENCY.md`):**
-
-- [ ] Finale Kommissions-Leitlinien zu Art. 50 (Konsultation 08.05.2026, Endfassung steht aus) — insb. Auslegung „matters of public interest" und Editorial-Control-Schwelle
-- [ ] Code of Practice Final-Fassung Juni 2026 — endgültige technische Marker-Standards
+- [ ] Finale Kommissions-Leitlinien zu AI Act Art. 50 (Konsultation 08.05.2026, Endfassung steht aus) — insb. Auslegung „matters of public interest" und Editorial-Control-Schwelle
+- [ ] Code of Practice on AI-Generated Content Final-Fassung Juni 2026 — endgültige technische Marker-Standards
 - [ ] DACH-Rechtsprechung speziell zu AI-Testimonial-Bildern in Werbemails (keine OLG-Entscheidung mit alleinigem AI-Bezug)
 - [ ] Genaue quantitative DSFA-Schwelle bei skalierter AI-Personalisierung
 - [ ] BSI-Empfehlungen zu C2PA und Wasserzeichen-Standards (Stand Mai 2026 nichts Spezifisches)
-
-**Merge-Vorbereitung:** Mit der Korrektur-Integration ist die Pre-Tag-Pflicht aus dem v1.5-Argon2id-Vorfall erfüllt. Nächster Schritt: User-Approval, dann `gh pr merge 6 --squash` + `git tag v1.7 && git push --tags`.
+- [ ] WhatsApp-Channels: höchstrichterliche Klärung steht aus (DSA-VLOP-Einstufung, Channel-Subscription-als-Einwilligung-Grenzen)
+- [ ] DACH-Bußgeldpraxis zu Kinder-Newsletter-Verifikation 2024–2026 (bisher nicht belastbar dokumentiert)
 
 ### Externer Re-Review v1.3 (optional)
 
@@ -125,25 +104,25 @@ Spiegelung auf `cursor/rules/dsgvo-ai-content-marketing.mdc`, `codex/AGENTS.md`,
 - [ ] Bei neuen Befunden: in einem v1.4-Patch einarbeiten.
 - [ ] **Achtung:** Beim Verfassen des externen Cross-Check-Prompts den SKILL.md-Body **nicht versehentlich doppelt einfügen** (passiert leicht — beide externen KIs flaggen sonst „doppelte Tabelle", was am Prompt liegt, nicht am Skill).
 
-### Cursor-Adaption ✅ (v1.3, Commit `d122638`)
+### Cursor-Adaption ✅ (laufend synchron, Stand v1.8)
 
-Sechs `.mdc`-Rules in `cursor/rules/`, alle Agent-Requested (`alwaysApply: false`), Description aus v1.3 übernommen:
+Fünfzehn `.mdc`-Rules in `cursor/rules/`, alle Agent-Requested (`alwaysApply: false`), bei jedem Skill-Patch mitgepflegt. Aufgeteilt nach Skill-Familien:
 
-- `dsgvo-third-country-transfer.mdc` (konsolidiert SKILL + PROVIDERS, ~30 KB)
-- `dsgvo-roles.mdc`, `dsgvo-dpia.mdc`, `dsgvo-cloud-sovereignty.mdc`, `dsgvo-eprivacy-tracking.mdc`, `dsgvo-revdsg-ch.mdc`
+- **Drittlandtransfer:** `dsgvo-third-country-transfer.mdc`, `dsgvo-roles.mdc`, `dsgvo-dpia.mdc`, `dsgvo-cloud-sovereignty.mdc`, `dsgvo-eprivacy-tracking.mdc`, `dsgvo-revdsg-ch.mdc`
+- **Auth & Logging:** `dsgvo-auth-and-logging.mdc`, `dsgvo-auth-tom.mdc`, `dsgvo-ip-addresses.mdc`
+- **E-Mail-Marketing:** `dsgvo-email-marketing.mdc`, `dsgvo-uwg-7.mdc`, `dsgvo-tracking-in-mail.mdc`, `dsgvo-unsubscribe-and-retention.mdc`, `dsgvo-service-vs-marketing.mdc`, `dsgvo-ai-content-marketing.mdc` (neu v1.7)
 
-Plus `cursor/INSTALL.md` (Agent-Requested-Erklärung, Verifikations-Prompt, Update-Befehle) und aktualisierte `cursor/README.md`.
+Plus `cursor/INSTALL.md` und `cursor/README.md`.
 
 **Community-Tasks** (Maintainer hat kein Cursor — Praxisbericht via Issue/PR willkommen):
 - Re-Test 1 (S3-Upload us-east-1) und Re-Test 3 (OpenAI + Patient-Allergie) in echtem Cursor-Projekt fahren, Trigger-Verhalten dokumentieren
 - Falls Cursor schwächer triggert: Description schärfen oder `globs:` mit File-Pattern-Triggern füllen (z.B. `globs: ["**/*.tf", "**/aws-*.{js,ts}"]`)
 
-### OpenAI Codex / GitHub Copilot Adaption ✅ (v1.3)
+### OpenAI Codex / GitHub Copilot Adaption ✅ (laufend synchron, Stand v1.8)
 
-- `codex/AGENTS.md` (~250 Zeilen) — Decision Tree, Anbieter-Quick-Ref, Code-Patterns, Code-Generation-Regel, CLOUD-Act-Branch, Häufige Fallen, VVT-Pflicht, Quellen
+- `codex/AGENTS.md` (~580 Zeilen) — drei Skill-Familien (Drittlandtransfer, Auth/Logging, E-Mail-Marketing inkl. AI-Act Art. 50 + v1.8-Erweiterungen): Decision Tree, Anbieter-Quick-Ref, Code-Patterns, Code-Generation-Regel, Häufige Fallen, VVT-Pflicht, Quellen
 - `codex/copilot-instructions.md` — identischer Inhalt, Header zeigt auf Copilot
 - `codex/INSTALL.md` (Codex + Copilot Setup, Verifikations-Prompt, Tag-Pinning)
-- `codex/README.md` aktualisiert (Status v1.3)
 
 **Community-Tasks** (Maintainer hat weder Codex CLI noch Copilot — Praxisbericht via Issue/PR willkommen):
 - In echtem Codex-CLI-Projekt installieren und Re-Test 1 + 3 fahren — verifizieren, ob Codex die Code-Generation-Regel (zwei Varianten) zuverlässig umsetzt
@@ -152,18 +131,19 @@ Plus `cursor/INSTALL.md` (Agent-Requested-Erklärung, Verifikations-Prompt, Upda
 
 ### Weitere Skill-Familien
 
-Alle nach demselben Schema: Prototyp → drei Reviews (Sonnet + extern × 2) → Korrekturen → Tests → Veröffentlichung.
+Alle künftigen Skill-Patches und neuen Skills folgen der **7-Phasen-Pipeline** (siehe Sektion 4 → „Arbeits-Reihenfolge") — verhindert die Doppelarbeit der v1.7-Lehre.
 
 **Vor jedem neuen Skill verbindlich:** [SKILL-BOUNDARIES.md](SKILL-BOUNDARIES.md) abgleichen, damit kein Thema doppelt gehört wird und keines verloren geht.
 
+- [x] **`dsgvo-third-country-transfer`** ✅ live (v1.4) — Drittlandtransfer + 5 Sub-Files. Cursor + Codex/Copilot synchron.
 - [x] **`dsgvo-auth-and-logging`** ✅ live (v1.5) — Audit-Logs, IP-Speicherung, Login-Tracking, Zweckbindung, Speicherbegrenzung, Pseudonymisierung in Logs. Vier Sub-Files: `SKILL.md`, `LOGGING.md`, `AUTH-TOM.md`, `IP-ADDRESSES.md`. Cursor + Codex/Copilot synchron.
+- [x] **`dsgvo-email-marketing`** ✅ live (v1.8) — UWG §7 + AT TKG § 174 + CH UWG Art. 3 I o + DSGVO Art. 6/7/21 + TDDDG § 25 + EU AI Act Art. 50 (v1.7) + WhatsApp/Drittland-Outbound/Kinder-risikobasiert/Soft-Bounce (v1.8). Sechs Sub-Files: `SKILL.md`, `CONSENT-AND-DOI.md`, `UWG-7.md`, `TRACKING-IN-MAIL.md`, `UNSUBSCRIBE-AND-RETENTION.md`, `SERVICE-VS-MARKETING.md`, `AI-CONTENT-AND-TRANSPARENCY.md`. Trigger: Newsletter-Provider-SDKs (Mailchimp/Klaviyo/HubSpot/Brevo/CleverReach/Rapidmail/MailerLite/ActiveCampaign), DOI-Endpoints, Mail-Tracking-Pixel, List-Unsubscribe-Header (RFC 8058), Service-vs-Werbung-Abgrenzung, AI-/LLM-Inhalts-Erzeugung, WhatsApp Business API, Drittland-Outbound. Cursor + Codex/Copilot synchron.
 - [ ] **`dsgvo-subject-rights`** — Auskunft (Art. 15), Berichtigung (16), Löschung (17), Einschränkung (18), Portabilität (20), Widerspruch (21). Trigger: User-Account-Features, „Konto löschen"-Endpoints, Datenexport-APIs, Auskunfts-Tickets.
 - [ ] **`dsgvo-personal-data-storage`** — Verschlüsselung at-rest und in-transit, Aufbewahrungsfristen pro Datenkategorie, Backups + Löschkonzept, Pseudonymisierung-Patterns. Trigger: DB-Schema, S3-Bucket-Konfig, Encryption-Settings, Backup-Strategien.
 - [ ] **`nis2-security-baseline`** — NIS2-Umsetzungsgesetz Deutschland (Stand prüfen), Mindestmaßnahmen Art. 21, 24/72h-Meldepflichten, Risikomanagement, Incident-Response. Trigger: Security-relevante Architektur, Auth-Hardening, Backup-Strategien, KRITIS-Sektor-Hinweise.
 - [ ] **`dsgvo-employment`** — § 26 BDSG (Beschäftigtendatenschutz), Bewerber-Daten, Performance-Tracking, HR-Tools (Personio, BambooHR, etc.), Krankenakten. Trigger: HR-System-Integrationen, Performance-Monitoring, Bewerber-Tools.
-- [x] **`dsgvo-email-marketing`** ✅ live (v1.6) — UWG §7 + AT TKG § 174 + CH UWG Art. 3 I o + DSGVO Art. 6/7/21 + TDDDG § 25. Fünf Sub-Files: `SKILL.md`, `CONSENT-AND-DOI.md`, `UWG-7.md`, `TRACKING-IN-MAIL.md`, `UNSUBSCRIBE-AND-RETENTION.md`, `SERVICE-VS-MARKETING.md`. Trigger: Newsletter-Provider-SDKs (Mailchimp/Klaviyo/HubSpot/Brevo/CleverReach/Rapidmail/MailerLite/ActiveCampaign), DOI-Endpoints, Mail-Tracking-Pixel, List-Unsubscribe-Header (RFC 8058), Service-vs-Werbung-Abgrenzung. Cursor + Codex/Copilot synchron.
 
-**Empfohlene Reihenfolge:** Auth-Logging zuerst (am meisten Synergie zum Drittlandtransfer-Skill), dann Subject-Rights, dann NIS2, dann Marketing/Employment.
+**Maintainer-Hinweis:** Die vier noch offenen Skills haben keine Deadline und keine Bauverpflichtung. Wenn sie kommen, dann nach der 7-Phasen-Pipeline und mit dreifacher externer Tiefenrecherche-Review vor Tag.
 
 ### Anbieter-Updates pflegen (laufend)
 
@@ -196,15 +176,28 @@ Der Skill schreibt aktuell „Anthropic: DPF (zur Live-Prüfung empfohlen)". Vor
 - `docs:` — Dokumentation
 - `chore:` — Repo-Pflege
 
-### Cross-Review-Disziplin (Pflicht für jeden neuen Skill)
+### Arbeits-Reihenfolge (7-Phasen-Pipeline, seit v1.8)
+
+Strikt einhalten, **Cursor und Codex NIE vor finalem Claude-Stand anfassen** (v1.7-Lehre — Doppelarbeit von ca. 30 % Aufwand):
+
+1. **Brainstorming** (User + Maintainer): Scope, Trigger, Code-Patterns festlegen
+2. **Erstwurf**: NUR `claude/skills/<name>/...` — keine Mirror-Files
+3. **Self-Review**: Primärquellen-Verifikation per WebFetch (EUR-Lex, Service Desks, BGH-Aktenzeichen)
+4. **Externer Review**: User wirft EINEN konsolidierten Prompt parallel in Grok + GPT + Gemini Deep Research
+5. **Korrektur-Runde**: 2/3-Mehrheits-Triangulation, Primärquelle bei strittigen Punkten. Eine Runde, dann Claude-Stand eingefroren
+6. **Mirror-Spiegelung**: Cursor + Codex + Copilot vom finalen Stand. Einmal
+7. **Release**: Commit, Push, Tag, Symlink-Check, Memory updaten
+
+### Cross-Review-Disziplin (Pflicht für jeden neuen Skill und Patch)
 
 1. Erster Wurf von einer Person/AI
 2. **Drei** unabhängige Reviews:
-   - Sonnet-Subagent intern (mit WebSearch)
-   - Externe Standard-KI-Review (GPT, Gemini, Mistral)
+   - Sonnet-Subagent intern (mit WebSearch) ODER eigene Self-Review per WebFetch
+   - Externe Standard-KI-Review (GPT, Gemini, Mistral, Grok)
    - Tiefenrecherche extern (Quellen-Crawling)
 3. Schnittmenge der Befunde priorisiert einarbeiten
 4. Trigger-Tests in echter Claude-Code-Session vor Veröffentlichung
+5. **Pre-Tag-Pflicht:** Bei rechtlichen Faktenclaims externer Tiefenrecherche-Review vor jedem `git tag`. Lehren aus v1.5 (BSI-Argon2id-Halluzination), v1.7 (Sanktionsnorm-Halluzination) und v1.8 (Wettbewerbszentrale-Leitfaden-Halluzination + überzogene Kinder-Verifikations-Aussagen) zeigen: interner Sub-Agent reicht nicht, kann Norm-Zitate halluzinieren
 
 ### Quellen-Pflicht
 
