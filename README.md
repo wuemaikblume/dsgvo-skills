@@ -4,11 +4,11 @@ Kostenlose Compliance-Pakete für **Claude AI / Claude Code**, **Cursor** und **
 
 > **Was ist ein Skill?** Eine Markdown-Datei mit YAML-Frontmatter, die das Tool bei passendem Kontext automatisch lädt. Bei Claude: [offizielle Anthropic-Doku](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview).
 
-## Status (v1.6)
+## Status (v1.7)
 
-- ✅ **`/claude`** — Anthropic Skills für Claude Code, Claude.ai, Claude API. Drei Skill-Familien: Drittlandtransfer (+ 5 Vertiefungs-Dateien), Auth & Logging (+ 3 Vertiefungs-Dateien) und E-Mail-Marketing (+ 5 Vertiefungs-Dateien).
-- ✅ **`/cursor`** — Vierzehn `.cursor/rules/*.mdc` Agent-Requested-Rules.
-- ✅ **`/codex`** — Konsolidierte `AGENTS.md` (Codex CLI) und `copilot-instructions.md` (GitHub Copilot), beide mit Drittlandtransfer-, Auth/Logging- und E-Mail-Marketing-Sektion.
+- ✅ **`/claude`** — Anthropic Skills für Claude Code, Claude.ai, Claude API. Drei Skill-Familien: Drittlandtransfer (+ 5 Vertiefungs-Dateien), Auth & Logging (+ 3 Vertiefungs-Dateien) und E-Mail-Marketing (+ 6 Vertiefungs-Dateien — inkl. neuer `AI-CONTENT-AND-TRANSPARENCY.md` für EU AI Act Art. 50, anwendbar ab 02.08.2026).
+- ✅ **`/cursor`** — Fünfzehn `.cursor/rules/*.mdc` Agent-Requested-Rules.
+- ✅ **`/codex`** — Konsolidierte `AGENTS.md` (Codex CLI) und `copilot-instructions.md` (GitHub Copilot), beide mit Drittlandtransfer-, Auth/Logging- und E-Mail-Marketing-Sektion inkl. AI-Act-Art-50-Block.
 
 ## Repository-Struktur
 
@@ -36,7 +36,8 @@ dsgvo-skills/
 │           ├── UWG-7.md            # UWG § 7 (DE) + AT TKG § 174 + CH UWG Art. 3 I o
 │           ├── TRACKING-IN-MAIL.md # Open-Pixel, Click-Redirect, externe Bilder
 │           ├── UNSUBSCRIBE-AND-RETENTION.md  # One-Click, RFC 8058, Suppression-Hash
-│           └── SERVICE-VS-MARKETING.md       # BGH-Linie, Mail-Template-Klassifikation
+│           ├── SERVICE-VS-MARKETING.md       # BGH-Linie, Mail-Template-Klassifikation
+│           └── AI-CONTENT-AND-TRANSPARENCY.md # EU AI Act Art. 50 + DSGVO + UWG-Schiene (neu v1.7)
 ├── cursor/                          # 14 .mdc Rules (Agent Requested)
 │   ├── INSTALL.md
 │   └── rules/
@@ -53,7 +54,8 @@ dsgvo-skills/
 │       ├── dsgvo-uwg-7.mdc                    # UWG § 7 DE/AT/CH
 │       ├── dsgvo-tracking-in-mail.mdc         # Open-Pixel, Click-Redirect, externe Bilder
 │       ├── dsgvo-unsubscribe-and-retention.mdc # One-Click + RFC 8058
-│       └── dsgvo-service-vs-marketing.mdc     # BGH-Linie, Mail-Template-Klassifikation
+│       ├── dsgvo-service-vs-marketing.mdc     # BGH-Linie, Mail-Template-Klassifikation
+│       └── dsgvo-ai-content-marketing.mdc     # EU AI Act Art. 50 + DSGVO + UWG (neu v1.7)
 ├── codex/                           # Codex CLI + GitHub Copilot
 │   ├── INSTALL.md
 │   ├── AGENTS.md                    # für Codex CLI (Projekt-Root)
@@ -95,9 +97,9 @@ Triggert bei Code, der Authentifizierung, Login, Session-Management, Audit-Logs,
 - IP-Adressen unter EuGH C-582/14 Breyer + BGH VI ZR 135/13 — Kürzung (/24 IPv4, /48 IPv6), HMAC-Pseudonymisierung, X-Forwarded-For-Trust-Chain
 - Code-Generation-Regel: Default DSGVO-konform; bei explizitem Wunsch („bcrypt cost 10", „IP voll loggen") zwei Varianten + Pflicht-Tabelle (Norm / Risiko / Konsequenz)
 
-### `dsgvo-email-marketing` (v1.0, neu in v1.6)
+### `dsgvo-email-marketing` (v1.1, erweitert in v1.7)
 
-Triggert bei werblicher E-Mail (Newsletter, Drip, Re-Engagement, Win-Back, Lead-Magnet) und an der Schnittstelle Service-Mail-vs-Werbung. Newsletter-Provider-SDKs (Mailchimp, Klaviyo, HubSpot, ActiveCampaign, Brevo, CleverReach, Rapidmail, MailerLite), DOI-Endpoints, Tracking-Pixel-Code, List-Unsubscribe-Header.
+Triggert bei werblicher E-Mail (Newsletter, Drip, Re-Engagement, Win-Back, Lead-Magnet) und an der Schnittstelle Service-Mail-vs-Werbung. Newsletter-Provider-SDKs (Mailchimp, Klaviyo, HubSpot, ActiveCampaign, Brevo, CleverReach, Rapidmail, MailerLite), DOI-Endpoints, Tracking-Pixel-Code, List-Unsubscribe-Header. **Seit v1.7 zusätzlich:** AI-personalisierter Newsletter-Content (LLM-Subject-Lines, AI-Bilder, Reply-an-AI-Chatbots).
 
 **Was abgedeckt ist:**
 - UWG § 7 (DE) inkl. § 7 II Nr. 3 + § 7 III Bestandskunden-Privileg, AT TKG 2021 § 174, CH UWG Art. 3 I o
@@ -107,6 +109,7 @@ Triggert bei werblicher E-Mail (Newsletter, Drip, Re-Engagement, Win-Back, Lead-
 - Code-Patterns: DOI-Token + DB-Schema + Confirm-Endpoint, Mail-Template-Klassifikation (transactional vs marketing) mit Send-Guard, Suppression-Hash nach Unsubscribe, RFC 8058 List-Unsubscribe-Header
 - Cold-B2B-Mailing: § 7 II Nr. 3 erfasst auch B2B; LinkedIn-/XING-DMs gelten als „elektronische Post" analog BGH I ZR 169/04
 - Gmail/Yahoo Sender Requirements (Februar 2024) — DKIM/SPF/DMARC + RFC 8058 Pflicht für Bulk-Sender ≥ 5.000 Mails/Tag
+- **Neu in v1.7 (Sub-Datei `AI-CONTENT-AND-TRANSPARENCY.md`):** EU AI Act Art. 50 ab 02.08.2026 anwendbar. Differenzierung Anbieter- vs. Betreiber-Pflichten (Abs. 1 Interaktion, Abs. 2 maschinenlesbare Markierung, Abs. 4 Deepfake + öffentliches Interesse, Werke-Ausnahme). Sanktionen bei Art. 50-Verstoß bis € 15 Mio. / 3 % weltweiter Konzern-Jahresumsatz (Art. 99 Abs. 4 lit. g). Eigene UWG-Schiene (§ 3a / § 5 / § 5a + Schwarze Liste) als Mitbewerber-Abmahnvektor. Externer Tiefenrecherche-Review (Grok + GPT-5.5 + Gemini Deep Research, Mai 2026) eingearbeitet.
 
 ### Was bewusst NICHT abgedeckt ist (kommt als eigene Skills)
 
@@ -180,7 +183,7 @@ Die ausführliche Roadmap mit aktuellen Aufgaben, Versions-Historie, Test-Ergebn
 |-------|--------|--------|
 | `dsgvo-third-country-transfer` | ✅ v1.4 | Drittlandtransfer + 5 Sub-Dateien |
 | `dsgvo-auth-and-logging` | ✅ v1.0 | Auth-Code, Audit-Logs, IP-Speicherung, MFA, Sentry-Scrubbing + 3 Sub-Dateien |
-| `dsgvo-email-marketing` | ✅ v1.0 (neu) | UWG § 7 + DSGVO Art. 6/7/21 + TDDDG § 25 für werbliche E-Mail in DACH + 5 Sub-Dateien |
+| `dsgvo-email-marketing` | ✅ v1.1 (erweitert) | UWG § 7 + DSGVO Art. 6/7/21 + TDDDG § 25 + EU AI Act Art. 50 (neu v1.7) für werbliche E-Mail in DACH + 6 Sub-Dateien |
 | `dsgvo-subject-rights` | ⬜ | Auskunft, Löschung, Portabilität (Art. 15-22) |
 | `dsgvo-personal-data-storage` | ⬜ | Verschlüsselung, Aufbewahrungsfristen, Backups |
 | `nis2-security-baseline` | ⬜ | Mindestmaßnahmen, 24/72h-Meldepflichten |

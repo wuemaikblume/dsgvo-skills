@@ -1,0 +1,188 @@
+---
+description: Use whenever code generates or modifies marketing-email content with AI/LLM APIs (OpenAI `openai` / `@openai/sdk`, Anthropic `@anthropic-ai/sdk`, Mistral `@mistralai/mistralai`, Cohere `cohere-ai`, Vertex AI `@google-cloud/vertexai`, Azure OpenAI) — even if the user prompt only says "Subject-Line mit GPT generieren", "personalisierte Empfehlungen via Claude", "AI-Body-Variation", "Konversations-Newsletter mit Chatbot", "Reply-to-AI Mail-Adresse". Triggers on AI image generation outputs (Midjourney, DALL-E, Stable Diffusion, Flux, Replicate) embedded into Mail-Templates (React Email, MJML, Maizzle, Handlebars). Triggers on phrases "AI-personalisierter Newsletter", "Subject-Line A/B mit LLM", "Newsletter-Empfehlungen mit AI", "AI-Chatbot in Mail", "KI-Personalisierung im Newsletter", "GPT-Footer-Disclaimer", "AI-Disclosure für Newsletter". Covers EU AI Act Art. 50 (Art. 50(1) Interaktions-Transparenz, Art. 50(2) maschinenlesbare Output-Markierung — Provider-Pflicht, Art. 50(4) Deepfake-Disclosure für Bild/Audio/Video, Art. 50(4) Text-Disclosure für „matters of public interest" mit Editorial-Control-Ausnahme), Art. 50(5) Form, Art. 99(4)(g) Sanktionen bis € 15 Mio. / 3 % weltweiter Konzern-Jahresumsatz, Stichtag 02.08.2026. Plus DSGVO Art. 13 (Privacy Notice für AI-Personalisierung), Art. 22 (automatisierte Entscheidung Edge-Case), Art. 25 (Pseudonymisierung), Art. 28 (DPA mit LLM-Provider), Art. 30 (VVT), Art. 35 + EDPB WP 248 (DSFA-Schwelle bei Profiling). Voluntary EU Code of Practice on AI-Generated Content (Final erwartet Juni 2026). Cross-Link: dsgvo-third-country-transfer (US-LLM DPF/SCCs/Cloud Act, OpenAI Ireland, Azure OpenAI westeurope, Mistral EU, Aleph Alpha); dsgvo-email-marketing (DOI-Disziplin bleibt unverändert, granulare Einwilligung für AI-Personalisierung); dsgvo-auth-and-logging (LLM-Prompt-Log-Scrubbing, Audit-Log für AI-Generation).
+globs:
+alwaysApply: false
+---
+
+
+# AI-personalisierter Newsletter-Content (EU AI Act Art. 50 + DSGVO Art. 13/22)
+
+## Stichtag und Sanktionen
+
+**EU AI Act Art. 50 wird am 2. August 2026 unmittelbar anwendbar** (Verordnung (EU) 2024/1689, in Kraft seit 1. August 2024; Art. 113 lit. b AI Act). Sanktionen bei Verstoß **gegen Art. 50** bis **€ 15 Mio. oder 3 % weltweiter Konzern-Jahresumsatz** (Art. 99 Abs. 4 lit. g — lit. g listet explizit „Transparenzpflichten gemäß Artikel 50"). Die niedrigere Stufe € 7,5 Mio. / 1,5 % (Art. 99 Abs. 5) betrifft nur Falschangaben an Behörden, nicht Art. 50. DSGVO bleibt unberührt (Art. 2 Abs. 7 AI Act).
+
+## Häufige Fehlannahme
+
+„Jede AI-generierte Marketing-Mail muss als KI markiert werden." Stimmt **nicht**. Art. 50 differenziert nach Akteur (Provider vs Deployer) und Inhaltstyp:
+
+| Art. 50 Absatz | Wer | Was | Greift bei Werbe-Newsletter? |
+|---|---|---|---|
+| Abs. 1 (EG 132) | Anbieter | Empfänger informieren, dass er mit AI interagiert; Ausnahme: dies ist „aus Sicht einer angemessen informierten, aufmerksamen und verständigen Person aufgrund der Umstände offensichtlich" | Ja bei interaktivem AI-Element; sprechende Sender-Adresse `chatbot@…`/`ai@…` + klarer Kontext kann Ausnahme tragen |
+| Abs. 2 (EG 133) | Anbieter | Output maschinenlesbar als künstlich kennzeichnen (C2PA, Wasserzeichen, Metadaten, Fingerprints) | Anbieter-Pflicht (OpenAI/Anthropic). Aus Abs. 2 selbst folgt für Deployer **keine** ausdrückliche „Markierung-nicht-entfernen"-Pflicht — die Erwartung ergibt sich aus Abs. 4, Code of Practice und API-Verträgen. |
+| Abs. 4 Satz 1 (EG 134) | Betreiber/Deployer | Deepfake i. S. d. Art. 3 Nr. 60 (Inhalt ähnelt **wirklichen** Personen/Objekten/Orten/Einrichtungen/Ereignissen und wirkt fälschlicherweise echt) offenlegen | Selten bei reiner Werbung. Fiktiv-realistische „Kunden"-Testimonials sind streng am Wortlaut oft *keine* Deepfakes — lösen aber UWG § 5/§ 5a-Irreführung aus. |
+| Abs. 4 Satz 2 (EG 134) | Betreiber/Deployer | AI-Text der *veröffentlicht wird, um die Öffentlichkeit über Angelegenheiten von öffentlichem Interesse zu informieren* offenlegen | **Nein** für klassische Produktwerbung. Ja für AI-Newsletter zu Politik/Gesundheit/Journalismus — **außer** bei echter menschlicher redaktioneller Kontrolle mit namentlich benannter Verantwortung. |
+| Abs. 4 Werke-Ausnahme | Betreiber/Deployer | Bei offensichtlich künstlerischem/kreativem/satirischem/fiktionalem/analogem Werk: Offenlegung reduziert auf „werkschonende" Form | Eine separate generelle „offensichtlich künstlich"-Ausnahme für Deepfakes (Cartoons etc.) gibt es im Wortlaut **nicht** — cartoonhafter Stil entzieht sich eher schon dem Deepfake-Begriff (kein Echtheits-Eindruck). |
+| Abs. 5 | Anbieter + Betreiber | klar und unterscheidbar, spätestens zur ersten Interaktion oder Exposition | gilt wo immer Abs. 1–4 greift |
+
+**Praktische Konsequenz für die Mehrzahl klassischer Marketing-Newsletter:** AI-generierte Subject-Lines, Body-Variationen, Empfehlungen sind **nicht** vom Art. 50-Markierungs-Pflicht-Teil erfasst. Die echten Pflichten kommen aus DSGVO Art. 13 (Privacy Notice), Art. 28 + Kap. V (DPA + DPF/SCCs für LLM-API), Art. 22 (Edge-Case automatisierte Entscheidung) — **plus zweite Front UWG § 3a / § 5 / § 5a / Schwarze Liste** (Fake-Testimonials abmahnbar durch Mitbewerber und Verbraucherschutzverbände).
+
+## Decision Tree
+
+```
+1. Mail enthält AI-generierten/-modifizierten Inhalt?
+   ├─ Nein → keine zusätzlichen Pflichten aus dieser Rule
+   └─ Ja → weiter
+
+2. Welcher Inhaltstyp?
+   ├─ Subject-Line / Body-Text werblich → DSGVO-Pfad (Schritt 5)
+   ├─ Realistisches Personen-Bild → Art. 50(4) Deepfake (Schritt 3)
+   ├─ Text zu Gesundheit/Politik/Journalismus → Art. 50(4) Public-Interest (Schritt 4)
+   └─ Interaktives AI-Element → Art. 50(1) (Schritt 6)
+
+3. Deepfake-Pfad (Art. 3 Nr. 60 ist eng):
+   ├─ Bezug zu wirklichen Personen/Objekten/Orten + Echtheits-Eindruck?
+   │  → Pflicht: Caption + Provider-Markierung (C2PA) NICHT entfernen
+   │  → Werke-Ausnahme prüfen (Kunst/Satire/Fiktion): reduziert auf werkschonende Form
+   ├─ Stilisiert/Cartoon → bereits nicht Deepfake (kein Echtheits-Eindruck)
+   └─ Fiktive aber fotorealistische Person ohne reales Vorbild → kein Deepfake i. e. S.
+      ABER: UWG § 5/§ 5a-Risiko bei Testimonial-Suggestion → trotzdem offenlegen
+
+4. Public-Interest-Text-Pfad (strikt):
+   ├─ Editorial-Control-Ausnahme verlangt namentlich benannte Verantwortung +
+   │  dokumentierte manuelle Vorab-Prüfung pro Inhalt. Reines Template-Approval
+   │  oder Stichprobenkontrolle reicht NICHT.
+   └─ Direkt-Versand ohne echte Review → Disclosure im Body Pflicht
+
+5. DSGVO-Pfad (gilt IMMER bei AI-Personalisierung):
+   ├─ DPA mit LLM-Provider + DPF/SCCs (Art. 28, Kap. V)
+   ├─ Pseudonymisierung vor LLM-Call (Art. 25)
+   ├─ AI-Personalisierung im Privacy Notice (Art. 13)
+   ├─ Granulare Einwilligung „separates Häkchen für AI-Personalisierung"
+   ├─ VVT-Eintrag (Art. 30)
+   └─ DSFA prüfen bei Profiling-Charakter (Art. 35 + EDPB WP 248)
+
+6. Interaktions-Pfad:
+   ├─ Offensichtlichkeits-Ausnahme (Art. 50 Abs. 1 letzter Halbsatz): sprechende
+   │  Sender-Adresse `chatbot@…`/`ai@…` + klarer Kontext → Pflicht kann entfallen.
+   │  Eng auslegen — bei human-emulierendem Bot oder vulnerablen Empfängergruppen
+   │  bleibt expliziter Hinweis Pflicht.
+   └─ Pflicht-Fall: Hinweis spätestens zur ersten Interaktion oder Exposition (Abs. 5);
+      Praxis: sichtbar in der Mail VOR dem Reply-Button + erste AI-Antwort startet mit
+      „Diese Nachricht wurde von einem KI-Assistenten verfasst".
+```
+
+## Code-Pattern: AI-personalisierte Subject-Line (Datenminimierung + Pseudonymisierung)
+
+```ts
+// Anti-Pattern: ungeprüft volle PII an LLM
+const subject = await openai.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{
+    role: 'user',
+    content: `Schreibe Subject-Line für ${recipient.firstName} ${recipient.lastName}
+              (E-Mail: ${recipient.email}, letzter Kauf: ${recipient.lastOrder.product}).`
+  }]
+});
+// → US-Drittlandtransfer voller Personendaten ohne Notwendigkeit
+// → keine Pseudonymisierung, kein Privacy-Notice-Cross-Check, keine separate Einwilligung
+```
+
+```ts
+// Pattern: Datenminimierung + Pseudonymisierung + Privacy-Notice-Cross-Check
+async function generatePersonalizedSubject(recipient: Recipient, campaign: Campaign) {
+  if (!isInPrivacyNotice('ai_personalization_marketing')) {
+    throw new Error('AI-Personalisierung nicht im Privacy Notice — Art. 13 verletzt');
+  }
+  if (!hasConsent(recipient, 'ai_personalization')) {
+    return campaign.defaultSubject;
+  }
+  const segmentToken = await pseudonymize({
+    interestCategory: recipient.interestCategory,
+    lastEngagementBucket: recipient.lastEngagementBucket,
+    purchaseRange: recipient.purchaseRange,
+  });
+  const subject = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [{
+      role: 'user',
+      content: `Subject-Line für Profil ${segmentToken}, Thema: ${campaign.theme}. Max 60 Zeichen.`
+    }],
+  });
+  await logAiPersonalization({ campaignId: campaign.id, recipientHash: recipient.hashedId,
+                               profileToken: segmentToken, model: 'gpt-4o' });
+  return subject.choices[0].message.content;
+}
+```
+
+## Code-Pattern: Footer für AI-personalisierte Mail (Best Practice, nicht Pflicht)
+
+```html
+<p style="font-size: 11px; color: #666;">
+  Diese E-Mail wurde teilweise mit Künstlicher Intelligenz personalisiert
+  (Subject-Line und Produkt-Empfehlungen). Details in der
+  <a href="https://example.de/datenschutz#ai-personalisierung">Datenschutzerklärung</a>.
+  Sie können der AI-Personalisierung jederzeit widersprechen
+  (<a href="https://example.de/preferences">Präferenz-Center</a>),
+  ohne den Newsletter abzubestellen.
+</p>
+```
+
+## Code-Pattern: Interaktiver AI-Chatbot in/via Mail (Art. 50 Abs. 1 — Pflicht)
+
+```html
+<!-- Pflicht-Disclosure VOR erster Interaktion, klar und unterscheidbar -->
+<div style="border-left: 3px solid #c41e1e; padding: 12px; background: #fafafa;">
+  <strong>Hinweis:</strong> Wenn Sie auf diese E-Mail antworten, schreiben Sie
+  mit einem KI-Assistenten (kein menschlicher Mitarbeiter). Möchten Sie mit
+  einem Menschen sprechen: <a href="mailto:support@example.de">support@example.de</a>.
+</div>
+```
+
+## Code-Pattern: AI-generiertes Bild im Newsletter (Art. 50 Abs. 4 Satz 1)
+
+```ts
+async function embedAiImage(imageUrl: string, isRealistic: boolean, hasPersons: boolean) {
+  const image = await fetchPreservingMetadata(imageUrl); // C2PA-Manifest erhalten
+  const disclosureRequired = isRealistic && hasPersons;
+  return {
+    html: `<figure><img src="${image.cid}" alt="${image.alt}" />
+      ${disclosureRequired ? `<figcaption style="font-size: 11px; color: #666;">
+        Bild mit Künstlicher Intelligenz erzeugt. Die abgebildete Person ist nicht real.
+      </figcaption>` : ''}
+    </figure>`,
+    metadata: image.c2paManifest,
+  };
+}
+```
+
+## Pre-Send-Checkliste
+
+| # | Frage | Norm |
+|---|---|---|
+| 1 | DPA + DPF/SCCs für LLM-Provider? | Art. 28 + Kap. V |
+| 2 | Datenminimierung umgesetzt? | Art. 5 Abs. 1 lit. c, Art. 25 |
+| 3 | Pseudonymisierung statt direkter Identifier? | Art. 25 |
+| 4 | AI-Personalisierung im Privacy Notice? | Art. 13 |
+| 5 | Granular-abwählbare Einwilligung für AI-Personalisierung? | Art. 6 + 7 + EDPB 05/2020 |
+| 6 | VVT-Eintrag „AI-Personalisierung Marketing"? | Art. 30 |
+| 7 | Greift Art. 50-Pfad (interaktiv / Deepfake / Public-Interest)? | AI Act Art. 50 |
+
+## Quellen
+
+- [AI Act Service Desk Art. 50 (EU-Kommission, deutsch)](https://ai-act-service-desk.ec.europa.eu/de/ai-act/article-50)
+- [AI Act Service Desk Art. 3 — Begriffsbestimmungen inkl. Nr. 60 Deepfake](https://ai-act-service-desk.ec.europa.eu/de/ai-act/article-3)
+- [AI Act Service Desk Art. 99 — Sanktionen (lit. g für Art. 50)](https://ai-act-service-desk.ec.europa.eu/de/ai-act/article-99)
+- [Verordnung (EU) 2024/1689 (eur-lex)](https://eur-lex.europa.eu/eli/reg/2024/1689/oj)
+- Erwägungsgründe 132 (Interaktion), 133 (Anbieter-Markierung), 134 (Betreiber-Disclosure)
+- [Code of Practice on AI-Generated Content](https://digital-strategy.ec.europa.eu/en/policies/code-practice-ai-generated-content) — freiwillig, Final Juni 2026, 2. Entwurf 05.03.2026
+- Entwurfsleitlinien Kommission zu Art. 50 in Konsultation seit 08.05.2026
+- [DSK-OH „KI und Datenschutz" (06.05.2024)](https://www.datenschutzkonferenz-online.de/orientierungshilfen.html)
+- DSK-OH „TOMs bei Entwicklung/Betrieb von KI-Systemen" (Juni 2025); DSK-OH RAG-Systeme (Oktober 2025); DSK-Blacklist Nr. 11 (KI-Profiling als DSFA-Auslöser)
+- [BfDI „KI in Behörden — Datenschutz von Anfang an mitdenken" (22.12.2025)](https://www.bfdi.bund.de/SharedDocs/Downloads/DE/DokumenteBfDI/Dokumente-allg/2025/Handreichung-KI.html)
+- [EDPB Guidelines 05/2020 on Consent](https://edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-052020-consent-under-regulation-2016679_en)
+- [DSGVO Art. 13, 22, 25, 28, 30, 32, 35 (eur-lex)](https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679)
+- [§ 5 / § 5a / § 3a UWG + Schwarze Liste (gesetze-im-internet.de)](https://www.gesetze-im-internet.de/uwg_2004/) — UWG-Front bei AI-Testimonials
+
+## Disclaimer
+
+Best-Practice-Sammlung, **keine Rechtsberatung**. Bei Massen-AI-Personalisierung, Health-/Finanz-Marketing mit AI, AI-Chatbot-Newsletter mit Kindern: Anwalt + Datenschutzbeauftragter VOR Live-Schaltung. **Stand:** Mai 2026. Externer Tiefenrecherche-Review durchgeführt (Grok + GPT-5.5 + Gemini Deep Research, Mai 2026); Primärquellen gegen AI Act Service Desk verifiziert.
