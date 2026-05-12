@@ -1,5 +1,5 @@
 ---
-description: Use whenever code touches newsletter, marketing-email, drip-campaign, re-engagement, win-back, lead-magnet, or any outbound email with promotional content — even if the user's prompt doesn't mention DSGVO, GDPR, UWG, privacy, or "personal data". Triggers on Mailchimp / @mailchimp/mailchimp_marketing, Brevo / @getbrevo/brevo / sib-api-v3-sdk (Sendinblue legacy), Klaviyo / klaviyo-api / klaviyo-php, HubSpot Marketing / @hubspot/api-client, ActiveCampaign, MailerLite / @mailerlite/mailerlite-nodejs, CleverReach, Rapidmail, GetResponse, Kit / ConvertKit, Constant Contact, Resend / Postmark / Amazon SES / SendGrid / Mailgun / Mailjet when used for marketing or bulk newsletter sends. Triggers on email-template frameworks React Email / MJML / Maizzle / Handlebars when the template contains promotional content, unsubscribe footers, or tracking pixels. Triggers on endpoints /newsletter/subscribe, /confirm-email, /unsubscribe, /opt-in, /opt-out, lists.addListMember, sendCampaign, broadcastEmail. Triggers on email-header logic List-Unsubscribe, List-Unsubscribe-Post (RFC 8058). Triggers on tracking pixels (1x1.gif, open-tracking image src, /open?id=, /c/<token>?u=). Triggers on DB-schema work involving subscribers, audience, contacts, mailing_list, consent_log, email_suppression_list, double_opt_in_tokens. Also triggers on phrases like "Newsletter einrichten", "DOI-Flow", "Double-Opt-In implementieren", "Abmelde-Link einbauen", "Bestätigungs-Mail", "Tracking-Pixel im Newsletter", "B2B Cold-Mailing", "Bewertungs-Mail nach Kauf", "Cross-Sell in Bestellbestätigung". Covers UWG § 7 (DE) inkl. § 7 II Nr. 3 + § 7 III Bestandskunden-Privileg, AT TKG 2021 § 174, CH UWG Art. 3 I o, DSGVO Art. 6 I a + Art. 7 (Marketing-Einwilligung), Art. 7 IV (Kopplungsverbot), Art. 8 (Kinder), Art. 21 II (Direktwerbungs-Widerspruch), TDDDG § 25, BGH I ZR 218/07 vom 20.05.2009 („E-Mail-Werbung II" — B2B nicht frei), BGH I ZR 164/09 vom 10.02.2011 („Telefonaktion II"), BGH VI ZR 134/15 vom 15.12.2015 („No-Reply"), BGH VI ZR 225/17 vom 10.07.2018 (Bewertungs-Bitte), OLG Hamm 18 U 154/22 vom 03.05.2023 (Plattform-DMs = elektronische Post), DSK-Direktwerbung, EDPB 05/2020 Consent, RFC 8058, Gmail/Yahoo Sender Requirements Feb 2024 + Microsoft Outlook seit 05.05.2025. Triggers ALSO on AI-personalisierter Newsletter-Content (`openai`, `@anthropic-ai/sdk`, `cohere-ai`, `@mistralai/mistralai`, GPT-Subject-Line, Claude-Body-Variation, AI-Bilder im Mail-Template, Konversations-Newsletter mit Chatbot, Reply-an-AI-Mail-Adressen). EU AI Act Art. 50 wird am 02.08.2026 unmittelbar anwendbar (Sanktionen bis € 15 Mio. / 3 % weltweiter Konzern-Jahresumsatz nach Art. 99 Abs. 4 lit. g). Detail-Pattern siehe `dsgvo-ai-content-marketing.mdc`. Cross-Link: dsgvo-third-country-transfer (US-Provider und US-LLM-API DPF/SCCs/Cloud Act); dsgvo-auth-and-logging (IP-Speicherung beim DOI + Versand-Log + LLM-Prompt-Log-Scrubbing).
+description: Use whenever code touches newsletter, marketing-email, drip-campaign, re-engagement, win-back, lead-magnet, or any outbound email with promotional content — even if the user's prompt doesn't mention DSGVO, GDPR, UWG, privacy, or "personal data". Triggers on Mailchimp / @mailchimp/mailchimp_marketing, Brevo / @getbrevo/brevo / sib-api-v3-sdk (Sendinblue legacy), Klaviyo / klaviyo-api / klaviyo-php, HubSpot Marketing / @hubspot/api-client, ActiveCampaign, MailerLite / @mailerlite/mailerlite-nodejs, CleverReach, Rapidmail, GetResponse, Kit / ConvertKit, Constant Contact, Resend / Postmark / Amazon SES / SendGrid / Mailgun / Mailjet when used for marketing or bulk newsletter sends. Triggers on email-template frameworks React Email / MJML / Maizzle / Handlebars when the template contains promotional content, unsubscribe footers, or tracking pixels. Triggers on endpoints /newsletter/subscribe, /confirm-email, /unsubscribe, /opt-in, /opt-out, lists.addListMember, sendCampaign, broadcastEmail. Triggers on email-header logic List-Unsubscribe, List-Unsubscribe-Post (RFC 8058). Triggers on tracking pixels (1x1.gif, open-tracking image src, /open?id=, /c/<token>?u=). Triggers on DB-schema work involving subscribers, audience, contacts, mailing_list, consent_log, email_suppression_list, double_opt_in_tokens. Also triggers on phrases like "Newsletter einrichten", "DOI-Flow", "Double-Opt-In implementieren", "Abmelde-Link einbauen", "Bestätigungs-Mail", "Tracking-Pixel im Newsletter", "B2B Cold-Mailing", "Bewertungs-Mail nach Kauf", "Cross-Sell in Bestellbestätigung". Covers UWG § 7 (DE) inkl. § 7 II Nr. 3 + § 7 III Bestandskunden-Privileg, AT TKG 2021 § 174, CH UWG Art. 3 I o, DSGVO Art. 6 I a + Art. 7 (Marketing-Einwilligung), Art. 7 IV (Kopplungsverbot), Art. 8 (Kinder), Art. 21 II (Direktwerbungs-Widerspruch), TDDDG § 25, BGH I ZR 218/07 vom 20.05.2009 („E-Mail-Werbung II" — B2B nicht frei), BGH I ZR 164/09 vom 10.02.2011 („Telefonaktion II"), BGH VI ZR 134/15 vom 15.12.2015 („No-Reply"), BGH VI ZR 225/17 vom 10.07.2018 (Bewertungs-Bitte), OLG Hamm 18 U 154/22 vom 03.05.2023 (Plattform-DMs = elektronische Post), DSK-Direktwerbung, EDPB 05/2020 Consent, RFC 8058, Gmail/Yahoo Sender Requirements Feb 2024 + Microsoft Outlook seit 05.05.2025. Triggers ALSO on AI-personalisierter Newsletter-Content (`openai`, `@anthropic-ai/sdk`, `cohere-ai`, `@mistralai/mistralai`, GPT-Subject-Line, Claude-Body-Variation, AI-Bilder im Mail-Template, Konversations-Newsletter mit Chatbot, Reply-an-AI-Mail-Adressen). EU AI Act Art. 50 wird am 02.08.2026 unmittelbar anwendbar (Sanktionen bis € 15 Mio. / 3 % weltweiter Konzern-Jahresumsatz nach Art. 99 Abs. 4 lit. g). Detail-Pattern siehe `dsgvo-ai-content-marketing.mdc`. Triggers ALSO on **WhatsApp/Messenger-Marketing** (WhatsApp Business App/API/Channels, Telegram-Channels, Signal-Broadcast, Adressbuch-Sync, Template-Messages) — separate Einwilligung pro Kanal, Bulk-Upload regelmäßig unzulässig. Triggers ALSO on **Kinder-Newsletter Art. 8** (DE 16 / AT 14 / CH ungeregelt, EDPB 05/2020 risikobasiert). Triggers ALSO on **Soft-Bounce-DSGVO-Anknüpfung** (Art. 5 I d/e + Abs. 2, dokumentierte Policy mit Versionsnummer). Triggers ALSO on **Drittland-Outbound** (DACH → US/UK/CA/AU-Empfänger; Art. 49 ist nicht der Anker; CAN-SPAM Opt-out, PECR Reg. 22, CASL, Spam Act). Cross-Link: dsgvo-third-country-transfer (US-Provider und US-LLM-API DPF/SCCs/Cloud Act); dsgvo-auth-and-logging (IP-Speicherung beim DOI + Versand-Log + LLM-Prompt-Log-Scrubbing).
 globs:
 alwaysApply: false
 ---
@@ -185,11 +185,12 @@ Dasselbe Pattern für Click-Redirects: `if recipient.consent_tracking → URL vi
 
 | Sub-File | Wann laden |
 |---|---|
-| `CONSENT-AND-DOI.md` | DOI-Flow, Confirm-Mail-Inhalt, Re-Subscribe, Lead-Magnet-Kopplung, Kinder-Newsletter |
-| `UWG-7.md` | UWG § 7 (DE), TKG § 174 (AT), UWG Art. 3 I o (CH), Cold-B2B, LinkedIn-DM |
+| `CONSENT-AND-DOI.md` | DOI-Flow, Confirm-Mail-Inhalt, Re-Subscribe, Lead-Magnet-Kopplung, Kinder-Newsletter (Art. 8 risikobasiert) |
+| `UWG-7.md` | UWG § 7 (DE), TKG § 174 (AT), UWG Art. 3 I o (CH), Cold-B2B, LinkedIn-DM, **WhatsApp/Messenger-Marketing**, **Drittland-Outbound** |
 | `TRACKING-IN-MAIL.md` | Open-Pixel, Click-Redirect, externe Bilder, Personalisierungs-Tracking |
-| `UNSUBSCRIBE-AND-RETENTION.md` | One-Click, RFC 8058, Suppression-Hash, Bounce, Aufbewahrung, Art. 21 II |
+| `UNSUBSCRIBE-AND-RETENTION.md` | One-Click, RFC 8058, Suppression-Hash, Hard-/**Soft-Bounce (DSGVO Art. 5 I d/e)**, Aufbewahrung, Art. 21 II |
 | `SERVICE-VS-MARKETING.md` | BGH-Linie, Trans-Mail-mit-Werbung, Onboarding-Drip-Mischmails |
+| `AI-CONTENT-AND-TRANSPARENCY.md` | AI-personalisierter Newsletter-Content, EU AI Act Art. 50 (02.08.2026), UWG-Schiene |
 
 ## Cross-Links
 
@@ -448,23 +449,40 @@ Maintainer-Empfehlung: einheitlich DOI fahren, auch wenn der Verteiler nur Schwe
 
 ## Kinder-Newsletter (Art. 8 DSGVO)
 
-Wenn die Zielgruppe potenziell Kinder unter 16 Jahren erreicht (Spielzeug, Schule, Gaming, Comics, Kinder-Streaming), greift Art. 8 DSGVO: die Einwilligung von Kindern unter 16 ist nur mit Zustimmung des Inhabers der elterlichen Verantwortung wirksam.
+Wenn die Zielgruppe potenziell Kinder erreicht (Spielzeug, Schule, Gaming, Comics, Kinder-Streaming, Edu-Plattformen), greift Art. 8 DSGVO. Altersgrenzen DACH: **DE 16** (keine Absenkung im BDSG), **AT 14** (§ 4 Abs. 4 DSG), **CH** keine feste Grenze (ZGB-Geschäftsfähigkeit; EDÖB empfiehlt 14–16 als Orientierung). Bei DACH-Mischlisten einheitlich auf 16 abstellen.
 
-Code-Pattern:
+**Risikobasierter Maßstab:** Art. 8 Abs. 2 verlangt „angemessene Anstrengungen unter Berücksichtigung der verfügbaren Technik". EDPB 05/2020 lässt **für Low-Risk-Verarbeitung** eine Altersabfrage + Eltern-Mail-Bestätigung **ausdrücklich zu**; bei höherem Risiko (Gaming mit monetären Triggern, In-App-Käufe, sensible Inhalte) sind stärkere Mechanismen erforderlich.
+
+| Stufe | Mechanismus | Wann passend |
+|---|---|---|
+| 1 | Geburtsjahr + Eltern-Mail-Bestätigung mit getrennter Domain | Low-Risk: rein redaktioneller Newsletter ohne Profiling |
+| 2 | + Plausibilitäts-Check (Domain-Trennung, Throttling pro IP/Device) | Marketing mit Kinder-Reichweite |
+| 3 | + Erwachsenen-Indiz im Eltern-Confirm (Mini-Captcha) + Token-TTL 24–48 h | Klar Kinder-gerichtetes Marketing |
+| 4 | + Kreditkarten-/Mikro-Zahlungs-Verifikation (COPPA-Standard) | Gaming-Communities, monetäre Trigger |
+| 5 | + eID / Video-Ident (BankIdent, AusweisApp) | Glücksspiel, Erwachsenen-naher Content |
+
+Die Stufen sind eine Maintainer-Operationalisierung des „angemessen"-Begriffs, kein normatives DSK-Schema.
+
+**Pflicht in jeder Stufe:**
+
+- Plausibilitäts-Check zwischen Kinder- und Eltern-Mail (identische Freemail-Domain ist *immer* ein Problem — die Bestätigung landet sonst beim Kind selbst)
+- Token-TTL 24–48 h für den Eltern-Confirm-Link
+- Throttling auf das Geburtsjahr-Feld (IP-/Device-basiert), sonst probiert das Kind durch
+- Aufbewahrung des Eltern-Confirm-Records separat zum Kinder-Eintrag (Art. 7 Abs. 1 Nachweis-Pflicht)
 
 ```html
 <form method="post" action="/newsletter/subscribe">
   <label>Geburtsjahr <input type="number" name="birthYear" min="1900" max="2026" required /></label>
-  <!-- bei Eingabe < 16 Jahre via Client-Side: alternativen Eltern-Mail-Pfad anzeigen -->
   <label>E-Mail (Empfänger) <input type="email" name="email" required /></label>
   <label hidden id="parent-email-block">
     Eltern-/Erziehungs-E-Mail <input type="email" name="parentEmail" />
   </label>
-  ...
 </form>
 ```
 
-Server-Pattern: ist `birthYear` so, dass das Alter < 16 wäre, geht der DOI-Confirm-Link an die Eltern-E-Mail, nicht an die Kinder-E-Mail. Der Kindern-Newsletter wird erst nach Bestätigung durch die Eltern aktiviert. Aufbewahrung des elterlichen Confirm-Datensatzes parallel zur Kinder-Anmeldung.
+Server-Pattern: wenn `birthYear` ein Alter < altersgrenze ergibt, geht der DOI-Confirm-Link an die Eltern-E-Mail (mit Plausibilitäts-Check und TTL), nicht an die Kinder-E-Mail. Newsletter wird erst nach Eltern-Bestätigung aktiviert.
+
+**Maintainer-Default bei mehrheitlich erwachsener Zielgruppe:** Kinder explizit ausschließen statt Trägerschaft verifizieren. Bestätigungs-Checkbox „Ich bin mind. 16 Jahre alt" + Suppression-Regel für später erkennbare Kinder-Anmeldungen (z. B. über Schul-Domains).
 
 ## Lead-Magnet-Kopplung (Art. 7 IV DSGVO)
 

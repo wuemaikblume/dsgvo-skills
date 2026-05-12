@@ -99,6 +99,45 @@ Kernpunkte:
 
 **Cross-Link revDSG:** für die datenschutzrechtliche Seite (Transparenz, Auskunftsrecht, Widerrufsrecht in CH) siehe `dsgvo-third-country-transfer/CH-REVDSG.md`.
 
+## WhatsApp / Messenger-Marketing
+
+OLG Hamm, Beschl. v. 03.05.2023 – 18 U 154/22 ordnet WhatsApp-, LinkedIn-, Xing-, Facebook-Direktnachrichten als „elektronische Post" iSd § 7 II Nr. 3 UWG ein (unionsrechtskonforme Auslegung der ePrivacy-RL 2002/58/EG Art. 2 lit. h). Konsequenzen:
+
+- Erstkontakt per WhatsApp-DM ohne ausdrückliche, vorherige Einwilligung — auch B2B — ist unzulässig.
+- E-Mail-Newsletter-Einwilligung deckt WhatsApp **nicht** ab. Einwilligung ist kanalbezogen.
+- WhatsApp-Channels (1:n): „Folgen"-Klick kann eine Einwilligung für **Channel-Updates** sein, wenn Transparenzpflichten zum Subscription-Zeitpunkt erfüllt sind. **Deckt nicht**: 1:1-Nachrichten, Template-Messages, Telefonnummern-Upload für andere Zwecke.
+- Bulk-Adressbuch-Upload an WhatsApp Business API ist regelmäßig unzulässig — Verstöße gegen Art. 5 Abs. 1 lit. b (Zweckbindung), Art. 6 (eigene Rechtsgrundlage je Kanal), Art. 13/14 (Transparenz inkl. Drittland), Art. 5 Abs. 1 lit. c (Datenminimierung), plus WhatsApp Business Policy (Meta verlangt Opt-in).
+- WhatsApp Business **App** mit lokalem Adressbuch-Sync ist hochproblematisch; **API über Business Solution Provider** ist konformitätsfähig bei sauberer Einwilligungs-/AVV-Struktur.
+
+```html
+<!-- Pattern: pro Kanal eigenes Häkchen (EDPB 05/2020 Granularität) -->
+<fieldset>
+  <legend>Wie möchten Sie von uns hören?</legend>
+  <label><input type="checkbox" name="consent_email" /> E-Mail-Newsletter</label>
+  <label><input type="checkbox" name="consent_whatsapp" /> WhatsApp-Newsletter</label>
+  <label><input type="checkbox" name="consent_sms" /> SMS</label>
+</fieldset>
+```
+
+Ein offizieller Wettbewerbszentrale-Leitfaden speziell zu WhatsApp aus 2025/2026 existiert nach Recherchestand Mai 2026 nicht; einschlägig bleiben die allgemeinen Social-Media-Werbekennzeichnungs-Hinweise.
+
+## Outbound aus DACH ins Drittland — Art. 49 ist nicht der Anker
+
+DACH-Versender → Empfänger in USA/UK/Asien ist eine andere Konstellation als „EU-Versender → US-Provider mit US-Servern". **Häufige Fehlklassifikation:** Art. 49 DSGVO greift erst bei Übermittlung an einen Verantwortlichen/Auftragsverarbeiter im Drittland. Direktversand an die betroffene Person selbst (Privat-Empfänger) ist nach EDPB-Leitlinie 05/2021 keine Kap.-V-Übermittlung. Restrisiko: Manche Aufsichten legen den Übermittlungsbegriff weiter aus; höchstrichterlich nicht abschließend geklärt.
+
+**Trotzdem zu beachten:** Räumlicher DSGVO-Anwendungsbereich (Art. 3 Abs. 1) bleibt voll bestehen — plus nationales Anti-Spam-Recht des Empfängerlandes:
+
+| Empfänger-Land | Kern-Anforderungen (über DACH hinaus) |
+|---|---|
+| **USA** — CAN-SPAM Act (15 USC § 7701 ff.) | **Opt-out-Regime** (nicht Opt-In!), keine B2B-Ausnahme. Korrekte Header, ehrlicher Betreff, klare Werbe-Kennzeichnung, gültige Postanschrift im Body, funktionierender Opt-Out mit 10-Werktage-Umsetzungsfrist. Anwendbar auf jeden Sender, dessen Mails US-Empfänger erreichen. State-Laws überlagern (insb. CCPA/CPRA). |
+| **UK** — PECR Reg. 22 + UK GDPR | Opt-In für **individual subscribers** (Privatpersonen, Sole Traders); Soft-Opt-In bei eigenen Bestandskunden für ähnliche Produkte; **corporate subscribers** toleranter, aber Opt-Out-Recht. ICO-Durchsetzung 2025/2026 schärfer. |
+| **Kanada** — CASL | **Express oder implied consent**, Express empfohlen bei Unsicherheit. Identifikation + Opt-Out Pflicht. Extraterritorial bei Empfängern in Kanada. Sanktionen: bis 1 Mio. CAD natürliche Personen, **bis 10 Mio. CAD Unternehmen**. |
+| **Australien** — Spam Act 2003 | **Express oder eng inferred consent**, identifizierbarer Sender, Opt-Out **innerhalb 5 Werktagen**. ACMA-Durchsetzung erfasst auch werbliche Push-Benachrichtigungen. |
+| **Brasilien** — LGPD | Analog DSGVO, Marketing-Einwilligung erforderlich. |
+| **Restwelt** | Mindestens DACH-Niveau; lokale Anwaltskanzlei bei systematischem Versand. |
+
+**Wichtig: indirekte Drittlandbezüge.** Wenn US-ESP/CRM/CDN/Support-Dienstleister auf dem Versandweg liegen, **liegt sehr wohl** eine Kap.-V-Übermittlung an einen Auftragsverarbeiter vor — DPF/SCCs nötig (siehe `dsgvo-third-country-transfer/PROVIDERS.md`). Sauber trennen: „Empfänger = betroffene Person" (Kap. V irrelevant) vs. „Provider auf dem Weg im Drittland" (Kap. V greift).
+
 ## Mailings für KMU mit DACH-Liste — der einheitliche Pfad
 
 Wenn die Empfängerliste Empfänger aus DE, AT und CH enthält (Standard im DACH-KMU-Markt), gilt die jeweils strengste Regel pro Empfänger. Praktisch heißt das:

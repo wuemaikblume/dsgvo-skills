@@ -199,23 +199,151 @@ Maintainer-Empfehlung: einheitlich DOI fahren, auch wenn der Verteiler nur Schwe
 
 ## Kinder-Newsletter (Art. 8 DSGVO)
 
-Wenn die Zielgruppe potenziell Kinder unter 16 Jahren erreicht (Spielzeug, Schule, Gaming, Comics, Kinder-Streaming), greift Art. 8 DSGVO: die Einwilligung von Kindern unter 16 ist nur mit Zustimmung des Inhabers der elterlichen Verantwortung wirksam.
+Wenn die Zielgruppe potenziell Kinder unter 16 Jahren erreicht (Spielzeug, Schule, Gaming, Comics, Kinder-Streaming, Edu-Plattformen), greift Art. 8 DSGVO. Der Wortlaut ist eindeutig: „Beruht die Verarbeitung auf einer Einwilligung [...] und wird das Kind nicht das 16. Lebensjahr vollendet haben, ist die Verarbeitung nur rechtmäßig, sofern und soweit diese Einwilligung durch den Träger der elterlichen Verantwortung [...] erteilt oder mit dessen Zustimmung erteilt wird. Der Verantwortliche unternimmt unter Berücksichtigung der verfügbaren Technik **angemessene Anstrengungen, um sich in solchen Fällen zu vergewissern, dass die Einwilligung [...] erteilt oder mit dessen Zustimmung erteilt wurde**" (Art. 8 Abs. 1 und 2 DSGVO).
 
-Code-Pattern:
+### Altersgrenze DACH
+
+- **Deutschland:** 16 Jahre (Art. 8 Abs. 1 DSGVO direkt, keine Absenkung durch BDSG). Art. 8 Abs. 1 Unterabsatz 2 erlaubt Mitgliedstaaten eine Absenkung auf nicht weniger als das vollendete 13. Lebensjahr — DE hat davon keinen Gebrauch gemacht.
+- **Österreich:** 14 Jahre (Datenschutzgesetz/DSG § 4 Abs. 4 — niedrigste Grenze in der EU, Sonderfall innerhalb der von Art. 8 Abs. 1 UA 2 gestatteten Spanne).
+- **Schweiz:** revDSG kennt keine feste Altersgrenze; allgemeine Geschäftsfähigkeit nach ZGB; in der Praxis vergleichbar zu 16 Jahren.
+
+Bei DACH-übergreifenden Listen einheitlich auf **16 Jahre** abstellen (strengste Regel), AT-Sonderfall nur dokumentieren wenn Versand ausschließlich AT.
+
+### Risikobasierter Maßstab statt einer fixen Hürde
+
+Art. 8 Abs. 2 verlangt **„angemessene Anstrengungen unter Berücksichtigung der verfügbaren Technik"** — der Wortlaut ist explizit risikobasiert. Die EDPB-Guidelines 05/2020 zur Einwilligung machen es klarer: Für Low-Risk-Verarbeitung kann eine Altersabfrage zusammen mit einer Eltern-E-Mail-Verifikation ausreichend sein; bei höherem Risiko sind stärkere Mechanismen geboten. Eine pauschale „Geburtsjahr-Self-Declaration ist verboten"-Regel existiert in der Aufsichtspraxis (Stand Mai 2026) nicht — entscheidend ist die Risiko-Bewertung des konkreten Verarbeitungs-Kontextes.
+
+**Was bedeutet „Risiko" hier?** Zu betrachten sind insbesondere:
+
+- **Inhalt:** rein informativer Newsletter vs. gezieltes Marketing für Kinder vs. Gaming-/In-App-Kauf-Trigger vs. sensible Inhalte (Health, Sexualität, Sucht)
+- **Datenarten:** nur E-Mail vs. zusätzliches Profiling, Verhaltens-Tracking, Standort, Art.-9-Daten
+- **Zielgruppen-Ausrichtung:** Newsletter, der zufällig auch Kinder erreicht (Tech-/Mode-/Allgemein-Newsletter) vs. Newsletter, der gezielt Kinder als Zielgruppe hat (Spielzeug, Schul-Tools, Gaming-Communities)
+- **Folgewirkungen:** rein redaktionelle Mail vs. Vertragsschluss-Trigger vs. monetäre Aktion
+
+### Pattern-Hierarchie nach Risiko-Stufe
+
+| Stufe | Mechanismus | Wann passend | Aufwand |
+|---|---|---|---|
+| 0 | Nur Häkchen „Ich bin 16+" | Nur, wenn Inhalt eindeutig nicht auf Kinder ausgerichtet ist und Kinder als Empfänger unwahrscheinlich sind. Bei jeder realistischen Kinder-Reichweite zu schwach. | minimal |
+| 1 | Geburtsjahr-Eingabe + Eltern-Mail-Bestätigung | **Low-Risk-Verarbeitung** (rein redaktioneller Newsletter ohne Profiling, ohne monetäre Trigger, ohne sensible Inhalte). EDPB 05/2020 lässt das ausdrücklich zu. Maintainer-Empfehlung: Plausibilitäts-Check (Stufe 2) anhängen, kostet wenig zusätzlich. | gering |
+| 2 | Stufe 1 + Plausibilitäts-Check (z. B. Eltern-Mail-Domain ≠ Kinder-Mail-Domain bei Freemail; Throttling pro IP/Device gegen Mehrfach-Anmeldungen) | Solide Basis für die meisten Marketing-Newsletter mit Kinder-Reichweite | gering |
+| 3 | Stufe 2 + Erwachsenen-Indiz im Eltern-Confirm (z. B. Mini-Captcha „Welcher dieser Begriffe ist erwachsen-typisch?"); zusätzliche TTL-Beschränkung des Eltern-Tokens (24–48 h) | Für klar Kinder-gerichtete Marketing-Newsletter (Spielzeug, Schul-Tools), aber ohne monetäre Wirkung | mittel |
+| 4 | Stufe 3 + Kreditkarten- / Mikro-Zahlungs-Verifikation (1-Cent-Test, sofortige Rückerstattung — US-COPPA-Standard) | High-Risk: Gaming-Communities mit In-App-Käufen, Streaming-Trial-Newsletter mit Cashback, Premium-Subscription-Anbahnung | hoch (geringe Kosten pro Anmeldung) |
+| 5 | Stufe 4 + eID / Video-Ident / Behörden-Schnittstelle (z. B. nPA, AusweisApp, BankIdent) | Sehr hohes Risiko: Glücksspiel, Erwachsenen-naher Content mit Kinder-Schutz-Pflichten, staatsnahe Kinder-Dienste | sehr hoch |
+
+**Maintainer-Empfehlung pro Risiko:**
+
+| Verarbeitungs-Profil | Empfohlene Mindest-Stufe |
+|---|---|
+| Reiner Edu-/Informations-Newsletter, kein Profiling | Stufe 1 (EDPB-konform), Stufe 2 als Best Practice |
+| Marketing-Newsletter mit Produkt-Empfehlungen an Kinder | Stufe 2 oder 3 |
+| Gaming/Streaming mit monetären Triggern | Stufe 4 |
+| Glücksspiel-nahes oder Erwachsenen-relevantes Umfeld | Stufe 5 |
+
+Diese Stufen sind **kein normatives DSK-Schema**, sondern eine Maintainer-Operationalisierung des „angemessen"-Begriffs aus Art. 8 Abs. 2. Bei Aufsichts-Prüfung argumentiert man mit der Risiko-Bewertung und der gewählten Stufe — nicht mit der Stufe an sich.
+
+### Anti-Pattern, das in jeder Stufe vermieden werden sollte
+
+- **Kein Plausibilitäts-Check zwischen Kinder- und Eltern-Mail:** identische Freemail-Domain (`@gmail.com` für beides) lässt Eltern-Bestätigung an die Kinder-Mailbox zurücklaufen — das ist *immer* ein Problem, unabhängig von der Risiko-Stufe.
+- **Geburtsjahr-Field ohne Rate-Limit/Throttling:** ein Kind probiert in 30 Sekunden alle Jahre durch und findet die akzeptierte Schwelle. Mindestens IP- oder Device-basiertes Throttling.
+- **Eltern-Confirm-Token ohne TTL:** ein Token, das ewig gilt, kann Wochen später vom Kind selbst geklickt werden. 24–48 h TTL ist die Praxis-Norm.
+
+### Maintainer-Default für Kinder-Randerfassung
+
+Pragmatische Empfehlung für kleine und mittlere Marketing-Teams: wenn die Zielgruppe **mehrheitlich erwachsen** ist und nur am Rand Kinder erfasst werden könnten, kann der Aufwand einer Trägerschafts-Verifikation oft vermieden werden, indem Kinder explizit ausgeschlossen werden:
 
 ```html
-<form method="post" action="/newsletter/subscribe">
-  <label>Geburtsjahr <input type="number" name="birthYear" min="1900" max="2026" required /></label>
-  <!-- bei Eingabe < 16 Jahre via Client-Side: alternativen Eltern-Mail-Pfad anzeigen -->
-  <label>E-Mail (Empfänger) <input type="email" name="email" required /></label>
-  <label hidden id="parent-email-block">
-    Eltern-/Erziehungs-E-Mail <input type="email" name="parentEmail" />
-  </label>
-  ...
-</form>
+<label>
+  <input type="checkbox" required name="adult_confirm" value="1" />
+  Ich bestätige, dass ich mindestens 16 Jahre alt bin.
+</label>
+<p style="font-size: 11px;">
+  Dieser Newsletter ist nicht für Kinder unter 16 Jahren bestimmt. Wir verarbeiten
+  keine Daten von Kindern unter 16 ohne nachweisbare Zustimmung der
+  Erziehungsberechtigten. Wenn Sie unter 16 sind, melden Sie sich bitte nicht an.
+</p>
 ```
 
-Server-Pattern: ist `birthYear` so, dass das Alter < 16 wäre, geht der DOI-Confirm-Link an die Eltern-E-Mail, nicht an die Kinder-E-Mail. Der Kindern-Newsletter wird erst nach Bestätigung durch die Eltern aktiviert. Aufbewahrung des elterlichen Confirm-Datensatzes parallel zur Kinder-Anmeldung.
+Plus serverseitig: Suppression-Regel, dass alle Anmeldungen, die später als „Kind" auffällig werden (z. B. über Schul-Domains `@schule-musterstadt.de`, oder über Beschwerde-Mails der Eltern), automatisch und unwiderruflich gesperrt werden.
+
+### Code-Pattern: Stufe-2/3-Verifikation (für Newsletter mit Kinder-Reichweite)
+
+```ts
+// Anmeldung mit Eltern-Mail + Plausibilität + Eltern-Confirm mit Erwachsenen-Quiz
+type ChildSubscription = {
+  childEmail: string;
+  parentEmail: string;
+  birthYear: number;
+};
+
+async function subscribeChild(data: ChildSubscription) {
+  const age = new Date().getFullYear() - data.birthYear;
+  if (age >= 16) {
+    // Erwachsenen-Flow
+    return regularSubscribe(data.childEmail);
+  }
+
+  // 1. Plausibilitäts-Check: nicht dieselbe Mailbox-Domäne wie Kinder-Mail
+  const childDomain = data.childEmail.split('@')[1];
+  const parentDomain = data.parentEmail.split('@')[1];
+  if (childDomain === parentDomain && isFreemailDomain(childDomain)) {
+    // Schulmail-Domain ist OK (Kind hat Schul-Account, Eltern haben dieselbe Schul-Domain idR nicht),
+    // aber Gmail/Outlook/Yahoo + dieselbe Domain = Verdachts-Pattern.
+    throw new Error('Eltern-Mail muss von anderer Domain sein als die Kinder-Mail.');
+  }
+
+  // 2. Eltern-DOI-Token erstellen, NICHT an Kind-Mail senden
+  const parentToken = await createDOIToken({
+    purpose: 'child_newsletter_parental_consent',
+    childEmail: data.childEmail,
+    parentEmail: data.parentEmail,
+    childBirthYear: data.birthYear,
+    ttlHours: 48,
+  });
+
+  // 3. Confirm-Mail an Eltern mit Verifikations-Schritt
+  await sendParentalConsentMail(data.parentEmail, parentToken);
+
+  // 4. Audit-Log: separate Aufbewahrung des Eltern-Confirms parallel zum Kinder-Eintrag
+  //    (Art. 7 Abs. 1 DSGVO — Nachweis-Pflicht der Einwilligung des Trägers)
+}
+
+async function confirmParentalConsent(token: string, quizAnswer: string) {
+  const t = await getToken(token);
+  if (!t || t.purpose !== 'child_newsletter_parental_consent') throw new Error('invalid_token');
+
+  // 5. Erwachsenen-Quiz: simples zusatzliches Indiz (Stufe 3, kein hartes Ident)
+  if (!isAdultQuizCorrect(quizAnswer)) {
+    await logFailedParentalConfirm(t);
+    throw new Error('parental_confirm_failed');
+  }
+
+  // 6. Aktivierung erst jetzt
+  await activateSubscription(t.childEmail, {
+    parentalConsentRecord: {
+      parentEmail: t.parentEmail,
+      confirmedAt: new Date(),
+      quizPassed: true,
+      childBirthYear: t.childBirthYear,
+    },
+  });
+}
+```
+
+### Eltern-Confirm-Mail — Pflicht-Inhalte
+
+Die Confirm-Mail an die Eltern muss laut DSK-Hinweisen mindestens enthalten:
+
+- **klare Identifikation des Kindes** (Name oder E-Mail-Adresse), damit Eltern überhaupt erkennen, worum es geht
+- **Beschreibung des Newsletters** (Inhalte, Versand-Frequenz, Datenarten)
+- **expliziter Hinweis auf das Alter des Kindes** und die Sonderschutz-Bedürftigkeit
+- **klare Bestätigungs-Handlung** mit dokumentiertem Erwachsenen-Indiz (Quiz / Mikro-Payment / eID)
+- **einfacher Widerrufs-Link** für die Eltern jederzeit
+- **Datenschutzerklärung-Verweis** auf den Abschnitt „Kinder"
+
+### Aufbewahrung des Eltern-Confirm-Records
+
+Der Datensatz „Eltern haben in die Verarbeitung der Kinder-Daten eingewilligt" ist getrennt vom Kinder-Newsletter-Datensatz aufzubewahren und erfüllt Art. 7 Abs. 1 (Nachweis-Pflicht). Aufbewahrungsfrist: solange die Newsletter-Anmeldung aktiv ist plus Verjährungsfrist nach Widerruf (in DE typischerweise 3 Jahre nach Widerruf, vergleichbar zur regulären Einwilligungs-Aufbewahrung).
 
 ## Lead-Magnet-Kopplung (Art. 7 IV DSGVO)
 

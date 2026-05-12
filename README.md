@@ -4,11 +4,11 @@ Kostenlose Compliance-Pakete für **Claude AI / Claude Code**, **Cursor** und **
 
 > **Was ist ein Skill?** Eine Markdown-Datei mit YAML-Frontmatter, die das Tool bei passendem Kontext automatisch lädt. Bei Claude: [offizielle Anthropic-Doku](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview).
 
-## Status (v1.7)
+## Status (v1.8)
 
-- ✅ **`/claude`** — Anthropic Skills für Claude Code, Claude.ai, Claude API. Drei Skill-Familien: Drittlandtransfer (+ 5 Vertiefungs-Dateien), Auth & Logging (+ 3 Vertiefungs-Dateien) und E-Mail-Marketing (+ 6 Vertiefungs-Dateien — inkl. neuer `AI-CONTENT-AND-TRANSPARENCY.md` für EU AI Act Art. 50, anwendbar ab 02.08.2026).
+- ✅ **`/claude`** — Anthropic Skills für Claude Code, Claude.ai, Claude API. Drei Skill-Familien: Drittlandtransfer (+ 5 Vertiefungs-Dateien), Auth & Logging (+ 3 Vertiefungs-Dateien) und E-Mail-Marketing (+ 6 Vertiefungs-Dateien — inkl. `AI-CONTENT-AND-TRANSPARENCY.md` für EU AI Act Art. 50). v1.8 erweitert E-Mail-Marketing um WhatsApp/Messenger, Drittland-Outbound (CAN-SPAM/PECR/CASL/Spam Act), Kinder-Newsletter risikobasiert, Soft-Bounce als DSGVO-Pattern.
 - ✅ **`/cursor`** — Fünfzehn `.cursor/rules/*.mdc` Agent-Requested-Rules.
-- ✅ **`/codex`** — Konsolidierte `AGENTS.md` (Codex CLI) und `copilot-instructions.md` (GitHub Copilot), beide mit Drittlandtransfer-, Auth/Logging- und E-Mail-Marketing-Sektion inkl. AI-Act-Art-50-Block.
+- ✅ **`/codex`** — Konsolidierte `AGENTS.md` (Codex CLI) und `copilot-instructions.md` (GitHub Copilot), beide mit Drittlandtransfer-, Auth/Logging- und E-Mail-Marketing-Sektion (inkl. AI-Act Art. 50 + v1.8-Erweiterungen).
 
 ## Repository-Struktur
 
@@ -97,9 +97,9 @@ Triggert bei Code, der Authentifizierung, Login, Session-Management, Audit-Logs,
 - IP-Adressen unter EuGH C-582/14 Breyer + BGH VI ZR 135/13 — Kürzung (/24 IPv4, /48 IPv6), HMAC-Pseudonymisierung, X-Forwarded-For-Trust-Chain
 - Code-Generation-Regel: Default DSGVO-konform; bei explizitem Wunsch („bcrypt cost 10", „IP voll loggen") zwei Varianten + Pflicht-Tabelle (Norm / Risiko / Konsequenz)
 
-### `dsgvo-email-marketing` (v1.1, erweitert in v1.7)
+### `dsgvo-email-marketing` (v1.2, erweitert in v1.8)
 
-Triggert bei werblicher E-Mail (Newsletter, Drip, Re-Engagement, Win-Back, Lead-Magnet) und an der Schnittstelle Service-Mail-vs-Werbung. Newsletter-Provider-SDKs (Mailchimp, Klaviyo, HubSpot, ActiveCampaign, Brevo, CleverReach, Rapidmail, MailerLite), DOI-Endpoints, Tracking-Pixel-Code, List-Unsubscribe-Header. **Seit v1.7 zusätzlich:** AI-personalisierter Newsletter-Content (LLM-Subject-Lines, AI-Bilder, Reply-an-AI-Chatbots).
+Triggert bei werblicher E-Mail (Newsletter, Drip, Re-Engagement, Win-Back, Lead-Magnet) und an der Schnittstelle Service-Mail-vs-Werbung. Newsletter-Provider-SDKs (Mailchimp, Klaviyo, HubSpot, ActiveCampaign, Brevo, CleverReach, Rapidmail, MailerLite), DOI-Endpoints, Tracking-Pixel-Code, List-Unsubscribe-Header. **Seit v1.7:** AI-personalisierter Newsletter-Content (LLM-Subject-Lines, AI-Bilder, Reply-an-AI-Chatbots). **Seit v1.8:** WhatsApp/Messenger-Marketing, Drittland-Outbound (CAN-SPAM/PECR/CASL/Spam Act), Kinder-Newsletter risikobasiert, Soft-Bounce als DSGVO-Pattern.
 
 **Was abgedeckt ist:**
 - UWG § 7 (DE) inkl. § 7 II Nr. 3 + § 7 III Bestandskunden-Privileg, AT TKG 2021 § 174, CH UWG Art. 3 I o
@@ -109,7 +109,13 @@ Triggert bei werblicher E-Mail (Newsletter, Drip, Re-Engagement, Win-Back, Lead-
 - Code-Patterns: DOI-Token + DB-Schema + Confirm-Endpoint, Mail-Template-Klassifikation (transactional vs marketing) mit Send-Guard, Suppression-Hash nach Unsubscribe, RFC 8058 List-Unsubscribe-Header
 - Cold-B2B-Mailing: § 7 II Nr. 3 erfasst auch B2B; LinkedIn-/XING-DMs gelten als „elektronische Post" analog BGH I ZR 169/04
 - Gmail/Yahoo Sender Requirements (Februar 2024) — DKIM/SPF/DMARC + RFC 8058 Pflicht für Bulk-Sender ≥ 5.000 Mails/Tag
-- **Neu in v1.7 (Sub-Datei `AI-CONTENT-AND-TRANSPARENCY.md`):** EU AI Act Art. 50 ab 02.08.2026 anwendbar. Differenzierung Anbieter- vs. Betreiber-Pflichten (Abs. 1 Interaktion, Abs. 2 maschinenlesbare Markierung, Abs. 4 Deepfake + öffentliches Interesse, Werke-Ausnahme). Sanktionen bei Art. 50-Verstoß bis € 15 Mio. / 3 % weltweiter Konzern-Jahresumsatz (Art. 99 Abs. 4 lit. g). Eigene UWG-Schiene (§ 3a / § 5 / § 5a + Schwarze Liste) als Mitbewerber-Abmahnvektor. Externer Tiefenrecherche-Review (Grok + GPT-5.5 + Gemini Deep Research, Mai 2026) eingearbeitet.
+- **Neu in v1.7 (Sub-Datei `AI-CONTENT-AND-TRANSPARENCY.md`):** EU AI Act Art. 50 ab 02.08.2026 anwendbar. Differenzierung Anbieter- vs. Betreiber-Pflichten (Abs. 1 Interaktion, Abs. 2 maschinenlesbare Markierung, Abs. 4 Deepfake + öffentliches Interesse, Werke-Ausnahme). Sanktionen bei Art. 50-Verstoß bis € 15 Mio. / 3 % weltweiter Konzern-Jahresumsatz (Art. 99 Abs. 4 lit. g). Eigene UWG-Schiene (§ 3a / § 5 / § 5a + Schwarze Liste) als Mitbewerber-Abmahnvektor.
+- **Neu in v1.8** — vier Cross-Review-Befunde eingearbeitet:
+  - **WhatsApp/Messenger-Marketing (UWG-7.md):** OLG Hamm 18 U 154/22 erfasst WhatsApp; Einwilligung pro Kanal; Channel-Follow nur für Channel-Updates; Bulk-Adressbuch-Upload regelmäßig unzulässig; App vs. API über BSP klar trennen.
+  - **Drittland-Outbound (UWG-7.md):** Art. 49 ist NICHT der Anker bei Versand an Drittland-Privatempfänger; räumlicher DSGVO-Anwendungsbereich (Art. 3 Abs. 1) plus nationales Anti-Spam-Recht (CAN-SPAM Opt-out, UK PECR Reg. 22, CASL bis 10 Mio. CAD Unternehmen, Spam Act AU 5-Werktage-Frist).
+  - **Kinder-Newsletter risikobasiert (CONSENT-AND-DOI.md):** Art. 8 Abs. 2 verlangt „angemessene Anstrengungen unter Berücksichtigung verfügbarer Technik"; EDPB 05/2020 lässt für Low-Risk-Verarbeitung Geburtsjahr + Eltern-Mail-Bestätigung ausdrücklich zu; bei höherem Risiko (Gaming, monetäre Trigger) Stufe 4–5 (Mikro-Zahlung, eID).
+  - **Soft-Bounce als DSGVO-Anknüpfung (UNSUBSCRIBE-AND-RETENTION.md):** keine fixe Behörden-Schwelle; dokumentierte interne Policy mit Versionsnummer (typisch 5–10 / 14–30 Tage); Audit-Log mit Provider-Code, Policy-Version, Consent-Ref, Override-Feldern.
+- **Tiefenrecherche-Review** für jeden Skill-Patch: Grok + GPT-5.5 + Gemini Deep Research, jeweils gegen Primärquellen (EUR-Lex, AI Act Service Desk, ICO, FTC, CRTC, ACMA, BGH/OLG-Aktenzeichen).
 
 ### Was bewusst NICHT abgedeckt ist (kommt als eigene Skills)
 
@@ -183,7 +189,7 @@ Die ausführliche Roadmap mit aktuellen Aufgaben, Versions-Historie, Test-Ergebn
 |-------|--------|--------|
 | `dsgvo-third-country-transfer` | ✅ v1.4 | Drittlandtransfer + 5 Sub-Dateien |
 | `dsgvo-auth-and-logging` | ✅ v1.0 | Auth-Code, Audit-Logs, IP-Speicherung, MFA, Sentry-Scrubbing + 3 Sub-Dateien |
-| `dsgvo-email-marketing` | ✅ v1.1 (erweitert) | UWG § 7 + DSGVO Art. 6/7/21 + TDDDG § 25 + EU AI Act Art. 50 (neu v1.7) für werbliche E-Mail in DACH + 6 Sub-Dateien |
+| `dsgvo-email-marketing` | ✅ v1.2 (erweitert) | UWG § 7 + DSGVO Art. 6/7/21 + TDDDG § 25 + EU AI Act Art. 50 + WhatsApp/Drittland-Outbound/Kinder-risikobasiert/Soft-Bounce (v1.8) + 6 Sub-Dateien |
 | `dsgvo-subject-rights` | ⬜ | Auskunft, Löschung, Portabilität (Art. 15-22) |
 | `dsgvo-personal-data-storage` | ⬜ | Verschlüsselung, Aufbewahrungsfristen, Backups |
 | `nis2-security-baseline` | ⬜ | Mindestmaßnahmen, 24/72h-Meldepflichten |

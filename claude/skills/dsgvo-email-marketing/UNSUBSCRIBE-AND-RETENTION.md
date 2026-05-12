@@ -114,7 +114,7 @@ CREATE TABLE email_suppression_list (
   email_hash CHAR(64) NOT NULL UNIQUE,  -- HMAC-SHA-256 mit serverseitigem Pepper
   suppressed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   reason TEXT NOT NULL CHECK (reason IN
-    ('user_unsubscribe','hard_bounce','spam_complaint','manual','re_permission_failed'))
+    ('user_unsubscribe','hard_bounce','spam_complaint','manual','re_permission_failed','soft_bounce_threshold_dsgvo'))
 );
 
 CREATE INDEX ON email_suppression_list (email_hash);
@@ -158,7 +158,7 @@ Aufbewahrung des Hashes: zeitlich unbegrenzt — er erfüllt die Schutzfunktion 
 | Bounce-Typ | Aktion | Hinweis |
 |---|---|---|
 | **Hard-Bounce** (z.B. Mailbox existiert nicht, Domain unbekannt) | Sofortige Entfernung aus Versandliste; Hash in Suppression mit `reason='hard_bounce'` | Klartext-E-Mail aus aktiver Liste löschen |
-| **Soft-Bounce** (z.B. Mailbox voll, temporäre Server-Probleme) | Bis zu 5 Versuche über mehrere Tage; danach behandeln wie Hard-Bounce | Maintainer-Faustregel; manche Stacks 3 Versuche |
+| **Soft-Bounce** (z.B. Mailbox voll, temporäre Server-Probleme) | Bis zu 5 Versuche über mehrere Tage; danach behandeln wie Hard-Bounce | DSGVO-begründet, nicht nur Deliverability — siehe Sektion unten |
 | **Spam-Komplaint** (Empfänger drückt „Spam"-Button bei Provider) | Sofortige Entfernung; Hash in Suppression mit `reason='spam_complaint'` | Niemals wieder anschreiben — auch nicht nach Re-Permission-Versuch |
 
 Provider-Webhooks für Bounces aktivieren (Mailchimp, Postmark, AWS SES, Brevo). Code-Pattern:
@@ -180,6 +180,134 @@ export async function POST(req: Request) {
   return new Response('OK', { status: 200 });
 }
 ```
+
+### Soft-Bounce-Suppression: dokumentierte Policy aus Art. 5 I d/e + Abs. 2
+
+Die Maintainer-Faustregel „nach N Soft-Bounces wie Hard-Bounce behandeln" wird oft als reine Deliverability-Hygiene verstanden — sie hat aber **eigenständige DSGVO-Anknüpfung**, die bei Aufsichts-Prüfungen relevant wird:
+
+**Art. 5 Abs. 1 lit. d (Richtigkeit):**
+> „Personenbezogene Daten müssen sachlich richtig und erforderlichenfalls auf dem neuesten Stand sein; es sind alle angemessenen Maßnahmen zu treffen, damit personenbezogene Daten, die im Hinblick auf die Zwecke ihrer Verarbeitung unrichtig sind, unverzüglich gelöscht oder berichtigt werden."
+
+Ein einzelner Soft-Bounce beweist noch keine sachliche Unrichtigkeit (Mailbox voll, temporäre Server-Probleme, Greylisting sind alle gültige nicht-permanente Ursachen). **Systematische Soft-Bounces über einen längeren Zeitraum** begründen aber ein starkes Indiz, dass die Adresse für den Zweck „Newsletter-Versand" nicht mehr funktional ist.
+
+**Art. 5 Abs. 1 lit. e (Speicherbegrenzung):**
+> „Personenbezogene Daten müssen in einer Form gespeichert werden, die die Identifizierung der betroffenen Personen nur so lange ermöglicht, wie es für die Zwecke, für die sie verarbeitet werden, erforderlich ist."
+
+Wenn der Zweck „Newsletter-Versand" ist und der Versand systematisch fehlschlägt, entfällt die Erforderlichkeit der Speicherung in der aktiven Liste.
+
+**Art. 5 Abs. 2 (Rechenschaftspflicht):**
+> „Der Verantwortliche ist für die Einhaltung des Absatzes 1 verantwortlich und muss dessen Einhaltung nachweisen können."
+
+Das heißt: Suppression-Entscheidungen müssen dokumentiert und gegenüber einer Aufsicht reproduzierbar sein.
+
+### Keine fixe Behörden-Schwelle — interne Policy stattdessen
+
+Es gibt **keinen behördlichen Konsens zu „N Versuche in T Tagen"**. Weder DSK noch EDPB noch BfDI haben eine konkrete Faustregel veröffentlicht (Stand Mai 2026). In Literatur und Praxis liegt die typische Range bei **5–10 Soft-Bounces in einem Fenster von 14–30 Tagen**, abhängig von Versand-Frequenz, Bounce-Klasse und Inhalts-Sensitivität.
+
+**Maintainer-Empfehlung:** eine eigene, dokumentierte interne Bounce-Policy festlegen und konsistent anwenden. Wichtiger als die exakte Zahl ist die **Dokumentation** der Policy und das **konsistente Befolgen**.
+
+### Beispiel-Policy mit Norm-Bezug
+
+| Stufe | Beobachtung | Handlung |
+|---|---|---|
+| 1 | 1–2 Soft-Bounces in Folge | Weiter zustellen; in Bounce-Log mit Zeitstempel und Provider-Antwort vermerken — kein Datenschutz-Issue |
+| 2 | 3–4 Soft-Bounces in Folge über mehrere Tage | Versand pausieren; einmaliger Re-Permission-/Reaktivierungs-Versuch (siehe nächste Sektion) erwägen — Art. 5 I d wird zunehmend relevant |
+| 3 | **≥ N Soft-Bounces über mind. T Tage** (Policy-spezifisch, typisch N=5 / T=14 oder N=10 / T=30) | Behandeln wie Hard-Bounce: aus aktiver Liste entfernen, Hash in Suppression, Klartext löschen. **Begründet aus Art. 5 I d + I e**, nicht nur aus Deliverability. |
+
+Die N/T-Werte werden in der internen Policy gesetzt und in der Datenschutzerklärung sinngemäß genannt (Aufbewahrungsfrist-Sektion). Bei besonders sensiblen Inhalten (Health-Newsletter, Kinder-Newsletter) tendiert die Praxis zu strengeren Werten (kleineres N, kürzeres T).
+
+### Audit-Log-Pflicht aus Art. 5 Abs. 2
+
+Für den Nachweis gegenüber Aufsichten reicht „wir haben die Adresse entfernt" nicht. Es gibt keine normierte Feldliste, aber Aufsichten erwarten typischerweise:
+
+```sql
+CREATE TABLE IF NOT EXISTS email_bounce_log (
+  id                   BIGSERIAL PRIMARY KEY,
+  email_hash           TEXT NOT NULL,          -- HMAC-SHA-256 + Pepper, kein Klartext
+  bounce_type          TEXT NOT NULL,          -- 'hard', 'soft', 'spam_complaint'
+  provider_code        TEXT,                   -- z.B. SMTP-Status 5.1.1, 4.2.2, Mailchimp event-id
+  provider_msg         TEXT,                   -- erste 200 Zeichen Provider-Antwort
+  occurred_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  campaign_id          UUID,                   -- welche Kampagne hat den Bounce ausgelöst
+  policy_version       TEXT,                   -- z.B. 'bounce-policy-v2026-05' — welche Regel galt zum Zeitpunkt
+  consent_record_ref   TEXT,                   -- Verweis auf den Consent-Datensatz (Audit-Spur)
+  manual_override      BOOLEAN DEFAULT FALSE,  -- wurde die Adresse manuell reaktiviert/suppressed?
+  override_actor       TEXT,                   -- wer (User/System) hat manuell eingegriffen
+  override_reason      TEXT                    -- Begründung bei manuellem Override
+);
+CREATE INDEX idx_bounce_log_email_hash ON email_bounce_log (email_hash, occurred_at DESC);
+
+CREATE TABLE IF NOT EXISTS email_suppression_audit (
+  id                   BIGSERIAL PRIMARY KEY,
+  email_hash           TEXT NOT NULL,
+  suppressed_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  reason               TEXT NOT NULL,          -- siehe email_suppression_list-Schema
+  policy_version       TEXT,                   -- welche Bounce-Policy hat ausgelöst
+  trigger_bounce_count INT,                    -- wie viele Bounces gezählt zur Auslöse-Zeit
+  trigger_window_days  INT,                    -- über welches Fenster wurde gezählt
+  reactivation_at      TIMESTAMPTZ,            -- falls später wieder aktiviert (z.B. Re-DOI)
+  reactivation_reason  TEXT
+);
+```
+
+Mit diesem Log lässt sich gegenüber einer Aufsicht jederzeit zeigen: „Adresse X wurde am Datum Y nach Z Soft-Bounces innerhalb W Tagen nach Policy-Version V suppressed — entspricht angemessener Maßnahme iSd Art. 5 I d." Aufbewahrungsfrist für den Log: 12 Monate nach Suppression (Nachweis-Sicherheit), danach Löschung.
+
+### Code-Pattern: Soft-Bounce-Counter mit konfigurierbarer Policy
+
+```ts
+// Policy konfigurierbar — Default-Werte sind eine vertretbare Maintainer-Wahl,
+// keine behördliche Vorgabe. In der internen Bounce-Policy dokumentieren.
+const BOUNCE_POLICY = {
+  version: 'bounce-policy-v2026-05',
+  softBounceThreshold: 5,
+  softBounceWindowDays: 14,
+};
+
+export async function handleSoftBounce(
+  emailHash: string,
+  providerCode: string,
+  providerMsg: string,
+  campaignId: string,
+  consentRecordRef: string,
+) {
+  // 1. Bounce protokollieren
+  await db.query(
+    `INSERT INTO email_bounce_log (email_hash, bounce_type, provider_code, provider_msg, campaign_id, policy_version, consent_record_ref)
+     VALUES ($1, 'soft', $2, $3, $4, $5, $6)`,
+    [emailHash, providerCode, providerMsg.substring(0, 200), campaignId, BOUNCE_POLICY.version, consentRecordRef]
+  );
+
+  // 2. Anzahl Soft-Bounces im Bezugsfenster zählen
+  const { rows } = await db.query(
+    `SELECT COUNT(*)::int AS cnt
+     FROM email_bounce_log
+     WHERE email_hash = $1 AND bounce_type = 'soft'
+       AND occurred_at > NOW() - INTERVAL '${BOUNCE_POLICY.softBounceWindowDays} days'`,
+    [emailHash]
+  );
+
+  // 3. Bei Erreichen der Schwelle: Suppression aus DSGVO-Gründen (Art. 5 I d/e)
+  if (rows[0].cnt >= BOUNCE_POLICY.softBounceThreshold) {
+    await db.query(
+      `INSERT INTO email_suppression_list (email_hash, reason)
+       VALUES ($1, 'soft_bounce_threshold_dsgvo')
+       ON CONFLICT (email_hash) DO UPDATE
+       SET suppressed_at = NOW(), reason = EXCLUDED.reason`,
+      [emailHash]
+    );
+    // Suppression-Audit-Eintrag (Art. 5 Abs. 2 Rechenschaftspflicht)
+    await db.query(
+      `INSERT INTO email_suppression_audit (email_hash, reason, policy_version, trigger_bounce_count, trigger_window_days)
+       VALUES ($1, 'soft_bounce_threshold_dsgvo', $2, $3, $4)`,
+      [emailHash, BOUNCE_POLICY.version, rows[0].cnt, BOUNCE_POLICY.softBounceWindowDays]
+    );
+    // Klartext aus aktiver Liste löschen
+    await db.query(`DELETE FROM subscribers WHERE email_hash = $1`, [emailHash]);
+  }
+}
+```
+
+Suppression-Reason `'soft_bounce_threshold_dsgvo'` macht im Log eindeutig sichtbar, dass die Entfernung normativ begründet ist (Art. 5 I d/e), nicht nur aus Deliverability-Hygiene. `policy_version` macht reproduzierbar, welche Regel zum Auslöse-Zeitpunkt galt — wichtig, wenn die Policy später angepasst wird.
 
 ## Re-Permission bei Inaktivität
 

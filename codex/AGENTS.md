@@ -453,15 +453,54 @@ List-Unsubscribe: <mailto:unsubscribe@example.com?token=XYZ>, <https://example.c
 List-Unsubscribe-Post: List-Unsubscribe=One-Click
 ```
 
+### WhatsApp / Messenger-Marketing
+
+OLG Hamm 18 U 154/22 (03.05.2023) erfasst WhatsApp, LinkedIn, Xing, Facebook-DMs als „elektronische Post" iSd § 7 II Nr. 3 UWG.
+
+- Erstkontakt per WhatsApp-DM ohne ausdrückliche, vorherige Einwilligung — auch B2B — ist unzulässig.
+- E-Mail-Newsletter-Einwilligung deckt WhatsApp **nicht** ab; Einwilligung kanalbezogen, EDPB 05/2020 Granularität.
+- WhatsApp-Channels (1:n-Broadcast): „Folgen"-Klick kann Einwilligung **für Channel-Updates** sein bei transparenter Information. Deckt **nicht** 1:1-Nachrichten, Template-Messages, Nummern-Upload.
+- Bulk-Adressbuch-Upload an WhatsApp Business API ist regelmäßig unzulässig: Verstöße gegen Art. 5 Abs. 1 lit. b (Zweckbindung), Art. 6 (kanalbezogene Rechtsgrundlage), Art. 13/14 (Drittland-Transparenz), Art. 5 Abs. 1 lit. c (Datenminimierung), plus WhatsApp Business Policy (Meta verlangt Opt-in).
+- WhatsApp Business **App** mit lokalem Sync ist hochproblematisch; **API über Business Solution Provider** ist konformitätsfähig.
+
+### Outbound aus DACH ins Drittland — Art. 49 ist NICHT der Anker
+
+DACH-Versender → US/UK/CA/AU-Privat-Empfänger: keine Kap.-V-Übermittlung iSd EDPB 05/2021, weil der Empfänger die betroffene Person selbst ist. Restrisiko: weite Aufsichts-Auslegung. Räumlicher DSGVO-Anwendungsbereich (Art. 3 Abs. 1) bleibt voll. Indirekte Drittland-Provider (US-ESP/CRM/CDN) **lösen** Kap. V aus — siehe `dsgvo-third-country-transfer`.
+
+Nationales Anti-Spam-Recht des Empfängerlands beachten:
+
+- **USA — CAN-SPAM Act (15 USC § 7701 ff.):** **Opt-out-Regime**, keine B2B-Ausnahme; korrekte Header, ehrlicher Betreff, Werbe-Kennzeichnung, Postanschrift im Body, Opt-Out-Umsetzung in 10 Werktagen. Anwendbar auf jeden Sender weltweit, dessen Mails US-Empfänger erreichen.
+- **UK — PECR Reg. 22 + UK GDPR:** Opt-In für individual subscribers, Soft-Opt-In für Bestandskunden mit ähnlichen Produkten; corporate subscribers toleranter, aber Opt-Out gewährleisten.
+- **Kanada — CASL:** **Express oder implied consent** (Express empfohlen). Sanktionen: bis 1 Mio. CAD natürliche Personen, **bis 10 Mio. CAD Unternehmen**, extraterritorial bei kanadischen Empfängern.
+- **Australien — Spam Act 2003:** Express oder eng inferred consent, **Opt-Out innerhalb 5 Werktagen**, ACMA erfasst auch werbliche Push-Benachrichtigungen.
+
+### Kinder-Newsletter (Art. 8 DSGVO) — risikobasiert
+
+Altersgrenzen DACH: **DE 16** (keine BDSG-Absenkung), **AT 14** (§ 4 Abs. 4 DSG), **CH** ungeregelt (ZGB-Geschäftsfähigkeit). Bei DACH-Mischlisten einheitlich auf 16 abstellen.
+
+Art. 8 Abs. 2 verlangt „angemessene Anstrengungen unter Berücksichtigung der verfügbaren Technik" — explizit risikobasiert. EDPB 05/2020 lässt Geburtsjahr + Eltern-Mail-Bestätigung für Low-Risk-Verarbeitung **zu**. Bei höherem Risiko (Gaming mit monetären Triggern, sensible Inhalte) sind stärkere Mechanismen (Mikro-Zahlung, eID, Video-Ident) erforderlich.
+
+Pflicht in jeder Stufe: Plausibilitäts-Check zwischen Kinder-/Eltern-Mail-Domain (identische Freemail-Domain ist immer Problem), Token-TTL 24–48 h für Eltern-Confirm, Throttling auf Geburtsjahr-Feld, separate Aufbewahrung des Eltern-Confirm-Records (Art. 7 Abs. 1 Nachweis).
+
+### Soft-Bounce als DSGVO-Anknüpfung (Art. 5 I d/e + Abs. 2)
+
+Faustregel „N Versuche / T Tage" ist **keine** Behörden-Vorgabe — DSK/EDPB/BfDI haben keine fixe Regel veröffentlicht (Stand Mai 2026). Praxis: 5–10 Bounces / 14–30 Tage. Wichtig ist eine dokumentierte interne Policy mit Versionsnummer und konsistente Anwendung.
+
+DSGVO-Anker: systematische Soft-Bounces sind Indiz für Art. 5 I d (Richtigkeit) und Art. 5 I e (Speicherbegrenzung); Art. 5 Abs. 2 verlangt Nachweisbarkeit (Audit-Log mit Bounce-Typ, Provider-Code, Policy-Version, Consent-Ref, manuelle Overrides). Suppression-Reason `soft_bounce_threshold_dsgvo` getrennt von Hard-Bounce protokollieren.
+
 ### Häufige Fallen
 
 - **Confirm-Mail mit „Übrigens, hier unsere Angebote"** — BGH VI ZR 134/15 („No-Reply"): Auto-Reply / Bestätigungs-Mail mit Werbezusatz = Eingriff Persönlichkeitsrecht; Unterlassungsanspruch.
 - **Cross-Sell-Block in Order-Confirmation** — BGH VI ZR 134/15 + VI ZR 225/17: macht aus Trans-Mail eine Werbe-Mail.
 - **Mailchimp-Audience mit Default-Tracking** — TDDDG § 25 + DSK-Direktwerbung 2022: separate Einwilligung erforderlich, nicht im Newsletter-Häkchen mit-eingewilligt.
 - **„LinkedIn-DM ist keine E-Mail"** — falsch; § 7 II Nr. 3 erfasst „elektronische Post" weit, OLG Hamm 18 U 154/22 (03.05.2023) stellt direkt fest, dass DMs in Xing/LinkedIn/Facebook/WhatsApp elektronische Post sind.
+- **WhatsApp-Newsletter aus E-Mail-Liste senden** — Einwilligung pro Kanal; Adressbuch-Sync an WhatsApp Business App / API ohne separate kanalspezifische Einwilligung ist regelmäßig unzulässig (Art. 5 I b/c + Art. 6 + Art. 13/14 + Meta-Policy).
 - **Re-Subscribe alter Listen ohne neuen DOI** — nach Widerruf ist alter Eintrag nicht reaktivierbar; neuer DOI nötig.
 - **„CAN-SPAM reicht für Europa"** — falsch; UWG + DSGVO + ePrivacy gelten zusätzlich.
+- **„Art. 49 DSGVO regelt Newsletter an US-Privatempfänger"** — falsch; Art. 49 greift erst bei Übermittlung an Auftragsverarbeiter/Verantwortliche im Drittland. Direktversand an die betroffene Person ist keine Kap.-V-Übermittlung. Aber: Empfängerland-Anti-Spam-Recht (CAN-SPAM, PECR, CASL, Spam Act) gilt.
 - **Klartext-E-Mail nach Unsubscribe in DB lassen** — Art. 5 I c verlangt Hash + Klartext-Löschung; Suppression läuft via Hash.
+- **„Geburtsjahr-Häkchen reicht für Kinder-Newsletter"** — Art. 8 Abs. 2 risikobasiert; bei Low-Risk OK mit Eltern-Mail + Plausibilitäts-Check, bei monetären/Gaming-Triggern stärkere Verifikation (Mikro-Zahlung, eID).
+- **Soft-Bounces dauerhaft in der Liste lassen** — Art. 5 I d/e: dokumentierte Bounce-Policy mit Versionsnummer (typisch 5–10 Bounces / 14–30 Tage), Suppression mit Reason `soft_bounce_threshold_dsgvo`, Bounce-Audit-Log für Rechenschaftspflicht.
 - **Bewertungs-Bitte ohne Marketing-Einwilligung** — BGH VI ZR 225/17: Werbung iSd § 7.
 
 Detail siehe Repo: <https://github.com/wuemaikblume/dsgvo-skills/tree/main/claude/skills/dsgvo-email-marketing> (SKILL/CONSENT-AND-DOI/UWG-7/TRACKING-IN-MAIL/UNSUBSCRIBE-AND-RETENTION/SERVICE-VS-MARKETING/AI-CONTENT-AND-TRANSPARENCY).
