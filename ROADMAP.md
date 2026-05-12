@@ -2,7 +2,7 @@
 
 > Diese Datei ist gleichzeitig öffentliche Roadmap UND **Onboarding-Doku für die nächste Arbeits-Session**. Sie enthält genug Kontext, dass weder ein neuer Claude-Lauf noch ein menschlicher Mitwirkender eine separate Erklärung braucht.
 
-**Stand:** 2026-05-08, Version 1.6 live, **v1.7 in Vorbereitung auf Branch `feat/ai-act-art50-email-marketing`**. v1.7 enthält neue Sub-Datei `AI-CONTENT-AND-TRANSPARENCY.md` im `dsgvo-email-marketing`-Skill — Antwort auf den am 02.08.2026 unmittelbar anwendbaren EU AI Act Art. 50 (Sanktionen bis € 7,5 Mio. / 1,5 % weltweiter Konzern-Jahresumsatz nach Art. 99 Abs. 4 lit. c). **Pre-Tag PFLICHT:** externe Tiefenrecherche-Review (Perplexity/Gemini Deep Research) der Faktenclaims, insbesondere zur DACH-Aufsichts-Position 2026, vor `git tag v1.7`. Vorgängiger Stand v1.6: drei Skills live über alle drei Tool-Targets (Claude / Cursor / Codex+Copilot).
+**Stand:** 2026-05-12, Version 1.6 live, **v1.7 in Vorbereitung auf Branch `feat/ai-act-art50-email-marketing`**. v1.7 enthält neue Sub-Datei `AI-CONTENT-AND-TRANSPARENCY.md` im `dsgvo-email-marketing`-Skill — Antwort auf den am 02.08.2026 unmittelbar anwendbaren EU AI Act Art. 50 (Sanktionen bei Art. 50-Verstoß bis € 15 Mio. / 3 % weltweiter Konzern-Jahresumsatz nach Art. 99 Abs. 4 lit. g). **Externer Tiefenrecherche-Review am 2026-05-12 durchgeführt** (Grok + GPT-5.5/ChatGPT + Gemini Deep Research, Primärquellen gegen AI Act Service Desk verifiziert), wesentliche Korrekturen eingearbeitet (siehe Sektion v1.7 unten). Vorgängiger Stand v1.6: drei Skills live über alle drei Tool-Targets (Claude / Cursor / Codex+Copilot).
 
 ---
 
@@ -64,7 +64,7 @@ dsgvo-skills/
 | v1.4 | (siehe Tag) | Faktenkorrektur DPF-Status (verifiziert gegen offizielle ITA-Excel-Liste 2026-05-04): Anthropic und OpenAI sind NICHT DPF-zertifiziert — Transfermechanismus auf SCCs Modul 2 (Anthropic) bzw. Modul 3 (OpenAI via Ireland) korrigiert. Clerk-Detail erweitert (Participant ID 2718, Status „Active - Re-certification under Review", Re-Cert-Fenster bis 27.2.2026). Stichtag mit Verifikations-Quelle aktualisiert. Korrekturen über Claude / Cursor / Codex / Copilot synchron. |
 | v1.5 | (siehe Tag) | `dsgvo-auth-and-logging` v1.0 — vier Sub-Files (SKILL/LOGGING/AUTH-TOM/IP-ADDRESSES). Drei Cross-Reviews (Sonnet intern, GPT-5.5 extern, Tiefenrecherche extern) eingearbeitet. Trigger-Tests Opus 6/6 PASS, Sonnet 4.6 3/6 PASS — Modell-Hinweis in README+INSTALL ergänzt (Sonnet erfordert ggf. expliziten Skill-Aufruf bei Setup-Fragen). Cursor + Codex/Copilot synchron mitversioniert. |
 | v1.6 | (siehe Tag) | `dsgvo-email-marketing` v1.0 — fünf Sub-Files (SKILL/CONSENT-AND-DOI/UWG-7/TRACKING-IN-MAIL/UNSUBSCRIBE-AND-RETENTION/SERVICE-VS-MARKETING). UWG § 7 (DE) + AT TKG § 174 + CH UWG Art. 3 I o + DSGVO Art. 6/7/21 + TDDDG § 25. BGH-Linie zur Service-vs-Werbung-Abgrenzung (I ZR 218/07, VI ZR 225/17, I ZR 164/09, OLG Hamm 4 U 121/13). DPF-Status der vier US-Newsletter-Provider live verifiziert (Mailchimp 7693, Klaviyo 6149, HubSpot 5812, ActiveCampaign 4495 — alle Active). PROVIDERS.md um 8 Profile erweitert (4 US + 4 EU). Cursor + Codex/Copilot synchron. |
-| v1.7 (in Vorbereitung) | Branch `feat/ai-act-art50-email-marketing` | `dsgvo-email-marketing` neue Sub-Datei `AI-CONTENT-AND-TRANSPARENCY.md` für EU AI Act Art. 50 (Stichtag 02.08.2026, Sanktionen bis € 7,5 Mio. / 1,5 % weltweiter Konzern-Jahresumsatz). Differenzierung Provider-Pflichten (Abs. 1 Interaktions-Transparenz, Abs. 2 maschinenlesbare Output-Markierung) vs. Deployer-Pflichten (Abs. 4 Deepfake Bild/Audio/Video, Abs. 4 Text mit „matters of public interest"-Schwelle und Editorial-Control-Ausnahme). Klarstellung: für 90 % der klassischen Werbe-Newsletter greift NICHT die Art. 50-Markierungspflicht — Schwerpunkt liegt auf DSGVO Art. 13 (Privacy Notice für AI-Personalisierung), Art. 28 + Kap. V (DPA + DPF/SCCs für LLM-API), Art. 22 (automatisierte Entscheidung Edge-Case), Art. 35 + EDPB WP 248 (DSFA bei AI-verstärktem Profiling). Code-Patterns für Subject-Line-Pseudonymisierung, AI-Footer, AI-Chatbot-Disclosure, Deepfake-Bild-Caption. Cursor (`dsgvo-ai-content-marketing.mdc`) + Codex AGENTS.md + Copilot copilot-instructions.md synchron erweitert. SKILL-BOUNDARIES.md ergänzt. **PRE-TAG-PFLICHT:** externer Tiefenrecherche-Review der Faktenclaims (insbesondere DACH-Aufsichts-Position 2026, finaler Code of Practice Juni 2026, Sanktions-Höhe Art. 99). Adressiert Issue #2 von 5 v1.7-Issues; Issues #1, #3, #4, #5 (WhatsApp, B2B-Drittland-Empfänger, Kinder-Newsletter, Soft-Bounce) folgen separat. |
+| v1.7 (in Vorbereitung, Review eingearbeitet 2026-05-12) | Branch `feat/ai-act-art50-email-marketing` | `dsgvo-email-marketing` neue Sub-Datei `AI-CONTENT-AND-TRANSPARENCY.md` für EU AI Act Art. 50 (Stichtag 02.08.2026, Sanktionen bei Art. 50-Verstoß **bis € 15 Mio. / 3 % nach Art. 99 Abs. 4 lit. g**). Differenzierung Anbieter-Pflichten (Abs. 1 Interaktions-Transparenz EG 132, Abs. 2 maschinenlesbare Markierung EG 133) vs. Betreiber-Pflichten (Abs. 4 Satz 1 Deepfake i. S. d. Art. 3 Nr. 60 EG 134, Abs. 4 Satz 2 Text bei „Angelegenheiten von öffentlichem Interesse" mit strikter Editorial-Control-Ausnahme, Werke-Ausnahme statt „offensichtlich künstlich"-Generalausnahme). Klarstellung: für die Mehrzahl klassischer Werbe-Newsletter greift NICHT die Art. 50-Markierungspflicht — Schwerpunkt liegt auf DSGVO Art. 13/22/25/28 + Kap. V (LLM-API-Drittland), DSFA-Schwelle (DSK-Blacklist Nr. 11) plus eigenständige **UWG-Schiene** (§ 3a / § 5 / § 5a / Schwarze Liste — Mitbewerber-Abmahnvektor). Code-Patterns für Subject-Line-Pseudonymisierung, AI-Footer, AI-Chatbot-Disclosure inkl. Offensichtlichkeits-Ausnahme bei `chatbot@…`-Adressen, AI-Bild-Caption mit klarer Trennung Deepfake (Art. 3 Nr. 60) vs. UWG-Testimonial-Risiko. Cursor (`dsgvo-ai-content-marketing.mdc`) + Codex AGENTS.md + Copilot copilot-instructions.md synchron erweitert + korrigiert. SKILL-BOUNDARIES.md ergänzt. **Tiefenrecherche-Review durchgeführt 2026-05-12** (Grok + GPT-5.5 + Gemini Deep Research; Primärquellen gegen AI Act Service Desk verifiziert). Adressiert Issue #2 von 5 v1.7-Issues; Issues #1, #3, #4, #5 (WhatsApp, B2B-Drittland-Empfänger, Kinder-Newsletter, Soft-Bounce) folgen separat. |
 
 ### Drei Cross-Reviews (alle Befunde im Repo eingearbeitet)
 
@@ -84,6 +84,39 @@ dsgvo-skills/
 ---
 
 ## 3. Offene Punkte (priorisiert + handlungsfertig)
+
+### v1.7 Tiefenrecherche-Review (durchgeführt 2026-05-12)
+
+Drei voneinander unabhängige Tiefenrecherchen (Grok + GPT-5.5/ChatGPT + Gemini Deep Research) zur AI-Act-Art-50-Sektion. Primärquellen-Verifikation gegen AI Act Service Desk der EU-Kommission und artificialintelligenceact.eu (Erwägungsgründe 132/133/134).
+
+**Eingearbeitete Korrekturen (Commit auf Branch `feat/ai-act-art50-email-marketing`):**
+
+- Sanktionsnorm: **Art. 99 Abs. 4 lit. g** (€ 15 Mio. / 3 %) statt fälschlich lit. c (€ 7,5 Mio. / 1,5 %) — lit. g listet explizit Art. 50; lit. c betrifft Verstöße gegen Anbieter-Pflichten aus Art. 16
+- Erwägungsgrund-Zuordnung: **EG 132** (Interaktions-Transparenz Abs. 1) / **EG 133** (Anbieter-Markierung Abs. 2) / **EG 134** (Betreiber-Disclosure Abs. 4)
+- Werke-Ausnahme statt vager „offensichtlich künstlich"-Ausnahme: Abs. 4 enthält **keine** separate Generalausnahme für offensichtlich künstliche Inhalte. Die einschlägige Ausnahme reduziert die Pflicht bei „künstlerischem, kreativem, satirischem, fiktionalem oder analogem Werk" auf eine „werkschonende" Offenlegung
+- Deepfake-Definition (Art. 3 Nr. 60) strikt am Wortlaut: Bezug zu **wirklichen** Personen/Objekten/Orten/Einrichtungen/Ereignissen + Echtheits-Eindruck. Fiktiv-fotorealistische „Kunden"-Testimonials erfüllen den engen Wortlaut nicht zwingend
+- **Neue Sektion UWG-Schiene:** § 3a UWG (Marktverhaltensregelung), § 5 / § 5a UWG (Irreführung), Schwarze Liste (Fake-Testimonials per se unlauter). Mitbewerber- und Verbraucherschutzverbands-Abmahnvektor unabhängig von Aufsicht
+- Editorial-Control-Ausnahme strikt: namentlich benannte Verantwortung + dokumentierte manuelle Vorab-Prüfung. Reines Template-Approval und reine Stichprobenkontrolle reichen nicht
+- Pseudonymisierung risikoadjustiert (Art. 25/32 DSGVO), nicht als ausnahmslose Pflicht formuliert
+- DSFA-Schwelle: keine starre 100k-Empfänger-Zahl mehr; DSK-Blacklist Nr. 11 (KI-Profiling) als zwingender Auslöser
+- Code of Practice präziser: 1. Entwurf 17.12.2025, 2. Entwurf 05.03.2026, Final Juni 2026 erwartet. Multi-Layer-Ansatz (C2PA + Wasserzeichen + Fingerprinting + EU-Piktogramm). Compliance-Demonstration für Signatories statt klassischer Konformitätsvermutung
+- Entwurfsleitlinien der Kommission zu Art. 50 in Konsultation seit 08.05.2026 ergänzt
+- Art. 2 Abs. 7 AI Act (DSGVO bleibt unberührt) als Klammer eingefügt
+- Chatbot-Pattern: Offensichtlichkeits-Ausnahme bei `chatbot@…`/`ai@…`-Sender-Adresse ergänzt
+- BfDI-Handreichung korrekt zitiert: „KI in Behörden — Datenschutz von Anfang an mitdenken", 22.12.2025
+- DSK-Quellen entwirrt: „KI und Datenschutz" 06.05.2024 / „TOMs bei KI-Systemen" Juni 2025 / „RAG-Systeme" Oktober 2025
+
+Spiegelung auf `cursor/rules/dsgvo-ai-content-marketing.mdc`, `codex/AGENTS.md`, `codex/copilot-instructions.md`, `claude/skills/dsgvo-email-marketing/SKILL.md` durchgeführt.
+
+**Verbleibende offene Punkte (Auslegung in Bewegung, dokumentiert in `AI-CONTENT-AND-TRANSPARENCY.md`):**
+
+- [ ] Finale Kommissions-Leitlinien zu Art. 50 (Konsultation 08.05.2026, Endfassung steht aus) — insb. Auslegung „matters of public interest" und Editorial-Control-Schwelle
+- [ ] Code of Practice Final-Fassung Juni 2026 — endgültige technische Marker-Standards
+- [ ] DACH-Rechtsprechung speziell zu AI-Testimonial-Bildern in Werbemails (keine OLG-Entscheidung mit alleinigem AI-Bezug)
+- [ ] Genaue quantitative DSFA-Schwelle bei skalierter AI-Personalisierung
+- [ ] BSI-Empfehlungen zu C2PA und Wasserzeichen-Standards (Stand Mai 2026 nichts Spezifisches)
+
+**Merge-Vorbereitung:** Mit der Korrektur-Integration ist die Pre-Tag-Pflicht aus dem v1.5-Argon2id-Vorfall erfüllt. Nächster Schritt: User-Approval, dann `gh pr merge 6 --squash` + `git tag v1.7 && git push --tags`.
 
 ### Externer Re-Review v1.3 (optional)
 

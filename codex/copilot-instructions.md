@@ -468,7 +468,7 @@ Detail siehe Repo: <https://github.com/wuemaikblume/dsgvo-skills/tree/main/claud
 
 ## AI-personalisierter Newsletter-Content (EU AI Act Art. 50 + DSGVO Art. 13/22)
 
-**Stichtag:** EU AI Act Art. 50 wird am 02.08.2026 unmittelbar anwendbar (Verordnung (EU) 2024/1689). Sanktionen bis € 7,5 Mio. oder 1,5 % weltweiter Konzern-Jahresumsatz (Art. 99 Abs. 4 lit. c).
+**Stichtag:** EU AI Act Art. 50 wird am 02.08.2026 unmittelbar anwendbar (Verordnung (EU) 2024/1689, Art. 113 lit. b). **Sanktion bei Art. 50-Verstoß:** bis € 15 Mio. oder 3 % weltweiter Konzern-Jahresumsatz (Art. 99 Abs. 4 lit. g — lit. g listet explizit Art. 50). Die € 7,5 Mio.-Stufe (Art. 99 Abs. 5) gilt nur für Falschangaben an Behörden. DSGVO bleibt unberührt (Art. 2 Abs. 7 AI Act).
 
 **Trigger (auch bei rein technischen Prompts):** `openai`, `@openai/sdk`, `@anthropic-ai/sdk`, `@mistralai/mistralai`, `cohere-ai`, AI-Subject-Line-Generation, AI-Body-Variation, dynamische Empfehlungen via LLM in Mail-Templates, AI-Bild-Embedding (Midjourney/DALL-E/Stable Diffusion/Flux), Konversations-Newsletter mit Chatbot, Reply-an-AI-Adressen.
 
@@ -476,12 +476,13 @@ Detail siehe Repo: <https://github.com/wuemaikblume/dsgvo-skills/tree/main/claud
 
 | Absatz | Wer | Gilt für Werbe-Newsletter? |
 |---|---|---|
-| Abs. 1 Interaktions-Transparenz | Provider | Ja, bei interaktivem AI-Element (Reply-an-AI, Chatbot, Konversations-Newsletter) |
-| Abs. 2 Output-Markierung maschinenlesbar | Provider (OpenAI, Anthropic) | Provider-Pflicht. Deployer darf Markierung nicht entfernen. |
-| Abs. 4 Satz 1 Deepfake-Disclosure (Bild/Audio/Video) | Deployer | Ja, bei realistischen AI-Bildern mit Personenbezug |
-| Abs. 4 Satz 2 Text-Disclosure | Deployer | **Nein** für klassische Produkt-Werbung. Ja für Politik/Gesundheit/Journalismus ohne menschliche Editorial-Kontrolle. |
+| Abs. 1 Interaktions-Transparenz (EG 132) | Anbieter | Ja bei interaktivem AI-Element. Offensichtlichkeits-Ausnahme (Abs. 1 letzter Halbsatz): sprechende Sender-Adresse `chatbot@…`/`ai@…` + klarer Kontext kann tragen. |
+| Abs. 2 Output-Markierung maschinenlesbar (EG 133) | Anbieter (OpenAI, Anthropic) | Anbieter-Pflicht. Aus Abs. 2 selbst folgt für Deployer keine ausdrückliche „Markierung-nicht-entfernen"-Pflicht; ergibt sich aus Abs. 4 + Code of Practice + API-Verträgen. |
+| Abs. 4 Satz 1 Deepfake (EG 134) | Betreiber/Deployer | Deepfake i. S. d. Art. 3 Nr. 60: Bezug zu **wirklichen** Personen/Objekten/Orten + Echtheits-Eindruck. Fiktive aber fotorealistische „Kunden"-Testimonials sind streng grammatikalisch oft kein Deepfake — lösen aber UWG § 5/§ 5a-Irreführung aus. |
+| Abs. 4 Satz 2 Text-Disclosure (EG 134) | Betreiber/Deployer | **Nein** für klassische Produkt-Werbung. Ja für Politik/Gesundheit/Journalismus, außer bei echter Editorial-Control (namentlich benannter Verantwortlicher + dokumentierte manuelle Prüfung). |
+| Abs. 4 Werke-Ausnahme | Betreiber/Deployer | Bei künstlerischem/satirischem/fiktionalem Werk: Offenlegung reduziert auf „werkschonende" Form. Keine separate „offensichtlich künstlich"-Generalausnahme im Wortlaut. |
 
-**Praktische Konsequenz für 90 % der Newsletter:** Subject-Lines, Body-Variation, Empfehlungen sind **außerhalb** der Art. 50-Markierungs-Pflicht. Die echten Pflichten kommen aus DSGVO:
+**Praktische Konsequenz für die Mehrzahl klassischer Newsletter:** Subject-Lines, Body-Variation, Empfehlungen sind **außerhalb** der Art. 50-Markierungs-Pflicht. Die echten Pflichten kommen aus DSGVO + zusätzlich UWG-Schiene (§ 3a / § 5 / § 5a / Schwarze Liste — abmahnbar durch Mitbewerber und Verbraucherschutzverbände, eigene Abmahnvektor unabhängig von der Aufsicht):
 
 1. **Art. 13** — AI-Personalisierung als Verarbeitungs-Zweck im Privacy Notice nennen
 2. **Art. 28 + Kap. V** — DPA + DPF/SCCs für LLM-API (siehe oben Anbieter-Quick-Ref)
@@ -539,7 +540,7 @@ async function generatePersonalizedSubject(recipient: Recipient, campaign: Campa
 ```
 Provider-seitige C2PA-/Wasserzeichen-Markierung NICHT entfernen (lossy compression vermeiden).
 
-**Voluntary Code of Practice on AI-Generated Content** (digital-strategy.ec.europa.eu) — finaler Stand erwartet Juni 2026, freiwilliges Compliance-Werkzeug. Kein C2PA-Zwang im Verordnungstext, fordert „wirksame, interoperable, robuste, zuverlässige" Lösungen. Für reine Werbung Best-Practice, kein Muss.
+**Voluntary Code of Practice on AI-Generated Content** (digital-strategy.ec.europa.eu) — 1. Entwurf 17.12.2025, 2. Entwurf 05.03.2026, Final erwartet Juni 2026. Freiwilliges Compliance-Instrument; Signatories nutzen es als Compliance-Demonstration gegenüber Aufsicht. Multi-Layer-Ansatz (C2PA-Metadaten + Wasserzeichen + Fingerprinting + standardisiertes EU-Piktogramm). Für reine Werbung Best-Practice, kein Muss. Entwurfsleitlinien Kommission zu Art. 50 zusätzlich in Konsultation seit 08.05.2026.
 
 **Disclaimer:** Anwalt + DSB konsultieren bei Massen-AI-Personalisierung, Health-/Finanz-Marketing mit AI, AI-Chatbot-Newsletter mit Kindern als Zielgruppe.
 
