@@ -131,8 +131,6 @@ Plus `cursor/INSTALL.md` und `cursor/README.md`.
 
 ### Weitere Skill-Familien
 
-Alle künftigen Skill-Patches und neuen Skills folgen der **7-Phasen-Pipeline** (siehe Sektion 4 → „Arbeits-Reihenfolge") — verhindert die Doppelarbeit der v1.7-Lehre.
-
 **Vor jedem neuen Skill verbindlich:** [SKILL-BOUNDARIES.md](SKILL-BOUNDARIES.md) abgleichen, damit kein Thema doppelt gehört wird und keines verloren geht.
 
 - [x] **`dsgvo-third-country-transfer`** ✅ live (v1.4) — Drittlandtransfer + 5 Sub-Files. Cursor + Codex/Copilot synchron.
@@ -143,7 +141,7 @@ Alle künftigen Skill-Patches und neuen Skills folgen der **7-Phasen-Pipeline** 
 - [ ] **`nis2-security-baseline`** — NIS2-Umsetzungsgesetz Deutschland (Stand prüfen), Mindestmaßnahmen Art. 21, 24/72h-Meldepflichten, Risikomanagement, Incident-Response. Trigger: Security-relevante Architektur, Auth-Hardening, Backup-Strategien, KRITIS-Sektor-Hinweise.
 - [ ] **`dsgvo-employment`** — § 26 BDSG (Beschäftigtendatenschutz), Bewerber-Daten, Performance-Tracking, HR-Tools (Personio, BambooHR, etc.), Krankenakten. Trigger: HR-System-Integrationen, Performance-Monitoring, Bewerber-Tools.
 
-**Maintainer-Hinweis:** Die vier noch offenen Skills haben keine Deadline und keine Bauverpflichtung. Wenn sie kommen, dann nach der 7-Phasen-Pipeline und mit dreifacher externer Tiefenrecherche-Review vor Tag.
+**Maintainer-Hinweis:** Die vier noch offenen Skills haben keine Deadline und keine Bauverpflichtung. Wenn sie kommen, dann nach der unten dokumentierten Cross-Review-Disziplin.
 
 ### Anbieter-Updates pflegen (laufend)
 
@@ -175,18 +173,6 @@ Der Skill schreibt aktuell „Anthropic: DPF (zur Live-Prüfung empfohlen)". Vor
 - `fix:` — Korrektur faktischer Fehler
 - `docs:` — Dokumentation
 - `chore:` — Repo-Pflege
-
-### Arbeits-Reihenfolge (7-Phasen-Pipeline, seit v1.8)
-
-Strikt einhalten, **Cursor und Codex NIE vor finalem Claude-Stand anfassen** (v1.7-Lehre — Doppelarbeit von ca. 30 % Aufwand):
-
-1. **Brainstorming** (User + Maintainer): Scope, Trigger, Code-Patterns festlegen
-2. **Erstwurf**: NUR `claude/skills/<name>/...` — keine Mirror-Files
-3. **Self-Review**: Primärquellen-Verifikation per WebFetch (EUR-Lex, Service Desks, BGH-Aktenzeichen)
-4. **Externer Review**: User wirft EINEN konsolidierten Prompt parallel in Grok + GPT + Gemini Deep Research
-5. **Korrektur-Runde**: 2/3-Mehrheits-Triangulation, Primärquelle bei strittigen Punkten. Eine Runde, dann Claude-Stand eingefroren
-6. **Mirror-Spiegelung**: Cursor + Codex + Copilot vom finalen Stand. Einmal
-7. **Release**: Commit, Push, Tag, Symlink-Check, Memory updaten
 
 ### Cross-Review-Disziplin (Pflicht für jeden neuen Skill und Patch)
 
